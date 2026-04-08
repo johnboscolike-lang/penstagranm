@@ -28,6 +28,20 @@ npm run test
 npm run build
 ```
 
+## 빠른 커밋/푸시
+
+앞으로는 아래 명령으로 현재 변경사항을 한 번에 `add + commit + push` 할 수 있습니다.
+
+```bash
+npm run publish -- -Message "한글 커밋 메시지"
+```
+
+테스트를 건너뛰고 바로 올리고 싶다면:
+
+```bash
+npm run publish -- -Message "빠른 저장" -SkipTests
+```
+
 ## 폴더 구조
 
 ```text

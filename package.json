@@ -12,6 +12,7 @@
     "db:generate": "prisma generate",
     "db:push": "node scripts/init-db.mjs",
     "db:seed": "tsx prisma/seed.ts",
+    "publish": "powershell -ExecutionPolicy Bypass -File scripts/auto-publish.ps1",
     "postinstall": "prisma generate"
   },
   "dependencies": {
