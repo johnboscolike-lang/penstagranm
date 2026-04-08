@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PhotoSlot {
+  PREP
+  GOAL
+  NOTES
+  ASSIGNMENT
+}
+
+model Post {
+  id          String     @id @default(cuid())
+  authorName  String
+  authorRole  String
+  avatarUrl   String?
+  lessonTitle String
+  caption     String
+  transcript  String     @default("")
+  createdAt   DateTime   @default(now())
+  comments    Comment[]
+  photos      PostPhoto[]
+}
+
+model PostPhoto {
+  id        String    @id @default(cuid())
+  postId    String
+  slot      PhotoSlot
+  label     String
+  imageUrl  String
+  createdAt DateTime  @default(now())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, slot])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  postId      String
+  authorName String
+  body       String
+  createdAt  DateTime @default(now())
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model ScheduleItem {
+  id          String   @id @default(cuid())
+  title       String
+  notes       String?
+  scheduledFor DateTime
+  createdAt   DateTime @default(now())
+}
