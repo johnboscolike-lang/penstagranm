@@ -1092,3 +1092,379 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ───────── 입장 ───────── */
+.login-students {
+  display: grid;
+  gap: 8px;
+  padding: 0 6px 4px;
+}
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.student-pick {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 8px !important;
+  background: none;
+  font-weight: 700;
+  text-align: left;
+}
+
+.student-pick:hover:not(:disabled) {
+  --frame: var(--frame-cardMint);
+}
+
+.login-teacher {
+  display: grid;
+  gap: 10px;
+  padding: 0 6px 4px;
+}
+
+/* ───────── 선생님 퀘스트 · 사진 인증 ───────── */
+.promise--quest {
+  --frame: var(--frame-cardMint);
+}
+
+.proof {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 2px dashed #b9dccf;
+}
+
+.proof__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.proof__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.proof__feedback {
+  padding: 6px 10px;
+  background: #fff;
+  box-shadow: 0 0 0 2px #7fd1bd;
+  line-height: 1.5;
+}
+
+.proof-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.proof-strip li {
+  position: relative;
+}
+
+.proof-strip__img {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--ink);
+  image-rendering: auto;
+}
+
+.proof-strip__remove {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--ink);
+  background: var(--danger);
+  color: #fff;
+  font-weight: 700;
+  line-height: 20px;
+  padding: 0;
+}
+
+.section-label {
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--teal-d);
+}
+
+/* ───────── 교사 화면 ───────── */
+.review-list {
+  display: grid;
+  gap: 12px;
+  margin: 0 6px 6px;
+}
+
+.review {
+  display: grid !important;
+  gap: 8px;
+  padding: 6px 10px 10px !important;
+}
+
+.review__head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.review__face {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: #d9f2ea;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.review__face .px {
+  --u: 3px;
+}
+
+.review__who {
+  display: grid;
+}
+
+.review__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.review__tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.mini-tile {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 4px;
+  background: #fff8e8;
+  box-shadow: 0 0 0 2px #d8c08a;
+  color: #8b7355;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mini-tile--done {
+  background: var(--teal);
+  box-shadow: 0 0 0 2px #0a3a34;
+  color: #fff;
+}
+
+.review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review__reopen > summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.overview {
+  display: grid;
+  gap: 6px;
+  margin: 0 6px 6px;
+}
+
+.overview__row {
+  display: grid !important;
+  grid-template-columns: auto minmax(110px, 0.6fr) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px !important;
+}
+
+.overview__face {
+  display: grid;
+  place-items: center;
+}
+
+.overview__who {
+  display: grid;
+}
+
+.overview__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.quest-form {
+  display: grid;
+  gap: 10px;
+  padding: 0 6px 4px;
+}
+
+.quest-form__group {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 6px 8px 8px;
+  border: 0;
+  background: #fff8e8;
+  box-shadow: 0 0 0 2px #e3cf9c;
+}
+
+.quest-form__group legend {
+  padding: 0 6px;
+  font-weight: 700;
+  color: var(--teal-d);
+}
+
+.quest-form__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quest-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 6px;
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  background: #fff;
+  box-shadow: 0 0 0 2px #d8c08a;
+  cursor: pointer;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pick input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--teal);
+}
+
+.pick--on {
+  background: #dff7ef;
+  box-shadow: 0 0 0 2px var(--teal);
+}
+
+.weekday-row {
+  display: flex;
+  gap: 6px;
+}
+
+.weekday {
+  width: 44px;
+  height: 40px;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 0 0 2px #d8c08a;
+  font-weight: 700;
+}
+
+.weekday--on {
+  background: var(--teal);
+  box-shadow:
+    0 0 0 2px #0a3a34,
+    inset 0 -3px 0 var(--teal-d);
+  color: #fff;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+}
+
+.quest-group {
+  display: grid;
+  gap: 6px;
+  margin: 8px 6px 0;
+}
+
+.quest-list {
+  display: grid;
+  gap: 6px;
+}
+
+.quest-item {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 8px !important;
+}
+
+.quest-item--paused {
+  opacity: 0.6;
+}
+
+.quest-item__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.quest-item__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.quest-item__actions {
+  display: flex;
+  gap: 6px;
+}
+
+.quest-empty {
+  padding: 8px 12px;
+  text-align: center;
+}
+
+@media (max-width: 699px) {
+  .overview__row {
+    grid-template-columns: auto 1fr;
+  }
+
+  .overview__chips,
+  .overview__row > .btn {
+    grid-column: 1 / -1;
+  }
+}

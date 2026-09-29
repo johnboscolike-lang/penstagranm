@@ -1,11 +1,11 @@
-import path from "node:path";
-import { mkdir } from "node:fs/promises";
+import os from "node:os";
 
-import formidable, { type Fields, type File as FormidableFile } from "formidable";
+import formidable, { type Fields, type File as FormidableFile, type Files } from "formidable";
 import type { NextApiRequest, PageConfig } from "next";
 
 import { PHOTO_SLOT_META, type PhotoSlotKey } from "@/utils/slot-metadata";
 import type { PostPhotoView } from "@/utils/types";
+import { MAX_UPLOAD_BYTES, storeUploadedFile, UploadError } from "@/utils/uploads";
 
 export const multipartApiConfig: PageConfig = {
   api: {
@@ -37,6 +37,35 @@ function getUploadedFile(entry: FormidableFile | FormidableFile[] | undefined): 
 }
 
 /**
+ * Parses a multipart request into text fields and temp files. Files land in the OS temp folder first
+ * because serverless hosts only allow writing there.
+ */
+async function parseMultipart(req: NextApiRequest, maxFiles: number): Promise<{ fields: Fields; files: Files }> {
+  const form = formidable({
+    keepExtensions: true,
+    multiples: true,
+    uploadDir: os.tmpdir(),
+    maxFiles,
+    maxFileSize: MAX_UPLOAD_BYTES,
+  });
+
+  try {
+    const [fields, files] = await form.parse(req);
+
+    return { fields, files };
+  } catch (error: unknown) {
+    const code = (error as { code?: number }).code;
+    if (code === 1009) {
+      throw new UploadError("사진이 너무 커요. 4MB 이하로 올려 주세요.");
+    }
+    if (code === 1015) {
+      throw new UploadError("사진은 한 번에 정해진 장수만 올릴 수 있어요.");
+    }
+    throw error;
+  }
+}
+
+/**
  * Parses a multipart post-creation request with the four fixed classroom slots.
  */
 export async function parsePostMultipartRequest(req: NextApiRequest): Promise<{
@@ -45,47 +74,33 @@ export async function parsePostMultipartRequest(req: NextApiRequest): Promise<{
   transcript: string;
   photos: PostPhotoView[];
 }> {
-  const uploadDirectory = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDirectory, { recursive: true });
+  const { fields, files } = await parseMultipart(req, PHOTO_SLOT_META.length);
+  const photos: PostPhotoView[] = [];
 
-  const form = formidable({
-    keepExtensions: true,
-    multiples: true,
-    uploadDir: uploadDirectory,
-    maxFiles: PHOTO_SLOT_META.length,
-    filename(name, extension, part): string {
-      const safeBaseName = (part.originalFilename ?? name ?? "slot")
-        .replace(/[^\w\-가-힣]+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "")
-        .toLowerCase();
-
-      return `${Date.now()}-${safeBaseName || "slot"}${extension}`;
-    },
-  });
-
-  const [fields, files] = await form.parse(req);
+  for (const slot of PHOTO_SLOT_META) {
+    const file = getUploadedFile(files[`photo-${slot.key}`] as FormidableFile | FormidableFile[] | undefined);
+    if (file) {
+      photos.push({ slot: slot.key as PhotoSlotKey, label: slot.label, imageUrl: await storeUploadedFile(file) });
+    }
+  }
 
   return {
     lessonTitle: getStringField(fields, "lessonTitle"),
     caption: getStringField(fields, "caption"),
     transcript: getStringField(fields, "transcript"),
-    photos: PHOTO_SLOT_META.flatMap((slot) => {
-      const file = getUploadedFile(
-        files[`photo-${slot.key}`] as FormidableFile | FormidableFile[] | undefined,
-      );
-
-      if (!file) {
-        return [];
-      }
-
-      return [
-        {
-          slot: slot.key as PhotoSlotKey,
-          label: slot.label,
-          imageUrl: `/uploads/${path.basename(file.filepath)}`,
-        },
-      ];
-    }),
+    photos,
   };
+}
+
+/**
+ * Parses a proof-photo request: one card id and one photo.
+ */
+export async function parseProofMultipartRequest(req: NextApiRequest): Promise<{ promiseId: string; imageUrl: string }> {
+  const { fields, files } = await parseMultipart(req, 1);
+  const file = getUploadedFile(files.photo as FormidableFile | FormidableFile[] | undefined);
+  if (!file) {
+    throw new UploadError("사진을 골라 주세요.");
+  }
+
+  return { promiseId: getStringField(fields, "promiseId"), imageUrl: await storeUploadedFile(file) };
 }

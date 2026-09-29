@@ -22,6 +22,29 @@ export function applySchema(database) {
         FOREIGN KEY ("teamId") REFERENCES "Team" ("id")
         ON DELETE CASCADE ON UPDATE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS "Quest" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "kind" TEXT NOT NULL,
+      "subject" TEXT NOT NULL,
+      "title" TEXT NOT NULL,
+      "note" TEXT NOT NULL DEFAULT '',
+      "unitKind" TEXT NOT NULL,
+      "unitStart" INTEGER NOT NULL DEFAULT 1,
+      "unitCount" INTEGER NOT NULL,
+      "advance" BOOLEAN NOT NULL DEFAULT false,
+      "weekdays" TEXT NOT NULL DEFAULT '12345',
+      "startDate" TEXT NOT NULL,
+      "endDate" TEXT,
+      "requireProof" BOOLEAN NOT NULL DEFAULT false,
+      "active" BOOLEAN NOT NULL DEFAULT true,
+      "createdBy" TEXT NOT NULL DEFAULT '선생님',
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "Quest_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS "Quest_studentId_idx" ON "Quest" ("studentId");
     CREATE TABLE IF NOT EXISTS "DailyPromise" (
       "id" TEXT NOT NULL PRIMARY KEY,
       "studentId" TEXT NOT NULL,
@@ -32,10 +55,21 @@ export function applySchema(database) {
       "unitKind" TEXT NOT NULL,
       "unitStart" INTEGER NOT NULL,
       "unitCount" INTEGER NOT NULL,
+      "scope" TEXT NOT NULL DEFAULT 'DAY',
+      "questId" TEXT,
+      "requireProof" BOOLEAN NOT NULL DEFAULT false,
+      "reviewStatus" TEXT NOT NULL DEFAULT 'NONE',
+      "feedback" TEXT NOT NULL DEFAULT '',
+      "submittedAt" DATETIME,
+      "reviewedAt" DATETIME,
+      "reviewedBy" TEXT NOT NULL DEFAULT '',
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT "DailyPromise_studentId_fkey"
         FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
-        ON DELETE CASCADE ON UPDATE CASCADE
+        ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT "DailyPromise_questId_fkey"
+        FOREIGN KEY ("questId") REFERENCES "Quest" ("id")
+        ON DELETE SET NULL ON UPDATE CASCADE
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "DailyPromise_studentId_dateKey_slotIndex_key"
       ON "DailyPromise" ("studentId", "dateKey", "slotIndex");
@@ -51,6 +85,23 @@ export function applySchema(database) {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "PromiseUnit_promiseId_unitNo_key"
       ON "PromiseUnit" ("promiseId", "unitNo");
+    CREATE TABLE IF NOT EXISTS "QuestProof" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "promiseId" TEXT NOT NULL,
+      "imageUrl" TEXT NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "QuestProof_promiseId_fkey"
+        FOREIGN KEY ("promiseId") REFERENCES "DailyPromise" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS "QuestProof_promiseId_idx" ON "QuestProof" ("promiseId");
+    CREATE TABLE IF NOT EXISTS "UploadedFile" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "mime" TEXT NOT NULL,
+      "size" INTEGER NOT NULL,
+      "data" BLOB NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
     CREATE TABLE IF NOT EXISTS "Purchase" (
       "id" TEXT NOT NULL PRIMARY KEY,
       "studentId" TEXT NOT NULL,
@@ -104,11 +155,31 @@ export function applySchema(database) {
     );
   `);
 
-  // 이전 버전 DB에는 Post.studentId 컬럼이 없으므로 한 번만 추가한다.
-  const postColumns = database.prepare('PRAGMA table_info("Post")').all();
-  if (!postColumns.some((column) => column.name === "studentId")) {
-    database.exec(
-      'ALTER TABLE "Post" ADD COLUMN "studentId" TEXT REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE',
-    );
+  // 이전 버전 DB에 없던 컬럼은 한 번만 추가한다.
+  addMissingColumns(database, "Post", [
+    ["studentId", 'TEXT REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],
+  ]);
+  addMissingColumns(database, "DailyPromise", [
+    ["scope", "TEXT NOT NULL DEFAULT 'DAY'"],
+    ["questId", 'TEXT REFERENCES "Quest" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],
+    ["requireProof", "BOOLEAN NOT NULL DEFAULT false"],
+    ["reviewStatus", "TEXT NOT NULL DEFAULT 'NONE'"],
+    ["feedback", "TEXT NOT NULL DEFAULT ''"],
+    ["submittedAt", "DATETIME"],
+    ["reviewedAt", "DATETIME"],
+    ["reviewedBy", "TEXT NOT NULL DEFAULT ''"],
+  ]);
+}
+
+/**
+ * 테이블에 아직 없는 컬럼만 ALTER TABLE 로 추가한다.
+ */
+function addMissingColumns(database, table, columns) {
+  const existing = new Set(database.prepare(`PRAGMA table_info("${table}")`).all().map((column) => column.name));
+
+  for (const [name, definition] of columns) {
+    if (!existing.has(name)) {
+      database.exec(`ALTER TABLE "${table}" ADD COLUMN "${name}" ${definition}`);
+    }
   }
 }

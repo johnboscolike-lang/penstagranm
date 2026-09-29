@@ -90,6 +90,7 @@ export interface WeekBoard {
   eligibleDayKeys: string[];
   closed: boolean;
   status: WeeklyStatus;
+  pendingReviewCount: number;
   individuals: IndividualRow[];
   topGroups: { rank: number; rows: IndividualRow[] }[];
   me: IndividualRow | null;
@@ -144,6 +145,7 @@ export function calcStudentWeek(
   weekAnyDayKey: string,
   asOfKey: string,
   joinedOnKey = "0000-01-01",
+  pendingReviewCount = 0,
 ): StudentWeekStats {
   const weekStartKey = getWeekStartKey(weekAnyDayKey);
   const allWeekKeys = getSchoolDayKeys(weekStartKey);
@@ -169,7 +171,7 @@ export function calcStudentWeek(
     score: calcWeeklyScore(dailyScores.map((entry) => entry.score)),
     stampCount,
     closed,
-    status: getWeeklyStatus(eligibleDayKeys.length, closed),
+    status: getWeeklyStatus(eligibleDayKeys.length, closed, pendingReviewCount),
     voucherTarget: getVoucherTarget(fullWeekKeys.length),
     voucherEarned: isVoucherEarned(stampCount, fullWeekKeys.length),
   };
@@ -184,14 +186,15 @@ export function buildWeekBoard(input: {
   index: PromiseIndex;
   asOfKey: string;
   meId: string;
+  pendingReviewCount?: number;
 }): WeekBoard {
-  const { students, teams, index, asOfKey, meId } = input;
+  const { students, teams, index, asOfKey, meId, pendingReviewCount = 0 } = input;
   const weekStartKey = getWeekStartKey(asOfKey);
   const teamNameById = new Map(teams.map((team) => [team.id, team.name]));
   const statsByStudent = new Map(
     students.map((student) => [
       student.id,
-      calcStudentWeek(index, student.id, weekStartKey, asOfKey, student.joinedOn),
+      calcStudentWeek(index, student.id, weekStartKey, asOfKey, student.joinedOn, pendingReviewCount),
     ]),
   );
 
@@ -254,6 +257,7 @@ export function buildWeekBoard(input: {
     eligibleDayKeys: myStats?.eligibleDayKeys ?? getEligibleDayKeys(weekStartKey, asOfKey),
     closed: getWeekdayIndex(asOfKey) >= 5,
     status: myStats?.status ?? "none",
+    pendingReviewCount,
     individuals,
     topGroups,
     me,

@@ -1,3 +1,5 @@
+import { deflateSync } from "node:zlib";
+
 import { PrismaClient, PhotoSlot } from "@prisma/client";
 
 import { addDaysToKey, getKstDateKey, getSchoolDayKeys, getWeekStartKey, isSchoolDay } from "../src/utils/kst";
@@ -127,6 +129,8 @@ const TEAM_SEEDS: TeamSeed[] = [
   },
 ];
 
+const NOT_STARTED_TODAY = new Set(["박하은", "이준서", "정유나", "윤서아", "임재현"]);
+
 const PLANNED_UNITS = DEFAULT_PROMISE_PLAN.map((template) => template.unitCount);
 
 // 도토리(나)의 지난 4주 기록. 각 날짜는 [국어 6쪽, 수학 4쪽, 영단어 15개] 중 확인한 단위 수.
@@ -156,6 +160,65 @@ function createRandom(seedText: string): () => number {
 
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/**
+ * Computes the CRC-32 checksum PNG chunks need.
+ */
+function crc32(buffer: Buffer): number {
+  let crc = 0xffffffff;
+  for (const byte of buffer) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1));
+    }
+  }
+
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+/**
+ * Wraps data into one PNG chunk.
+ */
+function pngChunk(type: string, data: Buffer): Buffer {
+  const body = Buffer.concat([Buffer.from(type), data]);
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length);
+  const checksum = Buffer.alloc(4);
+  checksum.writeUInt32BE(crc32(body));
+
+  return Buffer.concat([length, body, checksum]);
+}
+
+/**
+ * Draws a tiny "notebook photo" PNG (lined paper with a colored margin) so demo proofs show a real image.
+ */
+function buildDemoPhoto(accent: [number, number, number]): Buffer {
+  const size = 96;
+  const rows: Buffer[] = [];
+  for (let y = 0; y < size; y += 1) {
+    const row = Buffer.alloc(1 + size * 3);
+    for (let x = 0; x < size; x += 1) {
+      const onLine = y % 12 === 10;
+      const inMargin = x > 10 && x < 14;
+      const color = inMargin ? accent : onLine ? [150, 190, 230] : [255, 250, 235];
+      row[1 + x * 3] = color[0];
+      row[2 + x * 3] = color[1];
+      row[3 + x * 3] = color[2];
+    }
+    rows.push(row);
+  }
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(size, 0);
+  header.writeUInt32BE(size, 4);
+  header.set([8, 2, 0, 0, 0], 8);
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk("IHDR", header),
+    pngChunk("IDAT", deflateSync(Buffer.concat(rows))),
+    pngChunk("IEND", Buffer.alloc(0)),
+  ]);
 }
 
 /**
@@ -198,12 +261,112 @@ function pastPageStart(slotIndex: number, daysBack: number, pagesPerDay: number)
 }
 
 /**
+ * Stores a demo proof photo and returns the relative URL that /api/uploads serves.
+ */
+async function createDemoProof(promiseId: string, accent: [number, number, number]): Promise<void> {
+  const data = buildDemoPhoto(accent);
+  const file = await prisma.uploadedFile.create({ data: { mime: "image/png", size: data.length, data: new Uint8Array(data) } });
+  await prisma.questProof.create({ data: { promiseId, imageUrl: `/api/uploads/${file.id}` } });
+}
+
+/**
+ * Adds teacher quests in every review state so the teacher screens are alive on the first visit:
+ * one waiting for review, one confirmed with feedback, one sent back for a retry, plus a weekly quest.
+ */
+async function seedQuestDemo(
+  studentsByName: Map<string, string>,
+  myId: string,
+  todayKey: string,
+  thisMonday: string,
+): Promise<void> {
+  const base = { advance: false, weekdays: "12345", startDate: thisMonday, requireProof: true, createdBy: "국어 선생님" };
+  const idOf = (name: string): string => studentsByName.get(name) ?? myId;
+
+  const questFor = (studentName: string, subject: string, title: string, unitKind: string, unitStart: number, unitCount: number) =>
+    prisma.quest.create({ data: { ...base, studentId: idOf(studentName), kind: "DAILY", subject, title, unitKind, unitStart, unitCount } });
+
+  const linkTodayCard = async (studentName: string, slotIndex: number, quest: { id: string; subject: string; title: string }, extra: Record<string, unknown>) => {
+    const card = await prisma.dailyPromise.findFirst({ where: { studentId: idOf(studentName), dateKey: todayKey, slotIndex, scope: "DAY" } });
+    if (!card) {
+      return null;
+    }
+
+    return prisma.dailyPromise.update({
+      where: { id: card.id },
+      data: { questId: quest.id, subject: quest.subject, title: quest.title, requireProof: true, reviewStatus: "OPEN", ...extra },
+    });
+  };
+
+  const mine = await questFor("도토리", "수학", "올림포스 풀이", "PAGE", 24, 4);
+  await linkTodayCard("도토리", 1, mine, {});
+
+  const submitted = await questFor("한서윤", "국어", "예비 매3문 근거 표시", "PAGE", 12, 6);
+  const submittedCard = await linkTodayCard("한서윤", 0, submitted, { reviewStatus: "SUBMITTED", submittedAt: new Date() });
+  if (submittedCard) {
+    await createDemoProof(submittedCard.id, [230, 90, 100]);
+  }
+
+  const confirmed = await questFor("김도윤", "수학", "올림포스 풀이", "PAGE", 24, 4);
+  const confirmedCard = await linkTodayCard("김도윤", 1, confirmed, {
+    reviewStatus: "CONFIRMED",
+    feedback: "풀이 과정이 잘 보여요! 막힌 문제를 표시한 점이 좋아요.",
+    reviewedAt: new Date(),
+    reviewedBy: "수학 선생님",
+  });
+  if (confirmedCard) {
+    await createDemoProof(confirmedCard.id, [70, 140, 210]);
+  }
+
+  const retry = await questFor("최민재", "영단어", "내가 고른 단어 15개", "WORD", 1, 15);
+  const retryCard = await linkTodayCard("최민재", 2, retry, {
+    reviewStatus: "RETRY",
+    feedback: "사진이 흐려서 단어가 안 보여요. 밝은 곳에서 다시 찍어 줄래요?",
+    reviewedAt: new Date(),
+    reviewedBy: "영어 선생님",
+  });
+  if (retryCard) {
+    await createDemoProof(retryCard.id, [90, 180, 110]);
+  }
+
+  const weekly = await prisma.quest.create({
+    data: { ...base, studentId: myId, kind: "WEEKLY", subject: "영어", title: "독해 지문 읽기", unitKind: "PAGE", unitStart: 1, unitCount: 20, requireProof: false },
+  });
+  const weeklyCard = await prisma.dailyPromise.create({
+    data: {
+      studentId: myId,
+      dateKey: thisMonday,
+      slotIndex: 100,
+      scope: "WEEK",
+      questId: weekly.id,
+      subject: weekly.subject,
+      title: weekly.title,
+      unitKind: "PAGE",
+      unitStart: 1,
+      unitCount: 20,
+      reviewStatus: "OPEN",
+    },
+  });
+  await prisma.promiseUnit.createMany({
+    data: Array.from({ length: 8 }, (_, index) => ({ promiseId: weeklyCard.id, unitNo: index + 1 })),
+  });
+}
+
+/**
  * Resets demo data and inserts seed content for the local prototype.
  */
 async function main(): Promise<void> {
+  // 배포 빌드에서는 `--if-empty`로 부르므로, 이미 학생이 있으면 기존 데이터를 지우지 않고 건너뛴다.
+  if (process.argv.includes("--if-empty") && (await prisma.student.count()) > 0) {
+    process.stdout.write("이미 데이터가 있어 시드를 건너뜁니다.\n");
+    return;
+  }
+
+  await prisma.uploadedFile.deleteMany();
+  await prisma.questProof.deleteMany();
   await prisma.purchase.deleteMany();
   await prisma.promiseUnit.deleteMany();
   await prisma.dailyPromise.deleteMany();
+  await prisma.quest.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.postPhoto.deleteMany();
   await prisma.post.deleteMany();
@@ -275,6 +438,10 @@ async function main(): Promise<void> {
             }
           } else {
             confirmed = pickClassmateUnits(random, teamSeed.skill, PLANNED_UNITS[slotIndex]);
+            // 오늘 아직 시작하지 않은 친구들이 있어야 선생님이 낸 퀘스트가 바로 나타난다.
+            if (dayKey === todayKey && NOT_STARTED_TODAY.has(member.name) && slotIndex > 0) {
+              confirmed = 0;
+            }
           }
 
           const promiseId = `seed-${studentId}-${dayKey}-${slotIndex}`;
@@ -309,6 +476,8 @@ async function main(): Promise<void> {
       { studentId: myId, itemKey: "flowerbed", cost: 25 },
     ],
   });
+
+  await seedQuestDemo(studentsByName, myId, todayKey, thisMonday);
 
   const previousSchoolDays = dayKeys.filter((dayKey) => dayKey < todayKey && isSchoolDay(dayKey));
   const postDays = [

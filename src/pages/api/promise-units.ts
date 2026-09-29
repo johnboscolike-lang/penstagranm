@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
+import { requireApiSession } from "@/utils/auth-guard";
 import { getKstDateKey } from "@/utils/kst";
 import { createScopedLogger } from "@/utils/logger";
 import { respondWithQuestError } from "@/utils/quest-api";
-import { loadRoster, setUnitConfirmed } from "@/utils/quest-repository";
+import { setUnitConfirmed } from "@/utils/quest-repository";
 
 const logger = createScopedLogger("api/promise-units");
 
@@ -15,11 +16,16 @@ const unitSchema = z.object({
 });
 
 /**
- * Confirms or clears one page/word/lecture unit of today's promise.
+ * Confirms or clears one page/word/lecture unit of the student's own card.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.status(405).json({ message: "POST 요청만 허용됩니다." });
+    return;
+  }
+
+  const session = requireApiSession(req, res, "student");
+  if (!session?.studentId) {
     return;
   }
 
@@ -30,16 +36,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { me } = await loadRoster();
-    const confirmedUnitNos = await setUnitConfirmed({
-      studentId: me.id,
+    const card = await setUnitConfirmed({
+      studentId: session.studentId,
       promiseId: parsed.data.promiseId,
       unitNo: parsed.data.unitNo,
       done: parsed.data.done,
       todayKey: getKstDateKey(),
     });
 
-    res.status(200).json({ confirmedUnitNos });
+    res.status(200).json({ card });
   } catch (error: unknown) {
     if (respondWithQuestError(res, error)) {
       return;

@@ -111,6 +111,8 @@ describe("weekly score and voucher", () => {
     expect(getWeeklyStatus(3, false)).toBe("provisional");
     expect(getWeeklyStatus(5, true)).toBe("final");
     expect(getWeeklyStatus(2, true)).toBe("collecting");
+    expect(getWeeklyStatus(5, true, 2)).toBe("waiting");
+    expect(getWeeklyStatus(5, false, 2)).toBe("provisional");
   });
 });
 

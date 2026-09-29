@@ -2,9 +2,9 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { ChallengePanel } from "@/components/challenge/ChallengePanel";
 import { GameShell } from "@/components/GameShell";
+import { guardPage } from "@/utils/auth-guard";
 import { ChallengeScene } from "@/components/scenes/ChallengeScene";
-import { getLatestTeacherComment } from "@/utils/repository";
-import { getPageBase, getTodayView, getWeekBoardView, loadRoster } from "@/utils/quest-repository";
+import { getLatestFeedbackFor, getPageBase, getTodayView, getWeekBoardView, loadRoster } from "@/utils/quest-repository";
 import type { WeekBoard } from "@/utils/quest-board";
 import type { HudView, TodayView } from "@/utils/quest-types";
 
@@ -25,12 +25,17 @@ interface ChallengePageProps {
  * Loads today's promises, the weekly boards, and the newest teacher feedback for the owl's speech bubble.
  */
 export const getServerSideProps: GetServerSideProps<ChallengePageProps> = async (context) => {
-  const { hud, meId, todayKey } = await getPageBase();
-  const [today, board, roster, comment] = await Promise.all([
+  const guard = guardPage(context, "student");
+  if (!guard.ok) {
+    return guard.result;
+  }
+
+  const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
+  const [today, board, roster, feedback] = await Promise.all([
     getTodayView(meId, todayKey),
-    getWeekBoardView(todayKey),
-    loadRoster(),
-    getLatestTeacherComment(),
+    getWeekBoardView(todayKey, meId),
+    loadRoster(meId),
+    getLatestFeedbackFor(meId),
   ]);
   const myTeamId = roster.me.teamId;
   const myTeamScore = board.teams.find((team) => team.teamId === myTeamId)?.score ?? 0;
@@ -42,7 +47,7 @@ export const getServerSideProps: GetServerSideProps<ChallengePageProps> = async 
       board,
       myTeamId,
       litTiles: Math.round((myTeamScore / 100) * BRIDGE_TILES),
-      feedback: comment ? { who: comment.who, text: comment.body } : DEFAULT_FEEDBACK,
+      feedback: feedback ?? DEFAULT_FEEDBACK,
       initialTab: context.query.tab === "week" ? "week" : "today",
     },
   };

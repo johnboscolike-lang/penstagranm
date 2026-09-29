@@ -17,6 +17,7 @@ const STATUS_COPY: Record<WeekBoard["status"], { label: string; tone: string }> 
   none: { label: "아직 기록이 없어요", tone: "" },
   collecting: { label: "기록 모으는 중", tone: "tag--sky" },
   provisional: { label: "잠정 집계", tone: "tag--gold" },
+  waiting: { label: "집계 대기", tone: "tag--gold" },
   final: { label: "확정", tone: "tag--teal" },
 };
 
@@ -49,7 +50,11 @@ export function WeekBoardView({ board, myTeamId, onGoToday }: WeekBoardViewProps
       <div className="week-board__status">
         <span className={clsx("tag", status.tone)}>{status.label}</span>
         <span className="muted">
-          {board.closed ? "이번 주가 끝났어요" : `오늘까지 ${board.eligibleDayKeys.length}일 집계`}
+          {board.status === "waiting"
+            ? `선생님 확인 ${board.pendingReviewCount}건을 기다려요`
+            : board.closed
+              ? "이번 주가 끝났어요"
+              : `오늘까지 ${board.eligibleDayKeys.length}일 집계`}
         </span>
       </div>
 

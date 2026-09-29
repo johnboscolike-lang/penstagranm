@@ -1,22 +1,14 @@
 // @vitest-environment node
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
-
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const tempDir = mkdtempSync(path.join(tmpdir(), "penstagram-test-"));
-process.env.DATABASE_URL = `file:${path.join(tempDir, "test.db")}`;
-
-interface SqliteDatabase {
-  close(): void;
-}
+import { createTempDatabase } from "./helpers/temp-db";
 
 type Repo = typeof import("@/utils/quest-repository");
 type PrismaModule = typeof import("@/utils/prisma");
 
 let repo: Repo;
 let prisma: PrismaModule["prisma"];
+let disposeDatabase: () => Promise<void>;
 let meId = "";
 let otherId = "";
 let buyerId = "";
@@ -47,16 +39,7 @@ async function createDay(studentId: string, dateKey: string, confirmed: [number,
 }
 
 beforeAll(async () => {
-  // node:sqlite 의 타입은 @types/node 22.5 부터 들어 있어서, 지정자를 변수로 두고 불러온다.
-  const sqliteSpecifier = "node:sqlite";
-  const { DatabaseSync } = (await import(/* @vite-ignore */ sqliteSpecifier)) as {
-    DatabaseSync: new (databasePath: string) => SqliteDatabase;
-  };
-  const { applySchema } = await import("../../scripts/db-schema.mjs");
-  const database = new DatabaseSync(path.join(tempDir, "test.db"));
-  applySchema(database);
-  database.close();
-
+  disposeDatabase = (await createTempDatabase()).dispose;
   repo = await import("@/utils/quest-repository");
   ({ prisma } = await import("@/utils/prisma"));
 
@@ -67,8 +50,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await prisma.$disconnect();
-  rmSync(tempDir, { recursive: true, force: true });
+  await disposeDatabase();
 });
 
 describe("ensureTodayPromises", () => {
@@ -101,10 +83,10 @@ describe("setUnitConfirmed", () => {
     const [first] = (await repo.getTodayView(meId, TODAY)).promises;
     const base = { studentId: meId, promiseId: first.id, unitNo: 12, todayKey: TODAY };
 
-    expect(await repo.setUnitConfirmed({ ...base, done: true })).toEqual([12]);
-    expect(await repo.setUnitConfirmed({ ...base, done: true })).toEqual([12]);
+    expect((await repo.setUnitConfirmed({ ...base, done: true })).confirmedUnitNos).toEqual([12]);
+    expect((await repo.setUnitConfirmed({ ...base, done: true })).confirmedUnitNos).toEqual([12]);
     expect(await prisma.promiseUnit.count({ where: { promiseId: first.id } })).toBe(1);
-    expect(await repo.setUnitConfirmed({ ...base, done: false })).toEqual([]);
+    expect((await repo.setUnitConfirmed({ ...base, done: false })).confirmedUnitNos).toEqual([]);
   });
 
   it("rejects units outside the planned range", async () => {
@@ -176,8 +158,8 @@ describe("XP, coins and the shop", () => {
 
 describe("week views from the database", () => {
   it("ranks the week and reports last week's news without throwing", async () => {
-    const board = await repo.getWeekBoardView("2026-09-30");
-    const news = await repo.getLastWeekNewsView("2026-09-30");
+    const board = await repo.getWeekBoardView("2026-09-30", meId);
+    const news = await repo.getLastWeekNewsView("2026-09-30", meId);
 
     expect(board.individuals.length).toBe(3);
     expect(board.me?.name).toBe("나");

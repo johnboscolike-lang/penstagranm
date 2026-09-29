@@ -106,16 +106,19 @@ export async function getFeedPosts(): Promise<PostView[]> {
 }
 
 /**
- * Creates a new four-photo classroom post for the demo player.
+ * Creates a new four-photo classroom post for the logged-in student.
  */
-export async function createPost(input: {
-  lessonTitle: string;
-  caption: string;
-  transcript: string;
-  photos: PostPhotoView[];
-}): Promise<PostView> {
-  const author = await prisma.student.findFirst({
-    where: { isMe: true },
+export async function createPost(
+  input: {
+    lessonTitle: string;
+    caption: string;
+    transcript: string;
+    photos: PostPhotoView[];
+  },
+  studentId: string,
+): Promise<PostView> {
+  const author = await prisma.student.findUnique({
+    where: { id: studentId },
     include: { team: true },
   });
 

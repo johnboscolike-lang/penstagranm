@@ -25,8 +25,33 @@
   width: min(980px, 100%);
 }
 
-.stage__lead {
-  display: none;
+.stage--center {
+  justify-content: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.stage--center .stage__col {
+  width: min(720px, 100%);
+}
+
+.dock__item {
+  position: relative;
+}
+
+.dock__badge {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  min-width: 22px;
+  padding: 0 5px;
+  border: 2px solid var(--ink);
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
 }
 
 /* ───────── HUD ───────── */

@@ -279,3 +279,26 @@ export function getStudentArt(hairKey: string, bagIndex: number): ArtSpec {
 
   return cached(`student:${hairKey}:${bag}`, () => buildStudentArt(hairKey, bag));
 }
+
+/**
+ * Snow-owl head with round glasses (14x12), the teacher's avatar.
+ */
+export function buildOwlHeadArt(): ArtSpec {
+  return cached("owl-head", () => ({
+    rows: [
+      "..KK......KK..",
+      ".KwwK....KwwK.",
+      ".KwwwKKKKwwwK.",
+      "KwwwwwwwwwwwwK",
+      "KwGGGGwwGGGGwK",
+      "KGWWKWGGWWKWGK",
+      "KGWKKWGGWKKWGK",
+      "KwGGGGwwGGGGwK",
+      "KwwwwwOOwwwwwK",
+      ".KwwwwOOwwwwK.",
+      "..KwwwwwwwwK..",
+      "...KKKKKKKK...",
+    ],
+    palette: { K: COLOR.ink, w: "#f7f5ee", G: "#c9a23a", W: COLOR.white, O: "#f0a13a" },
+  }));
+}

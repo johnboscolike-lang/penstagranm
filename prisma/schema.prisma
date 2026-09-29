@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -76,21 +77,33 @@ model Student {
   promises  DailyPromise[]
   purchases Purchase[]
   posts     Post[]
+  quests    Quest[]
 }
 
+/// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
 model DailyPromise {
-  id        String        @id @default(cuid())
-  studentId String
-  dateKey   String
-  slotIndex Int
-  subject   String
-  title     String
-  unitKind  String
-  unitStart Int
-  unitCount Int
-  createdAt DateTime      @default(now())
-  student   Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  units     PromiseUnit[]
+  id           String        @id @default(cuid())
+  studentId    String
+  dateKey      String
+  slotIndex    Int
+  subject      String
+  title        String
+  unitKind     String
+  unitStart    Int
+  unitCount    Int
+  scope        String        @default("DAY")
+  questId      String?
+  requireProof Boolean       @default(false)
+  reviewStatus String        @default("NONE")
+  feedback     String        @default("")
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  reviewedBy   String        @default("")
+  createdAt    DateTime      @default(now())
+  student      Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  quest        Quest?        @relation(fields: [questId], references: [id], onDelete: SetNull)
+  units        PromiseUnit[]
+  proofs       QuestProof[]
 
   @@unique([studentId, dateKey, slotIndex])
   @@index([dateKey])
@@ -115,4 +128,49 @@ model Purchase {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, itemKey])
+}
+
+/// 교사가 학생 한 명에게 내는 퀘스트. kind=DAILY 는 요일마다 반복, kind=WEEKLY 는 한 주 목표.
+model Quest {
+  id           String         @id @default(cuid())
+  studentId    String
+  kind         String
+  subject      String
+  title        String
+  note         String         @default("")
+  unitKind     String
+  unitStart    Int            @default(1)
+  unitCount    Int
+  advance      Boolean        @default(false)
+  weekdays     String         @default("12345")
+  startDate    String
+  endDate      String?
+  requireProof Boolean        @default(false)
+  active       Boolean        @default(true)
+  createdBy    String         @default("선생님")
+  createdAt    DateTime       @default(now())
+  student      Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  cards        DailyPromise[]
+
+  @@index([studentId])
+}
+
+/// 학생이 찍어 올린 인증 사진. imageUrl 은 상대 경로(/uploads/… 또는 /api/uploads/…)다.
+model QuestProof {
+  id        String       @id @default(cuid())
+  promiseId String
+  imageUrl  String
+  createdAt DateTime     @default(now())
+  promise   DailyPromise @relation(fields: [promiseId], references: [id], onDelete: Cascade)
+
+  @@index([promiseId])
+}
+
+/// UPLOAD_STORAGE=db 일 때 사진 본문을 담는 곳(서버리스 배포용).
+model UploadedFile {
+  id        String   @id @default(cuid())
+  mime      String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
 }

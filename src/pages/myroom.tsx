@@ -1,6 +1,7 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { GameShell } from "@/components/GameShell";
+import { guardPage } from "@/utils/auth-guard";
 import { PostCard } from "@/components/PostCard";
 import { ProfileCard, RecordsHeader, WeekNewsCard, YardShop } from "@/components/room/RoomPanels";
 import { RoomScene } from "@/components/scenes/RoomScene";
@@ -21,13 +22,18 @@ interface MyRoomPageProps {
 /**
  * Loads the player's profile, last week's news, owned yard items, and the growth-record feed.
  */
-export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async () => {
-  const { hud, meId, todayKey } = await getPageBase();
+export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async (context) => {
+  const guard = guardPage(context, "student");
+  if (!guard.ok) {
+    return guard.result;
+  }
+
+  const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
   const [news, ownedItemKeys, posts, roster] = await Promise.all([
-    getLastWeekNewsView(todayKey),
+    getLastWeekNewsView(todayKey, meId),
     getOwnedItemKeys(meId),
     getFeedPosts(),
-    loadRoster(),
+    loadRoster(meId),
   ]);
 
   return {

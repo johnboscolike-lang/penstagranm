@@ -2,6 +2,7 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 
 import { PixelIcon } from "@/components/pixel/PixelSprite";
+import { guardPage } from "@/utils/auth-guard";
 import { GameShell } from "@/components/GameShell";
 import { SchoolPanel } from "@/components/school/SchoolPanel";
 import { SchoolScene } from "@/components/scenes/SchoolScene";
@@ -20,8 +21,13 @@ interface SchoolPageProps {
 /**
  * Loads the school panel data and a one-line summary of today's promises.
  */
-export const getServerSideProps: GetServerSideProps<SchoolPageProps> = async () => {
-  const { hud, meId, todayKey } = await getPageBase();
+export const getServerSideProps: GetServerSideProps<SchoolPageProps> = async (context) => {
+  const guard = guardPage(context, "student");
+  if (!guard.ok) {
+    return guard.result;
+  }
+
+  const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
   const [schedule, today] = await Promise.all([getUpcomingSchedule(todayKey, 4), getTodayView(meId, todayKey)]);
 
   return {

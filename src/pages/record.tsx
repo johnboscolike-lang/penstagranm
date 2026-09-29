@@ -1,6 +1,7 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { GameShell } from "@/components/GameShell";
+import { guardPage } from "@/utils/auth-guard";
 import { PostComposer } from "@/components/PostComposer";
 import { RecordScene } from "@/components/scenes/RecordScene";
 import { getPageBase } from "@/utils/quest-repository";
@@ -13,8 +14,13 @@ interface RecordPageProps {
 /**
  * Loads only the HUD; the composer itself is entirely client-side.
  */
-export const getServerSideProps: GetServerSideProps<RecordPageProps> = async () => {
-  const { hud } = await getPageBase();
+export const getServerSideProps: GetServerSideProps<RecordPageProps> = async (context) => {
+  const guard = guardPage(context, "student");
+  if (!guard.ok) {
+    return guard.result;
+  }
+
+  const { hud } = await getPageBase(guard.session.studentId as string);
 
   return { props: { hud } };
 };

@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
+import { requireApiSession } from "@/utils/auth-guard";
 import { createScopedLogger } from "@/utils/logger";
 import { respondWithQuestError } from "@/utils/quest-api";
-import { loadRoster, purchaseItem } from "@/utils/quest-repository";
+import { purchaseItem } from "@/utils/quest-repository";
 
 const logger = createScopedLogger("api/shop");
 
@@ -12,11 +13,16 @@ const purchaseSchema = z.object({
 });
 
 /**
- * Buys one decoration item with coins.
+ * Buys one decoration item with the student's coins.
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.status(405).json({ message: "POST 요청만 허용됩니다." });
+    return;
+  }
+
+  const session = requireApiSession(req, res, "student");
+  if (!session?.studentId) {
     return;
   }
 
@@ -27,8 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { me } = await loadRoster();
-    const result = await purchaseItem(me.id, parsed.data.itemKey);
+    const result = await purchaseItem(session.studentId, parsed.data.itemKey);
 
     res.status(201).json(result);
   } catch (error: unknown) {

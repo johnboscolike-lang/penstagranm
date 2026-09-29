@@ -1,4 +1,4 @@
-export const UNIT_KINDS = ["PAGE", "WORD", "LECTURE"] as const;
+export const UNIT_KINDS = ["PAGE", "WORD", "LECTURE", "CHECK"] as const;
 
 export type UnitKind = (typeof UNIT_KINDS)[number];
 
@@ -50,6 +50,10 @@ export function buildRangeLabel(range: PromiseRange): string {
     return range.unitCount === 1 ? `${range.unitStart}강` : `${range.unitStart}~${last}강`;
   }
 
+  if (range.unitKind === "CHECK") {
+    return `${range.unitCount}회`;
+  }
+
   return `${range.unitCount}개`;
 }
 
@@ -57,15 +61,22 @@ export function buildRangeLabel(range: PromiseRange): string {
  * Returns the text printed on one unit square: the page number, or a running count for words.
  */
 export function buildUnitLabel(kind: UnitKind, unitNo: number, unitStart: number): string {
-  return kind === "PAGE" ? String(unitNo) : String(unitNo - unitStart + 1);
+  return kind === "PAGE" || kind === "LECTURE" ? String(unitNo) : String(unitNo - unitStart + 1);
 }
+
+export const UNIT_KIND_LABELS: Readonly<Record<UnitKind, string>> = {
+  PAGE: "쪽수",
+  WORD: "단어 수",
+  LECTURE: "강의 번호",
+  CHECK: "횟수(체크)",
+};
 
 /**
  * Suggests the next range after a finished one: pages and lectures continue, words start over.
  */
 export function suggestNextRange(previous: PromiseRange | null, template: PromiseTemplate, slotIndex: number): PromiseRange {
-  if (template.unitKind === "WORD") {
-    return { unitKind: "WORD", unitStart: 1, unitCount: template.unitCount };
+  if (template.unitKind === "WORD" || template.unitKind === "CHECK") {
+    return { unitKind: template.unitKind, unitStart: 1, unitCount: template.unitCount };
   }
 
   const unitStart = previous ? previous.unitStart + previous.unitCount : (FIRST_PAGE_STARTS[slotIndex] ?? 1);

@@ -10,7 +10,6 @@ interface CommentFormProps {
  */
 export function CommentForm({ postId }: CommentFormProps) {
   const router = useRouter();
-  const [authorName, setAuthorName] = useState("");
   const [body, setBody] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -29,7 +28,6 @@ export function CommentForm({ postId }: CommentFormProps) {
       },
       body: JSON.stringify({
         postId,
-        authorName,
         body,
       }),
     });
@@ -40,7 +38,6 @@ export function CommentForm({ postId }: CommentFormProps) {
       return;
     }
 
-    setAuthorName("");
     setBody("");
     startTransition(() => {
       void router.replace(router.asPath, undefined, { scroll: false });
@@ -50,17 +47,6 @@ export function CommentForm({ postId }: CommentFormProps) {
   return (
     <form className="comment-form" onSubmit={handleSubmit}>
       <div className="comment-form__row">
-        <label className="sr-only" htmlFor={`comment-name-${postId}`}>
-          이름
-        </label>
-        <input
-          className="input"
-          id={`comment-name-${postId}`}
-          maxLength={20}
-          onChange={(event) => setAuthorName(event.target.value)}
-          placeholder="이름"
-          value={authorName}
-        />
         <label className="sr-only" htmlFor={`comment-body-${postId}`}>
           응원 한마디
         </label>

@@ -6,6 +6,7 @@ import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { PhotoSlotField } from "@/components/PhotoSlotField";
 import { PHOTO_SLOT_META, type PhotoSlotKey } from "@/utils/slot-metadata";
 import { validatePostDraft } from "@/utils/post-validation";
+import { resizeImageFile } from "@/utils/image-resize";
 
 interface SelectedPhoto {
   file: File;
@@ -100,12 +101,12 @@ export function PostComposer() {
     formData.append("lessonTitle", lessonTitle);
     formData.append("caption", caption);
     formData.append("transcript", transcript);
-    PHOTO_SLOT_META.forEach((slot) => {
+    for (const slot of PHOTO_SLOT_META) {
       const selected = selectedPhotos[slot.key];
       if (selected) {
-        formData.append(`photo-${slot.key}`, selected.file);
+        formData.append(`photo-${slot.key}`, await resizeImageFile(selected.file));
       }
-    });
+    }
 
     const response = await fetch("/api/posts", {
       method: "POST",

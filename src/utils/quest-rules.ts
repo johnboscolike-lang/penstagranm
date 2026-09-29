@@ -8,6 +8,8 @@ export const XP_PER_PROMISE = 20;
 export const XP_REFLECTION = 10;
 export const COIN_PER_PROMISE = 4;
 export const COIN_REFLECTION = 2;
+export const XP_PER_WEEKLY_QUEST = 30;
+export const COIN_PER_WEEKLY_QUEST = 6;
 export const XP_PER_LEVEL = 100;
 export const STAMP_TARGET = 3;
 export const STORM_GROWTH_GAIN = 20;
@@ -48,7 +50,7 @@ export interface WeekEvaluation {
 
 export type WeeklyBadge = "storm" | "comeback" | "firstStep" | "steady";
 
-export type WeeklyStatus = "none" | "collecting" | "provisional" | "final";
+export type WeeklyStatus = "none" | "collecting" | "provisional" | "waiting" | "final";
 
 export interface RankedEntry<T> {
   rank: number;
@@ -118,6 +120,18 @@ export function calcPromiseCoins(progress: PromiseProgress): number {
 }
 
 /**
+ * Weekly quest reward: floor(30 x f) XP and floor(6 x f) coins. It never enters the weekly ranking score.
+ */
+export function calcWeeklyQuestReward(progress: PromiseProgress): { xp: number; coins: number } {
+  const { confirmedUnits, plannedUnits } = normalizeProgress(progress);
+
+  return {
+    xp: Math.floor((XP_PER_WEEKLY_QUEST * confirmedUnits) / plannedUnits),
+    coins: Math.floor((COIN_PER_WEEKLY_QUEST * confirmedUnits) / plannedUnits),
+  };
+}
+
+/**
  * Summarizes one day: score, participation stamp, XP, and coins.
  */
 export function calcDailyResult(progresses: PromiseProgress[], reflected: boolean): DailyResult {
@@ -159,8 +173,9 @@ export function calcWeeklyScore(dailyScores: number[]): number | null {
 
 /**
  * Classifies how far a weekly ranking may be trusted for the current point in the week.
+ * A closed week that still has cards waiting for the teacher is "waiting" (집계 대기), never a zero.
  */
-export function getWeeklyStatus(eligibleDaysSoFar: number, weekClosed: boolean): WeeklyStatus {
+export function getWeeklyStatus(eligibleDaysSoFar: number, weekClosed: boolean, pendingReviewCount = 0): WeeklyStatus {
   if (eligibleDaysSoFar <= 0) {
     return "none";
   }
@@ -169,7 +184,11 @@ export function getWeeklyStatus(eligibleDaysSoFar: number, weekClosed: boolean):
     return "collecting";
   }
 
-  return weekClosed ? "final" : "provisional";
+  if (!weekClosed) {
+    return "provisional";
+  }
+
+  return pendingReviewCount > 0 ? "waiting" : "final";
 }
 
 /**

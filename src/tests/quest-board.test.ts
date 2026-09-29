@@ -79,6 +79,13 @@ describe("calcStudentWeek", () => {
     expect(stats.status).toBe("collecting");
   });
 
+  it("waits instead of finalizing when cards are still waiting for the teacher", () => {
+    const index = indexPromises(WEEK.flatMap((dateKey) => day("me", dateKey, [4, 4, 4])));
+
+    expect(calcStudentWeek(index, "me", "2026-09-29", "2026-10-04", "0000-01-01", 2).status).toBe("waiting");
+    expect(calcStudentWeek(index, "me", "2026-09-29", "2026-10-04").status).toBe("final");
+  });
+
   it("has no record before the student joined", () => {
     const stats = calcStudentWeek(indexPromises([]), "me", "2026-09-29", "2026-10-04", "2026-10-05");
 
