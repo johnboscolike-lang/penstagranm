@@ -77,12 +77,12 @@ npm run build
 
 ## 홍보 영상 (`/promo/`)
 
-배포 주소의 `/promo/`에서 40초짜리 홍보 영상을 소리와 함께 볼 수 있다. 영상은 HyperFrames(npm `hyperframes`)의 HTML 컴포지션이며, 별도 촬영 없이 게임 화면 캡처와 도트 스프라이트로 만들었다.
+배포 주소의 `/promo`(가로)와 `/promo/shorts`(세로)에서 40초짜리 홍보 영상을 소리와 함께 볼 수 있다. 두 주소는 `public/promo`의 정적 HTML로 보내는 리다이렉트다(`next.config.ts`). 영상은 HyperFrames(npm `hyperframes`)의 HTML 컴포지션이며, 별도 촬영 없이 게임 화면 캡처와 도트 스프라이트로 만들었다.
 
 | 파일 | 내용 |
 |---|---|
-| `public/promo/index.html` | 가로 16:9 (1920×1080) 컴포지션. `/promo/`에서 바로 재생 |
-| `public/promo/shorts.html` | 세로 9:16 (1080×1920) 쇼츠용 컴포지션. 글자·스프라이트를 키우고 구도를 세로로 다시 짰다. `/promo/shorts.html` |
+| `public/promo/index.html` | 가로 16:9 (1920×1080) 컴포지션. `/promo`에서 바로 재생 |
+| `public/promo/shorts.html` | 세로 9:16 (1080×1920) 쇼츠용 컴포지션. 글자·스프라이트를 키우고 구도를 세로로 다시 짰다. `/promo/shorts` |
 | `public/promo/penstagranm-promo.mp4` | 가로판 MP4 (소리 포함) |
 | `public/promo/penstagranm-shorts.mp4` | 세로판 MP4 (소리 포함) |
 
