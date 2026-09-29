@@ -1,0 +1,1094 @@
+/* ───────── 오늘의 학교 ───────── */
+.info-list {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.info-row {
+  padding: 0 !important;
+}
+
+.info-row__head {
+  display: grid;
+  grid-template-columns: 46px 64px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.info-row__head > .px:first-child {
+  justify-self: center;
+}
+
+.info-row__label {
+  font-weight: 700;
+  color: var(--teal-d);
+}
+
+.info-row__value {
+  display: grid;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.info-row__value small {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.info-row__chevron {
+  --u: 3px;
+  transition: transform 0.1s steps(2);
+}
+
+.info-row__chevron--open {
+  transform: rotate(90deg);
+}
+
+.info-row__body {
+  display: grid;
+  gap: 8px;
+  padding: 4px 12px 12px;
+  border-top: 2px dashed #e3cf9c;
+}
+
+.info-row__body h3 {
+  font-size: 14px;
+  color: var(--teal-d);
+}
+
+.timetable {
+  display: grid;
+  gap: 4px;
+}
+
+.timetable li {
+  display: grid;
+  grid-template-columns: 52px auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 6px;
+}
+
+.timetable__period {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.timetable__next {
+  background: #dff7ef;
+  outline: 2px solid var(--teal);
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.notice-list {
+  display: grid;
+  gap: 10px;
+}
+
+.notice-list li {
+  display: grid;
+  gap: 2px;
+}
+
+.notice-list__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel__foot {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.panel__foot .px {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.teaser {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px !important;
+  background: none;
+  filter: drop-shadow(0 4px 0 rgba(58, 42, 36, 0.25));
+}
+
+.teaser__text {
+  display: grid;
+  flex: 1;
+  font-weight: 700;
+}
+
+.teaser__text > span {
+  white-space: nowrap;
+}
+
+.teaser__text small {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+
+/* ───────── 탭 ───────── */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin: 0 4px 12px;
+  padding: 4px;
+  background: #e8d7ae;
+  box-shadow: 0 0 0 2px #b08553;
+}
+
+.tabs__tab {
+  min-height: 38px;
+  border: 0;
+  background: none;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.tabs__tab--on {
+  background: var(--teal);
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 -3px 0 var(--teal-d),
+    inset 0 3px 0 var(--teal-l),
+    0 0 0 2px #0a3a34;
+}
+
+/* ───────── 오늘 약속 ───────── */
+.promise-board {
+  display: grid;
+  gap: 12px;
+}
+
+.promise-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.promise-summary > div {
+  display: grid;
+}
+
+.promise-summary__score em {
+  font-style: normal;
+  font-size: 24px;
+  color: var(--teal-d);
+}
+
+.promise-list {
+  display: grid;
+  gap: 10px;
+}
+
+.promise {
+  display: grid;
+  gap: 8px;
+  padding: 4px 6px 6px !important;
+}
+
+.promise__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.promise__title {
+  font-weight: 700;
+}
+
+.promise__range {
+  margin-left: auto;
+  padding: 0 8px;
+  background: #f4e6c2;
+  font-size: 12px;
+  line-height: 22px;
+}
+
+.subject-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 0 6px;
+  min-height: 28px;
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 2px var(--ink);
+  background: var(--hud);
+}
+
+.subject-chip--rose {
+  background: #d9727a;
+}
+
+.subject-chip--sky {
+  background: #4a86c8;
+}
+
+.subject-chip--leaf {
+  background: #3fae5a;
+}
+
+.subject-chip--sun {
+  background: #e0902f;
+}
+
+.subject-chip .px {
+  --u: 2px;
+  filter: brightness(2) grayscale(1);
+}
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(46px, 1fr));
+  gap: 6px;
+}
+
+.tile-grid--small {
+  grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+  gap: 4px;
+}
+
+.tile {
+  --b: 2px;
+  --frame: var(--frame-tile);
+  display: grid;
+  place-items: center;
+  min-height: 46px;
+  padding: 0;
+  border: solid 8px transparent;
+  border-image-source: var(--frame);
+  border-image-slice: 4 fill;
+  background: none;
+  color: #8b7355;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tile-grid--small .tile {
+  min-height: 34px;
+  border-width: 6px;
+  font-size: 12px;
+}
+
+.tile:hover:not(.tile--done) {
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+}
+
+.tile:active {
+  transform: translateY(2px);
+}
+
+.tile--done {
+  --frame: var(--frame-tileDone);
+  color: #fff;
+}
+
+.tile--done .px {
+  --u: 3px;
+}
+
+.tile-grid--small .tile--done .px {
+  --u: 2px;
+}
+
+.promise__foot {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px;
+}
+
+.promise__count {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.promise__count b {
+  color: var(--teal-d);
+  font-size: 15px;
+}
+
+.reward-strip {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  gap: 6px 14px;
+  padding: 6px 8px !important;
+}
+
+.reward-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reward-strip b {
+  font-size: 16px;
+  color: var(--teal-d);
+}
+
+.rest-note {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px !important;
+}
+
+/* ───────── 이번 주 ───────── */
+.week-board {
+  display: grid;
+  gap: 10px;
+}
+
+.week-board__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.section-label {
+  padding: 0 4px;
+  font-size: 13px;
+  color: var(--teal-d);
+}
+
+.rank-list {
+  display: grid;
+  gap: 6px;
+}
+
+.rank-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 8px !important;
+}
+
+.rank-list--solo .rank-row {
+  grid-template-columns: auto auto 1fr auto;
+}
+
+.rank-row--mine {
+  --frame: var(--frame-cardMint);
+}
+
+.rank-row__medal {
+  --u: 3px;
+}
+
+.rank-row__rank {
+  min-width: 18px;
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+}
+
+.rank-list:not(.rank-list--solo) .rank-row__rank {
+  display: none;
+}
+
+.rank-row__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rank-row__main strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rank-row__main strong .px {
+  --u: 2px;
+}
+
+.rank-row__faces {
+  display: flex;
+  gap: 2px;
+}
+
+.rank-row__faces .px {
+  --u: 2px;
+}
+
+.rank-row__score {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--teal-d);
+}
+
+.rank-group__tie > summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  list-style: none;
+  background: #fff8e8;
+  box-shadow: 0 0 0 2px #b08553;
+}
+
+.rank-group__tie > ul {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.my-week {
+  display: grid !important;
+  gap: 8px;
+  padding: 6px 10px 10px !important;
+}
+
+.my-week__top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-week__top > div:nth-child(2) {
+  display: grid;
+}
+
+.my-week__score {
+  font-size: 30px;
+  line-height: 1.1;
+  color: var(--teal-d);
+}
+
+.my-week__rank {
+  display: grid;
+  text-align: right;
+}
+
+.my-week__rank b {
+  font-size: 18px;
+}
+
+.my-week__rank small {
+  color: var(--ink-soft);
+}
+
+.stamp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.stamp {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  background: #d9e6df;
+  box-shadow: 0 0 0 2px #7ea99a;
+}
+
+.stamp--on {
+  background: #ffe38a;
+  box-shadow: 0 0 0 2px #7a4f12;
+}
+
+.stamp .px {
+  --u: 2px;
+}
+
+.stamp-row__text {
+  flex: 1;
+  min-width: 160px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stamp-row__text b {
+  color: var(--teal-d);
+}
+
+/* ───────── 내공간 ───────── */
+.profile {
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px !important;
+}
+
+.profile__face {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  background: #d9f2ea;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 0 3px var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile__face .px {
+  --u: 3px;
+}
+
+.profile__main {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.profile__main .bar {
+  width: 100%;
+}
+
+.profile__name {
+  font-size: 22px;
+}
+
+.profile__lv {
+  display: grid;
+}
+
+.profile__lv b {
+  font-size: 18px;
+  color: var(--teal-d);
+}
+
+.news {
+  display: grid;
+  gap: 8px;
+}
+
+.news__badge,
+.news__reward {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px !important;
+}
+
+.news__badge > div,
+.news__reward > div {
+  display: grid;
+  gap: 2px;
+}
+
+.news__badge .px--icon,
+.news__reward .px--icon {
+  --u: 3px;
+}
+
+.shop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.shop__item {
+  display: grid !important;
+  gap: 4px;
+  justify-items: center;
+  padding: 4px 8px 8px !important;
+  text-align: center;
+}
+
+.shop__item--owned {
+  --frame: var(--frame-cardMint);
+}
+
+.shop__thumb {
+  display: grid;
+  place-items: end center;
+  width: 100%;
+  height: 84px;
+  background: linear-gradient(180deg, #d9f0fb 0 60%, #a7dc8a 60%);
+  box-shadow: 0 0 0 2px #b08553;
+  overflow: hidden;
+}
+
+.shop__thumb .px {
+  --u: 2px;
+  margin-bottom: 4px;
+  max-height: 78px;
+  width: auto;
+}
+
+.shop__item .muted {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.records {
+  display: grid;
+  gap: 14px;
+}
+
+.records-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--hud);
+  color: var(--cream);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 6px var(--gold);
+  margin: 6px 6px 4px;
+}
+
+.records-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.records-header .muted {
+  color: #b9e9dc;
+}
+
+/* ───────── 성장 기록(게시글) ───────── */
+.post {
+  display: grid;
+  gap: 10px;
+  padding: 6px 8px 10px !important;
+  filter: drop-shadow(0 4px 0 rgba(58, 42, 36, 0.22));
+}
+
+.post__header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.post__avatar {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  background: #d9f2ea;
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 0 2px var(--ink);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.post__avatar .px {
+  --u: 3px;
+}
+
+.post__who {
+  display: grid;
+}
+
+.post__body {
+  display: grid;
+  gap: 6px;
+}
+
+.post__body h3 {
+  font-size: 16px;
+  color: var(--teal-d);
+}
+
+.post__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.post__figure {
+  position: relative;
+  margin: 0;
+  background: #fff;
+  box-shadow: 0 0 0 2px #b08553;
+}
+
+.post__image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+.post__figure figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px 4px;
+  background: rgba(18, 60, 58, 0.86);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.transcript {
+  padding: 6px 10px;
+  background: #fff8e8;
+  box-shadow: 0 0 0 2px #e3cf9c;
+}
+
+.transcript summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.transcript p {
+  margin-top: 6px;
+}
+
+.comments {
+  display: grid;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 2px dashed #e3cf9c;
+}
+
+.comments h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.comments__list {
+  display: grid;
+  gap: 8px;
+}
+
+.comment {
+  display: grid;
+  gap: 2px;
+  padding: 4px 10px;
+  background: #fffdf5;
+  box-shadow: 0 0 0 2px #efe0bb;
+}
+
+.comment--teacher {
+  background: #eafaf4;
+  box-shadow: 0 0 0 2px #7fd1bd;
+}
+
+.comment__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.comment-form__row {
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ───────── 기록 작성기 ───────── */
+.composer {
+  display: grid;
+  gap: 12px;
+  padding: 0 6px 4px;
+}
+
+.composer__fields {
+  display: grid;
+  gap: 8px;
+}
+
+.composer__count {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.slot {
+  display: grid;
+  gap: 4px;
+}
+
+.slot__frame {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  cursor: pointer;
+  background: #fff8e8;
+  box-shadow:
+    0 0 0 3px #b08553,
+    inset 0 0 0 3px #f1dcae;
+  overflow: hidden;
+}
+
+.slot__frame:hover {
+  filter: brightness(1.04);
+}
+
+.slot--prep .slot__frame {
+  background: #ffe9cf;
+}
+
+.slot--goal .slot__frame {
+  background: #ffdbe4;
+}
+
+.slot--notes .slot__frame {
+  background: #d8f3ea;
+}
+
+.slot--assignment .slot__frame {
+  background: #e0e3ff;
+}
+
+.slot__placeholder {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 6px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.slot__placeholder strong {
+  font-size: 12px;
+}
+
+.slot__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slot__footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.slot__name {
+  overflow: hidden;
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recorder {
+  display: grid !important;
+  gap: 8px;
+  padding: 6px 10px 10px !important;
+}
+
+.recorder__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recorder__head h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--teal-d);
+}
+
+.recorder__buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.recorder__status--live {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.recorder__audio {
+  width: 100%;
+}
+
+/* ───────── 달력 ───────── */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  align-items: start;
+}
+
+.calendar__nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 8px 10px;
+}
+
+.calendar__nav .px {
+  --u: 2px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0 6px 6px;
+}
+
+.calendar-grid__weekday {
+  padding: 2px 0;
+  background: var(--hud);
+  color: var(--cream);
+  font-weight: 700;
+  text-align: center;
+}
+
+.calendar-grid__weekday.is-sun {
+  color: #ffb1a8;
+}
+
+.calendar-grid__weekday.is-sat {
+  color: #a9d8ff;
+}
+
+.calendar-grid__cell {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-height: 86px;
+  padding: 3px 4px;
+  background: #fff8e8;
+  box-shadow: 0 0 0 2px #e3cf9c;
+}
+
+.calendar-grid__cell:hover {
+  background: #fffdf5;
+  box-shadow: 0 0 0 2px var(--gold-d);
+}
+
+.calendar-grid__cell.is-muted {
+  opacity: 0.5;
+}
+
+.calendar-grid__cell.is-today {
+  box-shadow: 0 0 0 3px var(--teal);
+}
+
+.calendar-grid__cell.is-selected {
+  background: #dff7ef;
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 6px var(--gold);
+  position: relative;
+  z-index: 1;
+}
+
+.calendar-grid__day {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-grid__day .tag {
+  min-height: 18px;
+  padding: 0 5px;
+  line-height: 14px;
+}
+
+.calendar-pill {
+  overflow: hidden;
+  padding: 0 4px;
+  background: #ffe9a8;
+  font-size: 11px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenda {
+  display: grid;
+  gap: 8px;
+  margin: 0 6px 12px;
+}
+
+.agenda__item {
+  display: grid !important;
+  gap: 2px;
+  justify-items: start;
+  padding: 4px 8px !important;
+}
+
+.agenda__empty {
+  padding: 6px;
+  text-align: center;
+}
+
+.schedule-form {
+  display: grid;
+  gap: 8px;
+  padding: 0 6px 4px;
+}
+
+@media (max-width: 1199px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 699px) {
+  .calendar-grid__cell {
+    min-height: 62px;
+  }
+
+  .calendar-pill {
+    display: none;
+  }
+
+  .slot-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

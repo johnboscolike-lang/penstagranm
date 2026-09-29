@@ -1,12 +1,9 @@
 import { PhotoSlot, Prisma } from "@prisma/client";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { addMonths, format } from "date-fns";
 
 import { prisma } from "@/utils/prisma";
 import { getPhotoSlotMeta, sortPhotosBySlot, type PhotoSlotKey } from "@/utils/slot-metadata";
 import type { CommentView, PostPhotoView, PostView, ScheduleItemView } from "@/utils/types";
-
-const DEFAULT_AVATAR =
-  "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' x2='100%25' y1='0%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ff7a59'/%3E%3Cstop offset='100%25' stop-color='%23f43f5e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='160' height='160' rx='80' fill='url(%23g)'/%3E%3Ctext x='80' y='96' text-anchor='middle' fill='white' font-size='54' font-family='Arial' font-weight='700'%3E펜%3C/text%3E%3C/svg%3E";
 
 const SLOT_TO_PRISMA: Record<PhotoSlotKey, PhotoSlot> = {
   prep: PhotoSlot.PREP,
@@ -30,6 +27,11 @@ type PostRecord = Prisma.PostGetPayload<{
       };
     };
     photos: true;
+    student: {
+      select: {
+        hairKey: true;
+      };
+    };
   };
 }>;
 
@@ -67,6 +69,7 @@ function mapPostRecord(record: PostRecord): PostView {
     authorName: record.authorName,
     authorRole: record.authorRole,
     avatarUrl: record.avatarUrl,
+    authorHairKey: record.student?.hairKey ?? null,
     lessonTitle: record.lessonTitle,
     caption: record.caption,
     transcript: record.transcript,
@@ -88,6 +91,11 @@ export async function getFeedPosts(): Promise<PostView[]> {
         },
       },
       photos: true,
+      student: {
+        select: {
+          hairKey: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -98,7 +106,7 @@ export async function getFeedPosts(): Promise<PostView[]> {
 }
 
 /**
- * Creates a new four-photo classroom post.
+ * Creates a new four-photo classroom post for the demo player.
  */
 export async function createPost(input: {
   lessonTitle: string;
@@ -106,11 +114,16 @@ export async function createPost(input: {
   transcript: string;
   photos: PostPhotoView[];
 }): Promise<PostView> {
+  const author = await prisma.student.findFirst({
+    where: { isMe: true },
+    include: { team: true },
+  });
+
   const post = await prisma.post.create({
     data: {
-      authorName: "펜 선생님",
-      authorRole: "응용프로그래밍 수업 아카이브",
-      avatarUrl: DEFAULT_AVATAR,
+      studentId: author?.id,
+      authorName: author?.name ?? "우리반 모험가",
+      authorRole: author ? `${author.team.name} · 모험가` : "우리반 퀘스트 성장 기록",
       lessonTitle: input.lessonTitle,
       caption: input.caption,
       transcript: input.transcript,
@@ -129,6 +142,11 @@ export async function createPost(input: {
         },
       },
       photos: true,
+      student: {
+        select: {
+          hairKey: true,
+        },
+      },
     },
   });
 
@@ -160,14 +178,16 @@ export async function createComment(input: {
 }
 
 /**
- * Fetches the schedule entries for a specific month.
+ * Fetches the schedule entries for a specific month (month boundaries follow Asia/Seoul).
  */
 export async function getScheduleItemsForMonth(monthDate: Date): Promise<ScheduleItemView[]> {
+  const start = new Date(`${format(monthDate, "yyyy-MM")}-01T00:00:00+09:00`);
+  const end = new Date(`${format(addMonths(monthDate, 1), "yyyy-MM")}-01T00:00:00+09:00`);
   const items = await prisma.scheduleItem.findMany({
     where: {
       scheduledFor: {
-        gte: startOfMonth(monthDate),
-        lte: endOfMonth(monthDate),
+        gte: start,
+        lt: end,
       },
     },
     orderBy: {
@@ -205,4 +225,16 @@ export async function createScheduleItem(input: {
     notes: item.notes,
     scheduledFor: item.scheduledFor.toISOString(),
   };
+}
+
+/**
+ * Finds the newest comment written by a teacher ("...선생님") so scenes can show it as speech.
+ */
+export async function getLatestTeacherComment(): Promise<{ who: string; body: string } | null> {
+  const comment = await prisma.comment.findFirst({
+    where: { authorName: { endsWith: "선생님" } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return comment ? { who: comment.authorName, body: comment.body } : null;
 }

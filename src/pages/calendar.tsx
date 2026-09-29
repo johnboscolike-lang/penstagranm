@@ -1,13 +1,17 @@
 import { format } from "date-fns";
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
-import { AppShell } from "@/components/AppShell";
+import { GameShell } from "@/components/GameShell";
+import { SchoolScene } from "@/components/scenes/SchoolScene";
 import { ScheduleCalendar } from "@/components/ScheduleCalendar";
-import { formatDateKey, parseMonthInput, parseSelectedDateInput } from "@/utils/calendar";
+import { formatDateKey, parseMonthInput, parseSelectedDateInput, pickDefaultSelectedDay } from "@/utils/calendar";
+import { getPageBase } from "@/utils/quest-repository";
 import { getScheduleItemsForMonth } from "@/utils/repository";
+import type { HudView } from "@/utils/quest-types";
 import type { ScheduleItemView } from "@/utils/types";
 
 interface CalendarPageProps {
+  hud: HudView;
   currentMonthKey: string;
   selectedDateKey: string;
   items: ScheduleItemView[];
@@ -18,11 +22,12 @@ interface CalendarPageProps {
  */
 export const getServerSideProps: GetServerSideProps<CalendarPageProps> = async (context) => {
   const monthDate = parseMonthInput(context.query.month);
-  const selectedDate = parseSelectedDateInput(context.query.selectedDate, monthDate);
-  const items = await getScheduleItemsForMonth(monthDate);
+  const selectedDate = parseSelectedDateInput(context.query.selectedDate, pickDefaultSelectedDay(monthDate));
+  const [{ hud }, items] = await Promise.all([getPageBase(), getScheduleItemsForMonth(monthDate)]);
 
   return {
     props: {
+      hud,
       currentMonthKey: format(monthDate, "yyyy-MM"),
       selectedDateKey: formatDateKey(selectedDate),
       items,
@@ -31,21 +36,24 @@ export const getServerSideProps: GetServerSideProps<CalendarPageProps> = async (
 };
 
 /**
- * Renders the classroom scheduling board with day selection and inline entry creation.
+ * 학교 공간의 일정 달력: 날짜를 고르고 같은 화면에서 일정을 등록한다.
  */
 export default function CalendarPage({
+  hud,
   currentMonthKey,
   selectedDateKey,
   items,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <AppShell currentPath="calendar">
-      <section className="hero-card hero-card--calendar">
-        <p className="hero-card__eyebrow">CALENDAR MODE</p>
-        <h2>날짜마다 일정을 남기는 교실형 캘린더 보드</h2>
-        <p>날짜를 선택하면 오른쪽 패널에서 일정 목록과 신규 등록 폼을 바로 확인할 수 있습니다.</p>
-      </section>
+    <GameShell
+      banner="우리반 일정 달력"
+      hud={hud}
+      pageTitle="일정 달력"
+      scene={<SchoolScene hairKey={hud.hairKey} />}
+      space="school"
+      wide
+    >
       <ScheduleCalendar currentMonthKey={currentMonthKey} items={items} selectedDateKey={selectedDateKey} />
-    </AppShell>
+    </GameShell>
   );
 }

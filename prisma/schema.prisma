@@ -16,6 +16,8 @@ enum PhotoSlot {
 
 model Post {
   id          String     @id @default(cuid())
+  studentId   String?
+  student     Student?   @relation(fields: [studentId], references: [id], onDelete: SetNull)
   authorName  String
   authorRole  String
   avatarUrl   String?
@@ -54,4 +56,63 @@ model ScheduleItem {
   notes       String?
   scheduledFor DateTime
   createdAt   DateTime @default(now())
+}
+
+model Team {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  emblem   String
+  students Student[]
+}
+
+model Student {
+  id        String         @id @default(cuid())
+  name      String
+  hairKey   String
+  isMe      Boolean        @default(false)
+  joinedOn  String         @default("2000-01-01")
+  teamId    String
+  team      Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  promises  DailyPromise[]
+  purchases Purchase[]
+  posts     Post[]
+}
+
+model DailyPromise {
+  id        String        @id @default(cuid())
+  studentId String
+  dateKey   String
+  slotIndex Int
+  subject   String
+  title     String
+  unitKind  String
+  unitStart Int
+  unitCount Int
+  createdAt DateTime      @default(now())
+  student   Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  units     PromiseUnit[]
+
+  @@unique([studentId, dateKey, slotIndex])
+  @@index([dateKey])
+}
+
+model PromiseUnit {
+  id          String       @id @default(cuid())
+  promiseId   String
+  unitNo      Int
+  confirmedAt DateTime     @default(now())
+  promise     DailyPromise @relation(fields: [promiseId], references: [id], onDelete: Cascade)
+
+  @@unique([promiseId, unitNo])
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  studentId String
+  itemKey   String
+  cost      Int
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, itemKey])
 }

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdir } from "node:fs/promises";
 
-import formidable, { type Fields, type File as FormidableFile, type Files } from "formidable";
+import formidable, { type Fields, type File as FormidableFile } from "formidable";
 import type { NextApiRequest, PageConfig } from "next";
 
 import { PHOTO_SLOT_META, type PhotoSlotKey } from "@/utils/slot-metadata";

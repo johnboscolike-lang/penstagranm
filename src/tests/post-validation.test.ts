@@ -30,6 +30,6 @@ describe("validatePostDraft", () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("4개의 사진");
+    expect(result.success ? "" : result.error).toContain("4개의 사진");
   });
 });

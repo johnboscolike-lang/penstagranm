@@ -1,4 +1,7 @@
+import clsx from "clsx";
+
 import { CommentForm } from "@/components/CommentForm";
+import { PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
 import { formatFeedTimestamp } from "@/utils/calendar";
 import type { PostView } from "@/utils/types";
 
@@ -7,69 +10,69 @@ interface PostCardProps {
 }
 
 /**
- * Shows one classroom post with its four photos, transcript, and comments.
+ * Tells whether a commenter is a teacher so the comment can carry the teacher badge.
+ */
+function isTeacherName(name: string): boolean {
+  return name.endsWith("선생님");
+}
+
+/**
+ * 성장 기록 한 장: 준비·목표·필기·과제 네 컷, 전사, 친구와 선생님의 응원 댓글.
  */
 export function PostCard({ post }: PostCardProps) {
   return (
-    <article className="post-card">
-      <header className="post-card__header">
-        <div className="post-card__profile">
-          {post.avatarUrl ? (
-            <img alt={post.authorName} className="avatar" src={post.avatarUrl} />
-          ) : (
-            <div className="avatar avatar--fallback">{post.authorName.slice(0, 1)}</div>
-          )}
-          <div>
-            <strong>{post.authorName}</strong>
-            <p>{post.authorRole}</p>
-          </div>
+    <article className="post card pf">
+      <header className="post__header">
+        <span className="post__avatar">
+          <PixelAvatar hairKey={post.authorHairKey ?? "silver"} label={post.authorName} scale={1.1} />
+        </span>
+        <div className="post__who">
+          <strong>{post.authorName}</strong>
+          <span className="muted">{post.authorRole}</span>
         </div>
-        <span className="timestamp">{formatFeedTimestamp(post.createdAt)}</span>
+        <time className="muted" dateTime={post.createdAt}>
+          {formatFeedTimestamp(post.createdAt)}
+        </time>
       </header>
 
-      <div className="post-card__body">
-        <div>
-          <p className="post-card__eyebrow">LESSON SNAPSHOT</p>
-          <h3>{post.lessonTitle}</h3>
-          <p className="post-card__caption">{post.caption}</p>
-        </div>
-        <div className="post-card__grid">
+      <div className="post__body">
+        <h3>{post.lessonTitle}</h3>
+        <p>{post.caption}</p>
+        <div className="post__grid">
           {post.photos.map((photo) => (
-            <figure className="post-card__figure" key={`${post.id}-${photo.slot}`}>
-              <img alt={photo.label} className="post-card__image" src={photo.imageUrl} />
+            <figure className="post__figure" key={`${post.id}-${photo.slot}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- 업로드 이미지와 시드 도트 이미지를 그대로 보여 준다. */}
+              <img alt={photo.label} className="post__image" src={photo.imageUrl} />
               <figcaption>{photo.label}</figcaption>
             </figure>
           ))}
         </div>
         {post.transcript ? (
-          <details className="transcript-box">
-            <summary>녹음 전사 보기</summary>
+          <details className="transcript">
+            <summary>
+              <PixelIcon name="book" /> 녹음 전사 보기
+            </summary>
             <p>{post.transcript}</p>
           </details>
         ) : null}
       </div>
 
-      <section className="comment-section">
-        <div className="section-heading section-heading--tight">
-          <div>
-            <p className="section-heading__eyebrow">COMMENTS</p>
-            <h4>댓글</h4>
-          </div>
-          <span className="comment-count">{post.comments.length}개</span>
-        </div>
-        <ul className="comment-list">
+      <section aria-label="응원 댓글" className="comments">
+        <h4>
+          <PixelIcon name="heart" /> 응원 댓글 <span className="muted">{post.comments.length}개</span>
+        </h4>
+        <ul className="comments__list">
           {post.comments.map((comment) => (
-            <li className="comment-item" key={comment.id}>
-              <div className="comment-item__header">
+            <li className={clsx("comment", isTeacherName(comment.authorName) && "comment--teacher")} key={comment.id}>
+              <div className="comment__head">
                 <strong>{comment.authorName}</strong>
-                <span>{formatFeedTimestamp(comment.createdAt)}</span>
+                {isTeacherName(comment.authorName) ? <span className="tag tag--teal">교과 선생님</span> : null}
+                <span className="muted">{formatFeedTimestamp(comment.createdAt)}</span>
               </div>
               <p>{comment.body}</p>
             </li>
           ))}
-          {post.comments.length === 0 ? (
-            <li className="comment-item comment-item--empty">첫 댓글을 남겨 수업 반응을 모아보세요.</li>
-          ) : null}
+          {post.comments.length === 0 ? <li className="muted">첫 응원 댓글을 남겨 주세요.</li> : null}
         </ul>
         <CommentForm postId={post.id} />
       </section>

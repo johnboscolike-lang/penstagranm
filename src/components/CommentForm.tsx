@@ -6,7 +6,7 @@ interface CommentFormProps {
 }
 
 /**
- * Submits a new comment under a feed post and reloads the page data.
+ * Submits a new cheer comment under a growth record and reloads the page data.
  */
 export function CommentForm({ postId }: CommentFormProps) {
   const router = useRouter();
@@ -43,30 +43,44 @@ export function CommentForm({ postId }: CommentFormProps) {
     setAuthorName("");
     setBody("");
     startTransition(() => {
-      void router.replace(router.asPath);
+      void router.replace(router.asPath, undefined, { scroll: false });
     });
   }
 
   return (
     <form className="comment-form" onSubmit={handleSubmit}>
       <div className="comment-form__row">
+        <label className="sr-only" htmlFor={`comment-name-${postId}`}>
+          이름
+        </label>
         <input
-          className="text-input"
+          className="input"
+          id={`comment-name-${postId}`}
+          maxLength={20}
           onChange={(event) => setAuthorName(event.target.value)}
           placeholder="이름"
           value={authorName}
         />
+        <label className="sr-only" htmlFor={`comment-body-${postId}`}>
+          응원 한마디
+        </label>
         <input
-          className="text-input"
+          className="input"
+          id={`comment-body-${postId}`}
+          maxLength={200}
           onChange={(event) => setBody(event.target.value)}
-          placeholder="수업 피드백을 남겨보세요."
+          placeholder="응원 한마디를 남겨요"
           value={body}
         />
-        <button className="primary-button" disabled={isPending} type="submit">
+        <button className="btn btn--small" disabled={isPending} type="submit">
           등록
         </button>
       </div>
-      {feedback ? <p className="form-message form-message--error">{feedback}</p> : null}
+      {feedback ? (
+        <p className="msg msg--error" role="alert">
+          {feedback}
+        </p>
+      ) : null}
     </form>
   );
 }

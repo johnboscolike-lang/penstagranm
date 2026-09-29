@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { addMonths, format } from "date-fns";
+import clsx from "clsx";
 
+import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { ScheduleForm } from "@/components/ScheduleForm";
+import { formatKstTime } from "@/utils/kst";
 import {
   buildMonthGrid,
   formatDateKey,
   formatMonthHeading,
   groupScheduleItemsByDate,
   parseMonthInput,
+  WEEKDAY_LABELS,
 } from "@/utils/calendar";
 import type { ScheduleItemView } from "@/utils/types";
 
@@ -19,12 +23,9 @@ interface ScheduleCalendarProps {
 
 /**
  * Shows a monthly classroom calendar with a selected-day detail panel.
+ * 날짜 선택과 일정 등록이 한 페이지에서 모두 되도록 좌우로 나란히 둔다.
  */
-export function ScheduleCalendar({
-  currentMonthKey,
-  selectedDateKey,
-  items,
-}: ScheduleCalendarProps) {
+export function ScheduleCalendar({ currentMonthKey, selectedDateKey, items }: ScheduleCalendarProps) {
   const monthDate = parseMonthInput(currentMonthKey);
   const calendarCells = buildMonthGrid(monthDate);
   const itemsByDate = groupScheduleItemsByDate(items);
@@ -33,84 +34,88 @@ export function ScheduleCalendar({
   const nextMonthKey = format(addMonths(monthDate, 1), "yyyy-MM");
 
   return (
-    <section className="calendar-layout">
-      <div className="panel">
-        <div className="calendar-toolbar">
-          <div>
-            <p className="section-heading__eyebrow">SCHEDULE BOARD</p>
-            <h2>{formatMonthHeading(monthDate)}</h2>
-          </div>
-          <div className="calendar-toolbar__buttons">
-            <Link className="ghost-button" href={`/calendar?month=${previousMonthKey}`}>
-              이전 달
-            </Link>
-            <Link className="ghost-button" href={`/calendar?month=${nextMonthKey}`}>
-              다음 달
-            </Link>
-          </div>
+    <div className="calendar-layout">
+      <section aria-labelledby="calendar-title" className="panel pf">
+        <h2 className="panel__title" id="calendar-title">
+          <PixelIcon name="laurel" />
+          <span>
+            <span className="panel__eyebrow">우리반 일정 달력</span>
+            {formatMonthHeading(monthDate)}
+          </span>
+          <PixelIcon name="laurel" />
+        </h2>
+
+        <div className="calendar__nav">
+          <Link className="btn btn--small btn--cream" href={`/calendar?month=${previousMonthKey}`}>
+            <PixelIcon className="px--flip" name="chevron" />
+            이전 달
+          </Link>
+          <Link className="btn btn--small btn--cream" href={`/calendar?month=${nextMonthKey}`}>
+            다음 달
+            <PixelIcon name="chevron" />
+          </Link>
         </div>
 
-        <div className="calendar-grid">
-          {["일", "월", "화", "수", "목", "금", "토"].map((label) => (
-            <div className="calendar-grid__weekday" key={label}>
+        <div className="calendar-grid" role="grid" aria-label={`${formatMonthHeading(monthDate)} 달력`}>
+          {WEEKDAY_LABELS.map((label, index) => (
+            <div className={clsx("calendar-grid__weekday", index === 0 && "is-sun", index === 6 && "is-sat")} key={label} role="columnheader">
               {label}
             </div>
           ))}
           {calendarCells.map((cell) => {
             const dateKey = formatDateKey(cell.date);
             const dayItems = itemsByDate[dateKey] ?? [];
+            const selected = dateKey === selectedDateKey;
 
             return (
               <Link
-                className={[
+                aria-current={selected ? "date" : undefined}
+                className={clsx(
                   "calendar-grid__cell",
-                  cell.isCurrentMonth ? "" : "calendar-grid__cell--muted",
-                  cell.isToday ? "calendar-grid__cell--today" : "",
-                  dateKey === selectedDateKey ? "calendar-grid__cell--selected" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+                  !cell.isCurrentMonth && "is-muted",
+                  cell.isToday && "is-today",
+                  selected && "is-selected",
+                )}
                 href={`/calendar?month=${currentMonthKey}&selectedDate=${dateKey}`}
                 key={dateKey}
+                role="gridcell"
               >
-                <div className="calendar-grid__cell-header">
-                  <strong>{format(cell.date, "d")}</strong>
-                  <span>{dayItems.length}개</span>
-                </div>
-                <div className="calendar-grid__cell-items">
-                  {dayItems.slice(0, 2).map((item) => (
-                    <span className="calendar-pill" key={item.id}>
-                      {format(new Date(item.scheduledFor), "HH:mm")} {item.title}
-                    </span>
-                  ))}
-                </div>
+                <span className="calendar-grid__day">
+                  <b>{format(cell.date, "d")}</b>
+                  {dayItems.length > 0 ? <span className="tag tag--gold">{dayItems.length}</span> : null}
+                </span>
+                {dayItems.slice(0, 2).map((item) => (
+                  <span className="calendar-pill" key={item.id}>
+                    {formatKstTime(item.scheduledFor)} {item.title}
+                  </span>
+                ))}
               </Link>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      <aside className="panel panel--sidebar">
-        <div className="section-heading">
-          <div>
-            <p className="section-heading__eyebrow">SELECTED DAY</p>
-            <h3>{selectedDateKey}</h3>
-          </div>
-        </div>
-        <ul className="agenda-list">
+      <aside aria-labelledby="agenda-title" className="panel pf">
+        <h2 className="panel__title" id="agenda-title">
+          <PixelIcon name="laurel" />
+          <span>
+            <span className="panel__eyebrow">선택한 날짜</span>
+            {selectedDateKey}
+          </span>
+          <PixelIcon name="laurel" />
+        </h2>
+        <ul className="agenda">
           {selectedItems.map((item) => (
-            <li className="agenda-item" key={item.id}>
-              <strong>{format(new Date(item.scheduledFor), "HH:mm")}</strong>
-              <p>{item.title}</p>
-              {item.notes ? <span>{item.notes}</span> : null}
+            <li className="agenda__item card pf" key={item.id}>
+              <span className="tag tag--gold">{formatKstTime(item.scheduledFor)}</span>
+              <strong>{item.title}</strong>
+              {item.notes ? <span className="muted">{item.notes}</span> : null}
             </li>
           ))}
-          {selectedItems.length === 0 ? (
-            <li className="agenda-item agenda-item--empty">선택한 날짜에 등록된 일정이 없습니다.</li>
-          ) : null}
+          {selectedItems.length === 0 ? <li className="muted agenda__empty">이 날짜에는 아직 일정이 없어요.</li> : null}
         </ul>
         <ScheduleForm selectedDateKey={selectedDateKey} />
       </aside>
-    </section>
+    </div>
   );
 }

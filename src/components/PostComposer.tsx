@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/router";
 
 import { LessonRecorder } from "@/components/LessonRecorder";
+import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { PhotoSlotField } from "@/components/PhotoSlotField";
 import { PHOTO_SLOT_META, type PhotoSlotKey } from "@/utils/slot-metadata";
 import { validatePostDraft } from "@/utils/post-validation";
@@ -52,7 +53,8 @@ export function PostComposer() {
       }
 
       if (!file) {
-        const { [slotKey]: _removed, ...rest } = current;
+        const rest = { ...current };
+        delete rest[slotKey];
         return rest;
       }
 
@@ -126,39 +128,47 @@ export function PostComposer() {
     });
     setSelectedPhotos({});
     startTransition(() => {
-      void router.replace(router.asPath);
+      void router.push("/myroom#records");
     });
   }
 
+  const filledCount = PHOTO_SLOT_META.filter((slot) => selectedPhotos[slot.key]).length;
+
   return (
-    <section className="panel">
-      <div className="section-heading">
-        <div>
-          <p className="section-heading__eyebrow">POST STUDIO</p>
-          <h2>오늘 수업을 네 컷으로 업로드</h2>
-        </div>
-        <p className="helper-text">네 장이 모두 채워져야 업로드됩니다.</p>
-      </div>
-      <form className="composer-form" onSubmit={handleSubmit}>
-        <div className="input-grid">
+    <section aria-labelledby="record-title" className="panel pf">
+      <h2 className="panel__title" id="record-title">
+        <PixelIcon name="laurel" />
+        <span>
+          <span className="panel__eyebrow">준비 · 목표 · 필기 · 과제</span>
+          오늘 기록하기
+        </span>
+        <PixelIcon name="laurel" />
+      </h2>
+      <form className="composer" onSubmit={handleSubmit}>
+        <div className="composer__fields">
           <label className="field">
-            <span>수업 제목</span>
+            <span>제목</span>
             <input
-              className="text-input"
+              className="input"
               onChange={(event) => setLessonTitle(event.target.value)}
-              placeholder="예: 응용프로그래밍 3차시 - 배열 실습"
+              placeholder="예: 국어 예비 매3문 · 근거 표시하기"
               value={lessonTitle}
             />
           </label>
           <label className="field">
-            <span>캡션</span>
+            <span>오늘 한 줄 소감</span>
             <input
-              className="text-input"
+              className="input"
               onChange={(event) => setCaption(event.target.value)}
-              placeholder="오늘 수업의 핵심 흐름을 짧게 정리하세요."
+              placeholder="어디가 막혔고 다음엔 무엇을 해 볼지 적어요."
               value={caption}
             />
           </label>
+        </div>
+
+        <div className="composer__count">
+          <span className="tag tag--gold">네 컷 {filledCount} / {PHOTO_SLOT_META.length}</span>
+          <span className="muted">네 칸을 모두 채워야 올릴 수 있어요.</span>
         </div>
 
         <div className="slot-grid">
@@ -175,16 +185,18 @@ export function PostComposer() {
 
         <LessonRecorder onChange={setTranscript} value={transcript} />
 
-        {feedback ? <p className="form-message form-message--error">{feedback}</p> : null}
-
-        <div className="composer-form__actions">
-          <p className="helper-text">
-            준비-목표-필기-과제 네 컷과 전사 텍스트가 함께 저장됩니다.
+        {feedback ? (
+          <p className="msg msg--error" role="alert">
+            {feedback}
           </p>
-          <button className="primary-button" disabled={isPending} type="submit">
-            {isPending ? "업로드 중..." : "게시글 올리기"}
-          </button>
-        </div>
+        ) : null}
+
+        <button className="btn btn--block" disabled={isPending} type="submit">
+          <PixelIcon name="feather" />
+          <span>{isPending ? "올리는 중..." : "성장 기록 올리기"}</span>
+          <PixelIcon name="chevronLight" />
+        </button>
+        <p className="panel__foot muted">올리면 내공간의 성장 기록에 쌓이고, 하루 회고 +10 XP가 적립돼요.</p>
       </form>
     </section>
   );

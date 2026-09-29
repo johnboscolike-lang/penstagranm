@@ -9,6 +9,7 @@ import {
   startOfWeek,
 } from "date-fns";
 
+import { formatKstMonthDay, formatKstTime, getKstDateKey } from "@/utils/kst";
 import type { ScheduleItemView } from "@/utils/types";
 
 export interface CalendarCell {
@@ -34,12 +35,10 @@ export function formatMonthHeading(date: Date): string {
 }
 
 /**
- * Formats feed timestamps in a compact Korean-friendly style.
+ * Formats feed timestamps in a compact Korean-friendly style (Asia/Seoul).
  */
 export function formatFeedTimestamp(dateValue: string | Date): string {
-  const date = typeof dateValue === "string" ? new Date(dateValue) : dateValue;
-
-  return format(date, "M월 d일 HH:mm");
+  return `${formatKstMonthDay(dateValue)} ${formatKstTime(dateValue)}`;
 }
 
 /**
@@ -47,13 +46,14 @@ export function formatFeedTimestamp(dateValue: string | Date): string {
  */
 export function parseMonthInput(input?: string | string[]): Date {
   const monthValue = Array.isArray(input) ? input[0] : input;
+  const currentMonth = startOfMonth(parse(getKstDateKey(), "yyyy-MM-dd", new Date()));
   if (!monthValue || !/^\d{4}-\d{2}$/.test(monthValue)) {
-    return startOfMonth(new Date());
+    return currentMonth;
   }
 
   const parsed = parse(`${monthValue}-01`, "yyyy-MM-dd", new Date());
 
-  return Number.isNaN(parsed.getTime()) ? startOfMonth(new Date()) : startOfMonth(parsed);
+  return Number.isNaN(parsed.getTime()) ? currentMonth : startOfMonth(parsed);
 }
 
 /**
@@ -74,6 +74,13 @@ export function parseSelectedDateInput(
 }
 
 /**
+ * Picks the day to preselect: today when it lies in the shown month, otherwise the first of the month.
+ */
+export function pickDefaultSelectedDay(monthDate: Date, todayKey: string = getKstDateKey()): Date {
+  return todayKey.startsWith(format(monthDate, "yyyy-MM")) ? parse(todayKey, "yyyy-MM-dd", new Date()) : monthDate;
+}
+
+/**
  * Builds a six-row month grid so the calendar layout remains stable.
  */
 export function buildMonthGrid(monthDate: Date): CalendarCell[] {
@@ -86,7 +93,7 @@ export function buildMonthGrid(monthDate: Date): CalendarCell[] {
     return {
       date,
       isCurrentMonth: isSameMonth(date, monthDate),
-      isToday: isSameDay(date, new Date()),
+      isToday: isSameDay(date, parse(getKstDateKey(), "yyyy-MM-dd", new Date())),
     };
   }).filter((cell) => cell.date <= addDays(lastDayOfMonth, 8) || true);
 }
@@ -98,7 +105,7 @@ export function groupScheduleItemsByDate(
   items: ScheduleItemView[],
 ): Record<string, ScheduleItemView[]> {
   return items.reduce<Record<string, ScheduleItemView[]>>((grouped, item) => {
-    const key = formatDateKey(new Date(item.scheduledFor));
+    const key = getKstDateKey(new Date(item.scheduledFor));
     grouped[key] = [...(grouped[key] ?? []), item];
 
     return grouped;

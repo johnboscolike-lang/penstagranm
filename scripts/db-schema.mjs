@@ -1,0 +1,114 @@
+/**
+ * SQLite 스키마를 만든다. 로컬 실행 스크립트(init-db.mjs)와 저장소 테스트가 같이 쓴다.
+ * 이미 만들어진 DB에도 안전하게 다시 실행할 수 있다.
+ */
+export function applySchema(database) {
+  database.exec(`
+    PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS "Team" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "name" TEXT NOT NULL,
+      "emblem" TEXT NOT NULL
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "Team_name_key" ON "Team" ("name");
+    CREATE TABLE IF NOT EXISTS "Student" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "name" TEXT NOT NULL,
+      "hairKey" TEXT NOT NULL,
+      "isMe" BOOLEAN NOT NULL DEFAULT false,
+      "joinedOn" TEXT NOT NULL DEFAULT '2000-01-01',
+      "teamId" TEXT NOT NULL,
+      CONSTRAINT "Student_teamId_fkey"
+        FOREIGN KEY ("teamId") REFERENCES "Team" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS "DailyPromise" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "dateKey" TEXT NOT NULL,
+      "slotIndex" INTEGER NOT NULL,
+      "subject" TEXT NOT NULL,
+      "title" TEXT NOT NULL,
+      "unitKind" TEXT NOT NULL,
+      "unitStart" INTEGER NOT NULL,
+      "unitCount" INTEGER NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "DailyPromise_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "DailyPromise_studentId_dateKey_slotIndex_key"
+      ON "DailyPromise" ("studentId", "dateKey", "slotIndex");
+    CREATE INDEX IF NOT EXISTS "DailyPromise_dateKey_idx" ON "DailyPromise" ("dateKey");
+    CREATE TABLE IF NOT EXISTS "PromiseUnit" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "promiseId" TEXT NOT NULL,
+      "unitNo" INTEGER NOT NULL,
+      "confirmedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PromiseUnit_promiseId_fkey"
+        FOREIGN KEY ("promiseId") REFERENCES "DailyPromise" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "PromiseUnit_promiseId_unitNo_key"
+      ON "PromiseUnit" ("promiseId", "unitNo");
+    CREATE TABLE IF NOT EXISTS "Purchase" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "itemKey" TEXT NOT NULL,
+      "cost" INTEGER NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "Purchase_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "Purchase_studentId_itemKey_key"
+      ON "Purchase" ("studentId", "itemKey");
+    CREATE TABLE IF NOT EXISTS "Post" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "authorName" TEXT NOT NULL,
+      "authorRole" TEXT NOT NULL,
+      "avatarUrl" TEXT,
+      "lessonTitle" TEXT NOT NULL,
+      "caption" TEXT NOT NULL,
+      "transcript" TEXT NOT NULL DEFAULT '',
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS "PostPhoto" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "postId" TEXT NOT NULL,
+      "slot" TEXT NOT NULL,
+      "label" TEXT NOT NULL,
+      "imageUrl" TEXT NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "PostPhoto_postId_fkey"
+        FOREIGN KEY ("postId") REFERENCES "Post" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "PostPhoto_postId_slot_key" ON "PostPhoto" ("postId", "slot");
+    CREATE TABLE IF NOT EXISTS "Comment" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "postId" TEXT NOT NULL,
+      "authorName" TEXT NOT NULL,
+      "body" TEXT NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "Comment_postId_fkey"
+        FOREIGN KEY ("postId") REFERENCES "Post" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE TABLE IF NOT EXISTS "ScheduleItem" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "title" TEXT NOT NULL,
+      "notes" TEXT,
+      "scheduledFor" DATETIME NOT NULL,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // 이전 버전 DB에는 Post.studentId 컬럼이 없으므로 한 번만 추가한다.
+  const postColumns = database.prepare('PRAGMA table_info("Post")').all();
+  if (!postColumns.some((column) => column.name === "studentId")) {
+    database.exec(
+      'ALTER TABLE "Post" ADD COLUMN "studentId" TEXT REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE',
+    );
+  }
+}
