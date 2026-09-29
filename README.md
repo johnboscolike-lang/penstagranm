@@ -75,6 +75,35 @@ npm run build
 
 `npm run vercel-build`가 SQLite 스키마를 PostgreSQL 공급자로 바꾼 사본(`prisma/schema.postgres.prisma`)을 만들고, 테이블을 만든 뒤(`prisma db push`), 데이터가 비어 있을 때만 데모 데이터를 넣고, 앱을 빌드합니다. 요청 크기 제한(4.5MB)에 맞추려고 사진은 브라우저에서 긴 변 1280px로 줄여 올립니다.
 
+## 홍보 영상 (`/promo/`)
+
+배포 주소의 `/promo/`에서 40초짜리 홍보 영상을 소리와 함께 볼 수 있다. 영상은 HyperFrames(npm `hyperframes`)의 HTML 컴포지션이며, 별도 촬영 없이 게임 화면 캡처와 도트 스프라이트로 만들었다.
+
+| 파일 | 내용 |
+|---|---|
+| `public/promo/index.html` | 가로 16:9 (1920×1080) 컴포지션. `/promo/`에서 바로 재생 |
+| `public/promo/shorts.html` | 세로 9:16 (1080×1920) 쇼츠용 컴포지션. 글자·스프라이트를 키우고 구도를 세로로 다시 짰다. `/promo/shorts.html` |
+| `public/promo/penstagranm-promo.mp4` | 가로판 MP4 (소리 포함) |
+| `public/promo/penstagranm-shorts.mp4` | 세로판 MP4 (소리 포함) |
+
+- **음악**: 외부 음원 없이 코드로 합성한 120 BPM 칩튠 비트 (`scripts/promo/make-beat.mjs` → `public/promo/beat.mp3`). 킥·스네어·하이햇·베이스·아르페지오·멜로디로 구성하고, 드롭 직전 정적과 마지막 한 방을 넣었다.
+- **박자 맞춤**: 20마디(마디당 2초). 장면 전환·글자 등장·화면 흔들림이 모두 박자표(`scripts/promo/beat-grid.mjs`)의 박 위에 놓인다.
+- **재생기**: 브라우저에서 열면 `player.js`가 소리 시계에 맞춰 재생·되감기·전체 화면을 맡는다. HyperFrames 스튜디오·렌더러 안에서는 동작하지 않는다.
+
+```bash
+node scripts/promo/make-beat.mjs public/promo/beat.mp3      # 음악 다시 만들기 (ffmpeg 필요)
+npx hyperframes check public/promo                          # 규칙·레이아웃·대비 점검
+npx hyperframes render public/promo -o /tmp/promo.mp4       # 가로판 MP4로 뽑기
+
+# 세로판은 index.html이 있어야 해서 임시 폴더에 복사해 렌더한다
+tmp=$(mktemp -d) && cp -r public/promo/assets public/promo/beat.mp3 public/promo/player.js "$tmp" \
+  && cp public/promo/shorts.html "$tmp/index.html" \
+  && npx hyperframes render "$tmp" -o /tmp/shorts.mp4
+
+# 올리기 전에 용량을 줄인다 (소리는 그대로)
+ffmpeg -i /tmp/promo.mp4 -c:v libx264 -crf 25 -pix_fmt yuv420p -movflags +faststart -c:a copy public/promo/penstagranm-promo.mp4
+```
+
 ## 도트 아트
 
 - 글꼴 [갈무리](https://github.com/quiple/galmuri)(OFL)는 `public/fonts`에 포함되어 있습니다.

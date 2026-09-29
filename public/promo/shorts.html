@@ -1,0 +1,1001 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>우리반퀘스트 쇼츠 (세로 9:16)</title>
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Galmuri11";
+        src: url("assets/fonts/Galmuri11.woff2") format("woff2");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "Galmuri11";
+        src: url("assets/fonts/Galmuri11-Bold.woff2") format("woff2");
+        font-weight: 700;
+      }
+
+      :root {
+        --ink: #10302f;
+        --teal: #1fa38a;
+        --teal-d: #12756a;
+        --cream: #fbf1d6;
+        --sand: #eed9a4;
+        --gold: #ffd23f;
+        --pink: #ff7aa2;
+        --red: #e2483d;
+        --sky: #8fd6f2;
+        --night: #0d2530;
+        --outline: -7px -7px 0 var(--ink), 7px -7px 0 var(--ink), -7px 7px 0 var(--ink), 7px 7px 0 var(--ink),
+          0 -7px 0 var(--ink), 0 7px 0 var(--ink), -7px 0 0 var(--ink), 7px 0 0 var(--ink), 0 16px 0 var(--ink);
+      }
+
+      html,
+      body {
+        margin: 0;
+        background: var(--night);
+      }
+      body {
+        font-family: "Galmuri11", sans-serif;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--night);
+      }
+      #world {
+        position: absolute;
+        inset: 0;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+      .abs {
+        position: absolute;
+        display: block;
+      }
+      .spr {
+        position: absolute;
+        display: block;
+        image-rendering: pixelated;
+      }
+      .stroke {
+        color: var(--cream);
+        text-shadow: var(--outline);
+        white-space: nowrap;
+        line-height: 1;
+      }
+      .px-box {
+        position: absolute;
+        background: var(--cream);
+        border: 7px solid var(--ink);
+        box-shadow: 12px 12px 0 var(--ink);
+      }
+      .chip {
+        position: absolute;
+        display: block;
+        padding: 12px 30px;
+        background: var(--gold);
+        border: 6px solid var(--ink);
+        box-shadow: 8px 8px 0 var(--ink);
+        font-size: 50px;
+        line-height: 1.1;
+        white-space: nowrap;
+      }
+      .chip.teal {
+        background: var(--teal);
+        color: var(--cream);
+      }
+      .chip.pink {
+        background: var(--pink);
+      }
+      .chip.cream {
+        background: var(--cream);
+      }
+      .pill {
+        position: absolute;
+        left: 60px;
+        width: 960px;
+        height: 130px;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        padding: 0 36px;
+        box-sizing: border-box;
+        background: var(--cream);
+        border: 7px solid var(--ink);
+        box-shadow: 12px 12px 0 var(--ink);
+        font-size: 58px;
+        white-space: nowrap;
+      }
+      .pill img {
+        display: block;
+        height: 68px;
+        width: auto;
+        image-rendering: pixelated;
+      }
+      .frame {
+        position: absolute;
+        background: var(--ink);
+        border: 7px solid var(--ink);
+        box-shadow: 16px 16px 0 rgba(16, 48, 47, 0.85);
+      }
+      .frame .bar {
+        position: relative;
+        height: 44px;
+        background: var(--sand);
+        border-bottom: 7px solid var(--ink);
+      }
+      .frame .bar i {
+        position: absolute;
+        top: 12px;
+        width: 16px;
+        height: 16px;
+        background: var(--ink);
+      }
+      .frame .screen {
+        position: relative;
+        overflow: hidden;
+        background: var(--cream);
+      }
+      .cam {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform-origin: 0 0;
+      }
+      .cam img {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      .star {
+        position: absolute;
+        display: block;
+        background: var(--cream);
+      }
+      .lt {
+        display: inline-block;
+        font-size: 300px;
+        line-height: 1;
+        color: var(--cream);
+        text-shadow: var(--outline), 0 28px 0 var(--ink);
+        margin: 0 6px;
+      }
+      .lt.gold {
+        color: var(--gold);
+      }
+      .cell {
+        position: absolute;
+        display: block;
+        background: var(--ink);
+      }
+      #crt {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.07) 0 2px, rgba(0, 0, 0, 0) 2px 4px);
+      }
+      #flash {
+        position: absolute;
+        inset: 0;
+        background: #fffdf0;
+        opacity: 0;
+      }
+      #hud {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      #prog {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1080px;
+        height: 14px;
+        background: rgba(16, 48, 47, 0.55);
+      }
+      #prog-fill {
+        display: block;
+        width: 1080px;
+        height: 14px;
+        background: var(--gold);
+        transform-origin: 0 0;
+      }
+      #beats {
+        position: absolute;
+        right: 40px;
+        top: 44px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 26px;
+        color: var(--cream);
+        background: var(--ink);
+        padding: 8px 16px;
+      }
+      #beats b {
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: #3a5a58;
+        border: 3px solid var(--ink);
+        box-sizing: border-box;
+      }
+      .bg {
+        position: absolute;
+        inset: 0;
+        display: block;
+      }
+      .checker {
+        background: repeating-conic-gradient(#fbf1d6 0 25%, #f3e5bd 0 50%) 0 0 / 72px 72px;
+      }
+      .rays {
+        position: absolute;
+        left: -1320px;
+        top: -900px;
+        width: 3720px;
+        height: 3720px;
+        background: repeating-conic-gradient(#ffd23f 0 7.5deg, #ffc21a 0 15deg);
+      }
+      .ground {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 1080px;
+        height: 150px;
+        background: url("assets/sprites/floor-stone.svg") 0 0 / 144px 144px;
+        image-rendering: pixelated;
+        border-top: 10px solid var(--ink);
+      }
+      .big {
+        position: absolute;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="shorts" data-start="0" data-width="1080" data-height="1920" data-duration="40" data-poster="7.55">
+      <audio id="bgm" src="beat.mp3" data-start="0" data-duration="40" data-track-index="0" data-volume="1"></audio>
+
+      <div id="world">
+        <!-- ───────── 0. 인트로 (0–4s) ───────── -->
+        <section id="s-intro" class="clip" data-start="0" data-duration="4" data-track-index="1">
+          <div class="bg" style="background: var(--night)"></div>
+          <div id="stars-a" class="abs" style="left: 0; top: 0; width: 1080px; height: 1300px"></div>
+          <img class="spr" alt="" src="assets/sprites/hills.svg" style="left: -420px; top: 1554px; width: 1920px; height: 216px" />
+          <div class="ground"></div>
+          <img class="spr" alt="" src="assets/sprites/castle.svg" style="left: 20px; top: 1336px; width: 1050px; height: 434px" />
+          <div id="logo-a" class="big" style="left: 0; top: 270px; width: 1080px; text-align: center; white-space: nowrap">
+            <div id="logo-a1" style="height: 330px"></div>
+            <div id="logo-a2" style="height: 330px"></div>
+          </div>
+          <div id="tag-a" class="chip cream" style="left: 190px; top: 960px; font-size: 62px">교실 퀘스트 RPG</div>
+          <img id="owl-a" class="spr" alt="" src="assets/sprites/owl.svg" style="left: 40px; top: 1290px; width: 360px; height: 432px" />
+          <img id="cat-a" class="spr" alt="" src="assets/sprites/cat.svg" style="left: 700px; top: 1490px; width: 294px; height: 210px" />
+          <div id="ask" class="big" style="left: 0; top: 930px; width: 1080px; text-align: center">
+            <div id="ask1" class="stroke" style="font-size: 120px; margin-bottom: 40px"></div>
+            <div id="ask2" class="stroke" style="font-size: 150px; color: var(--gold)"></div>
+          </div>
+        </section>
+
+        <!-- ───────── 1. 훅 (4–8s) ───────── -->
+        <section id="s-hook" class="clip" data-start="4" data-duration="4" data-track-index="1">
+          <div id="hook-bg" class="bg" style="background: var(--gold)"></div>
+          <div id="rays" class="rays"></div>
+          <img id="cloud-h1" class="spr" alt="" src="assets/sprites/cloud-a.svg" style="left: 90px; top: 170px; width: 400px; height: 140px" />
+          <img id="cloud-h2" class="spr" alt="" src="assets/sprites/cloud-b.svg" style="left: 600px; top: 330px; width: 480px; height: 168px" />
+          <div id="h-1" class="big stroke" style="left: 60px; top: 280px; font-size: 300px">지루한</div>
+          <div id="h-2" class="big stroke" style="left: 50px; top: 640px; font-size: 380px; color: var(--red)">숙제?</div>
+          <div id="h-x1" class="abs" style="left: 30px; top: 830px; width: 1020px; height: 46px; background: var(--ink)"></div>
+          <div id="h-x2" class="abs" style="left: 30px; top: 830px; width: 1020px; height: 46px; background: var(--ink)"></div>
+          <div id="h-3" class="big stroke" style="left: 40px; top: 420px; font-size: 190px">오늘부터는</div>
+          <div id="h-4" class="big stroke" style="left: 60px; top: 690px; font-size: 270px; color: var(--gold)">퀘스트!</div>
+          <img id="h-owl" class="spr" alt="" src="assets/sprites/owl.svg" style="left: 620px; top: 1180px; width: 400px; height: 480px" />
+          <img id="h-cat" class="spr" alt="" src="assets/sprites/cat.svg" style="left: 60px; top: 1400px; width: 336px; height: 240px" />
+          <img id="h-bird" class="spr" alt="" src="assets/sprites/bird.svg" style="left: 800px; top: 1010px; width: 180px; height: 160px" />
+          <div id="h-tag" class="chip teal" style="left: 60px; top: 150px; font-size: 62px">우리반퀘스트</div>
+        </section>
+
+        <!-- ───────── 2. 선생님이 퀘스트를 내요 (8–16s) ───────── -->
+        <section id="s-assign" class="clip" data-start="8" data-duration="8" data-track-index="1">
+          <div class="bg checker"></div>
+          <div id="a-step" class="chip" style="left: 60px; top: 150px">STEP 1</div>
+          <div id="a-t1" class="big stroke" style="left: 60px; top: 260px; font-size: 150px">선생님이</div>
+          <div id="a-t2" class="big stroke" style="left: 60px; top: 440px; font-size: 118px; color: var(--gold)">퀘스트를 내요</div>
+          <div id="a-done" class="chip teal" style="left: 640px; top: 150px">배달 완료!</div>
+
+          <div id="a-frame" class="frame" style="left: 50px; top: 620px; width: 960px">
+            <div class="bar"><i style="left: 16px"></i><i style="left: 44px"></i><i style="left: 72px"></i></div>
+            <div class="screen" style="width: 960px; height: 600px">
+              <div id="a-cam" class="cam" style="width: 960px; height: 600px"><img alt="" src="assets/shots/t-quests.jpg" /></div>
+            </div>
+          </div>
+
+          <div id="a-p1" class="pill" style="top: 1350px"><img alt="" src="assets/sprites/head-brown.svg" /><span>학생마다 따로따로</span></div>
+          <div id="a-p2" class="pill" style="top: 1350px"><img alt="" src="assets/sprites/icon-calendar.svg" /><span>일일 반복 · 주간 목표</span></div>
+          <div id="a-p3" class="pill" style="top: 1350px"><img alt="" src="assets/sprites/icon-book.svg" /><span>요일·기간·분량 자유롭게</span></div>
+          <div id="a-p4" class="pill" style="top: 1350px"><img alt="" src="assets/sprites/icon-heart.svg" /><span>사진 인증 필수 설정</span></div>
+          <div id="a-p5" class="pill" style="top: 1350px"><img alt="" src="assets/sprites/icon-megaphone.svg" /><span>여러 명에게 한 번에!</span></div>
+
+          <img id="a-scroll1" class="spr" alt="" src="assets/sprites/icon-mail.svg" style="left: 492px; top: 860px; width: 96px; height: 64px" />
+          <img id="a-scroll2" class="spr" alt="" src="assets/sprites/icon-mail.svg" style="left: 492px; top: 860px; width: 96px; height: 64px" />
+          <img id="a-scroll3" class="spr" alt="" src="assets/sprites/icon-mail.svg" style="left: 492px; top: 860px; width: 96px; height: 64px" />
+          <div id="a-h1" class="abs" style="left: 185px; top: 1500px; width: 130px">
+            <img class="spr" alt="" src="assets/sprites/student-blonde.svg" style="left: 21px; top: 0; width: 88px; height: 136px" />
+            <span class="chip cream" style="left: 0; top: 146px; padding: 4px 12px; font-size: 30px; border-width: 4px; box-shadow: 4px 4px 0 var(--ink)">박하은</span>
+          </div>
+          <div id="a-h2" class="abs" style="left: 475px; top: 1500px; width: 130px">
+            <img class="spr" alt="" src="assets/sprites/student-brown.svg" style="left: 21px; top: 0; width: 88px; height: 136px" />
+            <span class="chip cream" style="left: 0; top: 146px; padding: 4px 12px; font-size: 30px; border-width: 4px; box-shadow: 4px 4px 0 var(--ink)">이준서</span>
+          </div>
+          <div id="a-h3" class="abs" style="left: 765px; top: 1500px; width: 130px">
+            <img class="spr" alt="" src="assets/sprites/student-black.svg" style="left: 21px; top: 0; width: 88px; height: 136px" />
+            <span class="chip cream" style="left: 0; top: 146px; padding: 4px 12px; font-size: 30px; border-width: 4px; box-shadow: 4px 4px 0 var(--ink)">정유나</span>
+          </div>
+        </section>
+
+        <!-- ───────── 3. 사진 찍어 인증! (16–24s) ───────── -->
+        <section id="s-proof" class="clip" data-start="16" data-duration="8" data-track-index="1">
+          <div class="bg" style="background: var(--teal-d)"></div>
+          <div id="p-dots" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px"></div>
+          <div id="p-step" class="chip" style="left: 60px; top: 140px">STEP 2</div>
+          <div id="p-t1" class="big stroke" style="left: 60px; top: 240px; font-size: 180px">사진 찍어</div>
+          <div id="p-t2" class="big stroke" style="left: 60px; top: 430px; font-size: 180px; color: var(--gold)">인증!</div>
+          <div id="p-flow" class="abs" style="left: 60px; top: 650px; width: 960px; height: 100px">
+            <span id="p-f1" class="chip cream" style="left: 0; top: 0">찍고</span>
+            <span id="p-f2" class="chip cream" style="left: 210px; top: 0">올리고</span>
+            <span id="p-f3" class="chip cream" style="left: 470px; top: 0">제출!</span>
+          </div>
+          <div id="p-phone" class="abs" style="left: 210px; top: 800px; width: 440px; height: 940px; background: var(--ink); box-shadow: 14px 14px 0 rgba(0,0,0,.45)">
+            <div id="p-screen" class="abs" style="left: 20px; top: 26px; width: 400px; height: 888px; overflow: hidden; background: var(--cream)">
+              <img id="p-i1" class="abs" alt="" src="assets/shots/m-quest.jpg" style="left: 0; top: -280px; width: 400px" />
+              <img id="p-i2" class="abs" alt="" src="assets/shots/m-proof.jpg" style="left: 0; top: -280px; width: 400px" />
+              <img id="p-i3" class="abs" alt="" src="assets/shots/m-submitted.jpg" style="left: 0; top: -280px; width: 400px" />
+              <div id="p-tap" class="abs" style="left: 88px; top: 388px; width: 44px; height: 44px; border: 6px solid var(--red); box-sizing: border-box"></div>
+              <div id="p-hl1" class="abs" style="left: 34px; top: 99px; width: 112px; height: 112px; border: 6px solid var(--gold); box-sizing: border-box"></div>
+              <div id="p-hl2" class="abs" style="left: 36px; top: 306px; width: 330px; height: 62px; border: 6px solid var(--gold); box-sizing: border-box"></div>
+            </div>
+          </div>
+          <div id="p-note" class="chip pink" style="left: 60px; top: 1610px; font-size: 48px">카메라 · 앨범 어디서든 OK</div>
+          <div id="p-poly" class="abs" style="left: 690px; top: 1000px; width: 340px; height: 400px; background: #fffdf5; border: 5px solid var(--ink); box-shadow: 10px 10px 0 var(--ink)">
+            <img alt="" src="assets/shots/proof.png" class="spr" style="left: 28px; top: 28px; width: 276px; height: 314px; border: 4px solid var(--ink); box-sizing: border-box; object-fit: cover" />
+            <span class="abs" style="left: 120px; top: -26px; width: 110px; height: 44px; background: rgba(255, 210, 63, 0.9); border: 3px solid var(--ink); box-sizing: border-box"></span>
+          </div>
+          <div id="p-click" class="big stroke" style="left: 600px; top: 830px; font-size: 130px; color: var(--gold)">찰칵!</div>
+          <img id="p-cam" class="spr" alt="" src="assets/sprites/icon-star.svg" style="left: 40px; top: 1440px; width: 160px; height: 144px" />
+          <div id="p-done" class="chip teal" style="left: 560px; top: 1500px; font-size: 68px">제출 완료!</div>
+          <img id="p-mail" class="spr" alt="" src="assets/sprites/icon-mail.svg" style="left: 420px; top: 1100px; width: 168px; height: 112px" />
+        </section>
+
+        <!-- ───────── 4. 선생님 확인! (24–32s) ───────── -->
+        <section id="s-review" class="clip" data-start="24" data-duration="8" data-track-index="1">
+          <div id="r-bg1" class="bg" style="background: #123a37"></div>
+          <div id="r-bg2" class="bg" style="background: var(--gold)"></div>
+          <div id="r-rays" class="rays"></div>
+
+          <div id="r-wait" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px">
+            <div id="r-frame" class="frame" style="left: 30px; top: 240px; width: 1000px">
+              <div class="bar"><i style="left: 16px"></i><i style="left: 44px"></i><i style="left: 72px"></i></div>
+              <div class="screen" style="width: 1000px; height: 625px">
+                <div id="r-cam" class="cam" style="width: 1000px; height: 625px"><img alt="" src="assets/shots/t-review-dotori.jpg" /></div>
+                <div id="r-scan" class="abs" style="left: 0; top: 0; width: 1000px; height: 12px; background: var(--gold); box-shadow: 0 0 0 4px var(--ink)"></div>
+              </div>
+            </div>
+            <img id="r-owl" class="spr" alt="" src="assets/sprites/owl.svg" style="left: 60px; top: 1010px; width: 340px; height: 408px" />
+            <div id="r-say" class="px-box" style="left: 430px; top: 1050px; width: 590px; padding: 24px 30px; font-size: 56px; box-sizing: border-box">음… 어디 보자!</div>
+            <div id="r-btns" class="abs" style="left: 0; top: 1460px; width: 1080px; height: 140px">
+              <span id="r-b1" class="chip teal" style="left: 30px; top: 20px; font-size: 50px">수행 확인</span>
+              <span id="r-b2" class="chip cream" style="left: 370px; top: 20px; font-size: 50px">다시 시도</span>
+              <span id="r-b3" class="chip pink" style="left: 710px; top: 20px; font-size: 50px">도움 필요</span>
+              <div id="r-sel" class="abs" style="left: 354px; top: 4px; width: 320px; height: 116px; border: 8px solid var(--red); box-sizing: border-box"></div>
+            </div>
+          </div>
+
+          <div id="r-win" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px">
+            <div id="r-ring" class="abs" style="left: 160px; top: 170px; width: 760px; height: 500px; border: 14px solid var(--ink); box-sizing: border-box"></div>
+            <div id="r-stamp" class="abs" style="left: 160px; top: 170px; width: 760px; height: 500px; border: 22px solid var(--teal-d); box-sizing: border-box; background: rgba(251, 241, 214, 0.92); color: var(--teal-d); font-size: 200px; line-height: 210px; padding-top: 28px; text-align: center; white-space: nowrap"><span class="abs" style="left: 0; top: 28px; width: 716px">수행</span><span class="abs" style="left: 0; top: 238px; width: 716px">확인!</span></div>
+            <div id="r-tag" class="chip teal" style="left: 90px; top: 720px; font-size: 54px">수행 확인됨</div>
+            <div id="r-fb" class="px-box" style="left: 140px; top: 830px; width: 880px; padding: 28px 30px; font-size: 54px; box-sizing: border-box; height: 150px"><span id="r-fbtxt"></span></div>
+            <img id="r-fbowl" class="spr" alt="" src="assets/sprites/owl.svg" style="left: 16px; top: 840px; width: 100px; height: 120px" />
+
+            <div id="r-xp" class="abs" style="left: 60px; top: 1080px; width: 960px; height: 330px">
+              <div class="px-box" style="left: 0; top: 0; width: 960px; height: 320px; box-sizing: border-box"></div>
+              <div class="abs" style="left: 40px; top: 30px; font-size: 50px">경험치 XP</div>
+              <div class="abs" style="left: 40px; top: 104px; width: 880px; height: 60px; background: var(--ink)">
+                <span id="r-xpfill" class="abs" style="left: 6px; top: 6px; width: 868px; height: 48px; background: var(--teal); transform-origin: 0 0"></span>
+              </div>
+              <div id="r-lvl" class="big stroke" style="left: 40px; top: 200px; font-size: 92px; color: var(--gold)">LEVEL UP!</div>
+              <img id="r-coin" class="spr" alt="" src="assets/sprites/icon-coin.svg" style="left: 640px; top: 196px; width: 96px; height: 96px" />
+              <div id="r-coint" class="abs" style="left: 750px; top: 218px; font-size: 56px">코인!</div>
+            </div>
+
+            <div id="r-rank" class="abs" style="left: 60px; top: 170px; width: 960px; height: 1300px">
+              <div class="big stroke" style="left: 0; top: 0; font-size: 190px">주간 순위</div>
+              <div id="rk1" class="abs" style="left: 0; top: 300px; width: 960px; height: 200px"></div>
+              <div id="rk2" class="abs" style="left: 0; top: 560px; width: 960px; height: 200px"></div>
+              <div id="rk3" class="abs" style="left: 0; top: 820px; width: 960px; height: 200px"></div>
+              <div id="rk-note" class="chip teal" style="left: 0; top: 1110px; font-size: 58px">매주 월요일 새 출발!</div>
+            </div>
+            <div id="r-confetti" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px"></div>
+          </div>
+        </section>
+
+        <!-- ───────── 5. 세 개의 공간 (32–36s) ───────── -->
+        <section id="s-spaces" class="clip" data-start="32" data-duration="4" data-track-index="1">
+          <div class="bg" style="background: var(--sky)"></div>
+          <img id="sp-c1" class="spr" alt="" src="assets/sprites/cloud-a.svg" style="left: 30px; top: 70px; width: 320px; height: 112px" />
+          <img id="sp-c2" class="spr" alt="" src="assets/sprites/cloud-b.svg" style="left: 680px; top: 300px; width: 400px; height: 140px" />
+          <div id="sp-t" class="big stroke" style="left: 0; top: 130px; width: 1080px; text-align: center; font-size: 92px">하루가 게임이 되는</div>
+          <div id="sp-t2" class="big stroke" style="left: 0; top: 260px; width: 1080px; text-align: center; font-size: 150px; color: var(--gold)">세 개의 공간</div>
+          <div id="sp-k1" class="abs" style="left: 60px; top: 480px; width: 960px; height: 330px">
+            <div class="frame" style="left: 0; top: 0; width: 946px"><div class="screen" style="width: 946px; height: 260px"><img alt="" src="assets/shots/school.jpg" style="position:absolute;left:0;top:-190px;width:946px;height:auto;display:block" /></div></div>
+            <div class="chip teal" style="left: 40px; top: 250px; font-size: 62px">학교</div>
+          </div>
+          <div id="sp-k2" class="abs" style="left: 60px; top: 850px; width: 960px; height: 330px">
+            <div class="frame" style="left: 0; top: 0; width: 946px"><div class="screen" style="width: 946px; height: 260px"><img alt="" src="assets/shots/challenge.jpg" style="position:absolute;left:0;top:-190px;width:946px;height:auto;display:block" /></div></div>
+            <div class="chip" style="left: 40px; top: 250px; font-size: 62px">주간도전</div>
+          </div>
+          <div id="sp-k3" class="abs" style="left: 60px; top: 1220px; width: 960px; height: 330px">
+            <div class="frame" style="left: 0; top: 0; width: 946px"><div class="screen" style="width: 946px; height: 260px"><img alt="" src="assets/shots/myroom.jpg" style="position:absolute;left:0;top:-190px;width:946px;height:auto;display:block" /></div></div>
+            <div class="chip pink" style="left: 40px; top: 250px; font-size: 62px">내공간</div>
+          </div>
+          <div id="sp-chips" class="abs" style="left: 0; top: 1610px; width: 1080px; height: 220px">
+            <span class="chip cream sc" style="left: 40px; top: 0; font-size: 46px">네 컷 기록</span>
+            <span class="chip cream sc" style="left: 340px; top: 0; font-size: 46px">댓글</span>
+            <span class="chip cream sc" style="left: 520px; top: 0; font-size: 46px">음성 전사</span>
+            <span class="chip cream sc" style="left: 40px; top: 100px; font-size: 46px">일정 달력</span>
+            <span class="chip cream sc" style="left: 340px; top: 100px; font-size: 46px">상점·꾸미기</span>
+            <span class="chip cream sc" style="left: 700px; top: 100px; font-size: 46px">주간 순위</span>
+          </div>
+        </section>
+
+        <!-- ───────── 6. 지금 플레이! (36–40s) ───────── -->
+        <section id="s-cta" class="clip" data-start="36" data-duration="4" data-track-index="1">
+          <div class="bg" style="background: var(--night)"></div>
+          <div id="stars-b" class="abs" style="left: 0; top: 0; width: 1080px; height: 1300px"></div>
+          <img class="spr" alt="" src="assets/sprites/hills.svg" style="left: -420px; top: 1554px; width: 1920px; height: 216px" />
+          <div class="ground"></div>
+          <div id="logo-b" class="big" style="left: 0; top: 90px; width: 1080px; text-align: center; white-space: nowrap">
+            <div id="logo-b1" style="height: 330px"></div>
+            <div id="logo-b2" style="height: 330px"></div>
+          </div>
+          <div id="c-play" class="big stroke" style="left: 0; top: 780px; width: 1080px; text-align: center; font-size: 150px; color: var(--gold)">지금 바로</div>
+          <div id="c-play2" class="big stroke" style="left: 0; top: 950px; width: 1080px; text-align: center; font-size: 190px; color: var(--gold)">플레이!</div>
+          <div id="c-url" class="px-box" style="left: 60px; top: 1180px; width: 960px; height: 130px; box-sizing: border-box; text-align: center; font-size: 62px; line-height: 116px; white-space: nowrap">penstagranm.vercel.app</div>
+          <div id="c-how" class="abs" style="left: 0; top: 1335px; width: 1080px; text-align: center; font-size: 34px; color: var(--cream); background: rgba(16, 48, 47, 0.85); padding: 6px 0; white-space: nowrap">학생은 이름만 누르면 입장 · 선생님은 교실 PIN</div>
+          <div id="c-qr" class="px-box" style="left: 60px; top: 1392px; width: 230px; height: 230px; box-sizing: border-box; padding: 8px"><img alt="" src="assets/qr.svg" style="display: block; width: 200px; height: 200px; image-rendering: pixelated" /></div>
+          <div id="c-btn" class="chip teal" style="left: 340px; top: 1400px; font-size: 62px; padding: 14px 40px">PLAY 시작하기</div>
+          <div id="c-scan" class="chip" style="left: 340px; top: 1510px; font-size: 44px">스캔해도 입장!</div>
+          <div id="c-crew" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px">
+            <img class="spr c-kid" alt="" src="assets/sprites/cat.svg" style="left: 20px; top: 1660px; width: 168px; height: 120px" />
+            <img class="spr c-kid" alt="" src="assets/sprites/student-rose.svg" style="left: 230px; top: 1642px; width: 88px; height: 136px" />
+            <img class="spr c-kid" alt="" src="assets/sprites/student-brown.svg" style="left: 340px; top: 1642px; width: 88px; height: 136px" />
+            <img class="spr c-kid" alt="" src="assets/sprites/student-green.svg" style="left: 450px; top: 1642px; width: 88px; height: 136px" />
+            <img class="spr c-kid" alt="" src="assets/sprites/owl.svg" style="left: 850px; top: 1570px; width: 200px; height: 240px" />
+          </div>
+          <div id="c-confetti" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px"></div>
+        </section>
+      </div>
+
+      <div id="crt"></div>
+      <div id="hud">
+        <div id="prog"><span id="prog-fill"></span></div>
+        <div id="beats"><b></b><b></b><b></b><b></b><span>120 BPM</span></div>
+      </div>
+      <div id="wipe" class="abs" style="left: 0; top: 0; width: 1080px; height: 1920px"></div>
+      <div id="flash"></div>
+    </div>
+
+    <script>
+      /* 우리반퀘스트 쇼츠(세로 9:16) — 120 BPM, 20마디(40초). 가로판과 같은 박자표 위에 세로 구도로 다시 짰다. */
+      window.__promoStandalone = typeof window.__timelines === "undefined";
+      (function () {
+        var BPM = 120;
+        var BEAT = 60 / BPM;
+        var BAR = BEAT * 4;
+        var W = 1080;
+        var INK = "#10302f";
+
+        /**
+         * 마디·박 번호를 초로 바꾼다.
+         * @param {number} bar 마디
+         * @param {number} [beat] 박
+         * @returns {number} 초
+         */
+        function at(bar, beat) {
+          return bar * BAR + (beat || 0) * BEAT;
+        }
+
+        /**
+         * 같은 값이 나오는 난수 생성기 (mulberry32).
+         * @param {number} seed 시작 값
+         * @returns {function(): number} 0~1 난수 함수
+         */
+        function rng(seed) {
+          var a = seed >>> 0;
+          return function () {
+            a = (a + 0x6d2b79f5) >>> 0;
+            var t = a;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+        }
+        var rand = rng(20260930);
+
+        /**
+         * 선택자로 요소 하나를 찾는다.
+         * @param {string} sel CSS 선택자
+         * @returns {Element} 요소
+         */
+        function $(sel) {
+          return document.querySelector(sel);
+        }
+
+        /**
+         * 선택자로 요소 목록을 찾는다.
+         * @param {string} sel CSS 선택자
+         * @returns {Element[]} 요소 배열
+         */
+        function $$(sel) {
+          return Array.prototype.slice.call(document.querySelectorAll(sel));
+        }
+
+        /**
+         * 빈 요소를 만들어 부모에 붙인다.
+         * @param {Element} host 부모
+         * @param {string} css 인라인 스타일
+         * @param {string} [cls] 클래스
+         * @returns {HTMLElement} 만든 요소
+         */
+        function box(host, css, cls) {
+          var el = document.createElement("i");
+          el.style.cssText = "position:absolute;display:block;" + css;
+          if (cls) el.className = cls;
+          host.appendChild(el);
+          return el;
+        }
+
+        /**
+         * 로고 글자 여섯 개를 두 줄(우리반 / 퀘스트)로 만들어 붙인다.
+         * @param {Element} rowA 첫째 줄 부모
+         * @param {Element} rowB 둘째 줄 부모
+         * @returns {HTMLElement[]} 글자 요소들
+         */
+        function makeLogo(rowA, rowB) {
+          return "우리반퀘스트".split("").map(function (ch, i) {
+            var s = document.createElement("span");
+            s.className = "lt" + (i >= 3 ? " gold" : "");
+            s.textContent = ch;
+            (i < 3 ? rowA : rowB).appendChild(s);
+            return s;
+          });
+        }
+
+        /**
+         * 글자를 한 자씩 span으로 나눠 붙인다.
+         * @param {Element} host 부모
+         * @param {string} text 문장
+         * @returns {HTMLElement[]} 글자 요소들
+         */
+        function typed(host, text) {
+          return text.split("").map(function (ch) {
+            var s = document.createElement("span");
+            s.textContent = ch;
+            s.style.display = "inline-block";
+            s.style.whiteSpace = "pre";
+            host.appendChild(s);
+            return s;
+          });
+        }
+
+        /**
+         * 별밭을 만든다.
+         * @param {Element} host 부모
+         * @param {number} n 개수
+         * @returns {HTMLElement[]} 별 요소들
+         */
+        function makeStars(host, n) {
+          var out = [];
+          for (var i = 0; i < n; i++) {
+            var size = rand() < 0.22 ? 14 : 8;
+            out.push(box(host, "left:" + Math.round(rand() * (W - 14)) + "px;top:" + Math.round(rand() * 1280) + "px;width:" + size + "px;height:" + size + "px;background:#fbf1d6;", "star"));
+          }
+          return out;
+        }
+
+        /**
+         * 확대 카메라 위치를 계산한다. (화면 밖이 보이지 않게 가장자리에서 멈춤)
+         * @param {number} w 화면 너비
+         * @param {number} h 화면 높이
+         * @param {number} fx 초점 x (0~1)
+         * @param {number} fy 초점 y (0~1)
+         * @param {number} s 배율
+         * @returns {{x: number, y: number, scale: number}} GSAP 값
+         */
+        function zoomTo(w, h, fx, fy, s) {
+          var x = Math.min(0, Math.max(w - w * s, w / 2 - fx * w * s));
+          var y = Math.min(0, Math.max(h - h * s, h / 2 - fy * h * s));
+          return { x: x, y: y, scale: s };
+        }
+
+        var tl = gsap.timeline({ paused: true });
+        var STEP = "steps(4)";
+
+        /* ───── 공통: 진행 막대 · 박자 점 · 킥 펌프 ───── */
+        tl.fromTo("#prog-fill", { scaleX: 0 }, { scaleX: 1, duration: 40, ease: "none" }, 0);
+        var dots = $$("#beats b");
+        for (var b = 0; b < 80; b++) {
+          tl.fromTo(dots[b % 4], { backgroundColor: "#ffd23f", scale: 1.5 }, { backgroundColor: "#3a5a58", scale: 1, duration: BEAT * 0.9, ease: "power2.out" }, b * BEAT);
+        }
+        for (var k = 8; k < 77; k++) {
+          if (k / 2 >= 25.5 && k / 2 < 26) continue;
+          tl.fromTo("#world", { scale: 1.016 }, { scale: 1, duration: 0.3, ease: "power3.out" }, k * BEAT);
+        }
+
+        /**
+         * 화면을 흔든다. 세기는 점점 줄어든다.
+         * @param {number} t 시작 시각
+         * @param {number} amp 처음 흔들림(px)
+         * @param {number} [hits] 횟수
+         */
+        function shake(t, amp, hits) {
+          var n = hits || 6;
+          for (var i = 0; i < n; i++) {
+            var a = amp * (1 - i / n);
+            tl.to("#world", { x: (rand() - 0.5) * 2 * a, y: (rand() - 0.5) * 2 * a, duration: 0.04, ease: "none" }, t + i * 0.045);
+          }
+          tl.to("#world", { x: 0, y: 0, duration: 0.05, ease: "none" }, t + n * 0.045);
+        }
+
+        /**
+         * 하얀 번쩍임.
+         * @param {number} t 시작 시각
+         * @param {number} peak 최대 밝기
+         * @param {number} [fade] 사라지는 시간
+         */
+        function flash(t, peak, fade) {
+          tl.fromTo("#flash", { opacity: peak }, { opacity: 0, duration: fade || 0.3, ease: "steps(5)" }, t);
+        }
+
+        /**
+         * 팝업으로 튀어나오게 한다.
+         * @param {string|Element} target 대상
+         * @param {number} t 시각
+         * @param {object} [extra] 추가 값
+         */
+        function pop(target, t, extra) {
+          tl.from(target, Object.assign({ scale: 0.2, opacity: 0, duration: 0.24, ease: "back.out(2.4)" }, extra || {}), t);
+        }
+
+        /* ───── 픽셀 와이프 전환 (6×11칸) ───── */
+        var wipeHost = $("#wipe");
+        var cols = 6;
+        var rows = 11;
+        var cells = [];
+        for (var r = 0; r < rows; r++) {
+          for (var c = 0; c < cols; c++) {
+            var cell = box(wipeHost, "left:" + c * 180 + "px;top:" + r * 180 + "px;width:180px;height:180px;background:" + INK + ";", "cell");
+            cell._d = ((c + r) / (cols + rows)) * 0.13 + rand() * 0.06;
+            cells.push(cell);
+          }
+        }
+        tl.set(cells, { scale: 0 }, 0);
+        [at(4, 0), at(8, 0), at(12, 0), at(16, 0)].forEach(function (boundary) {
+          cells.forEach(function (cellEl) {
+            tl.to(cellEl, { scale: 1.02, duration: 0.09, ease: "steps(3)" }, boundary - 0.24 + cellEl._d);
+            tl.to(cellEl, { scale: 0, duration: 0.09, ease: "steps(3)" }, boundary + cellEl._d + 0.02);
+          });
+        });
+
+        /* ───── 0. 인트로 ───── */
+        var starsA = makeStars($("#stars-a"), 70);
+        starsA.slice(0, 26).forEach(function (s, i) {
+          var t0 = 0.2 + rand() * 3;
+          tl.to(s, { opacity: 0.15, duration: 0.02 }, t0);
+          tl.to(s, { opacity: 1, duration: 0.02 }, t0 + 0.25 + (i % 3) * 0.1);
+        });
+        var logoA = makeLogo($("#logo-a1"), $("#logo-a2"));
+        logoA.forEach(function (letter, i) {
+          tl.from(letter, { y: -700, opacity: 0, scale: 1.6, duration: 0.24, ease: STEP }, at(0, 0) + i * (BEAT / 4));
+        });
+        shake(at(0, 0) + 0.05, 16, 5);
+        flash(0, 0.9, 0.35);
+        pop("#tag-a", at(0, 3));
+        tl.from("#owl-a", { x: -600, duration: 0.6, ease: "power3.out" }, at(0, 2));
+        tl.from("#cat-a", { x: 700, duration: 0.6, ease: "power3.out" }, at(0, 2.5));
+        tl.to("#owl-a", { y: -30, duration: BEAT / 2, ease: "steps(2)", yoyo: true, repeat: 5 }, at(1, 0));
+        tl.to("#logo-a", { y: -170, scale: 0.8, duration: 0.32, ease: "power3.inOut", transformOrigin: "50% 50%" }, at(1, 0));
+        tl.to("#tag-a", { opacity: 0, duration: 0.1 }, at(1, 0));
+        var ask1 = typed($("#ask1"), "숙제가 게임이");
+        var ask2 = typed($("#ask2"), "된다면?");
+        tl.from(ask1, { opacity: 0, y: 30, duration: 0.02, stagger: BEAT / 8 }, at(1, 0.5));
+        tl.from(ask2, { opacity: 0, y: 30, duration: 0.02, stagger: BEAT / 8 }, at(1, 1.5));
+        tl.to("#ask", { scale: 1.1, duration: BEAT * 2, ease: "steps(8)", transformOrigin: "50% 50%" }, at(1, 2));
+        for (var q = 0; q < 8; q++) {
+          shake(at(1, 2) + q * (BEAT / 2), 3 + q * 2.4, 2);
+        }
+        tl.fromTo("#flash", { opacity: 0 }, { opacity: 1, duration: BEAT / 2, ease: "steps(8)" }, at(1, 3.5));
+
+        /* ───── 1. 훅 ───── */
+        var t0h = at(2, 0);
+        tl.to("#rays", { rotation: 30, duration: 4, ease: "steps(32)", transformOrigin: "50% 50%" }, t0h);
+        tl.fromTo("#flash", { opacity: 1 }, { opacity: 0, duration: 0.4, ease: "steps(6)" }, t0h);
+        shake(t0h + 0.02, 24, 7);
+        tl.from("#h-1", { scale: 2.6, opacity: 0, duration: 0.2, ease: "steps(3)", transformOrigin: "0 50%" }, t0h);
+        tl.from("#h-2", { scale: 2.6, opacity: 0, duration: 0.2, ease: "steps(3)", transformOrigin: "0 50%" }, at(2, 1));
+        shake(at(2, 1) + 0.02, 18, 6);
+        tl.fromTo("#h-x1", { scaleX: 0, rotation: 4 }, { scaleX: 1, rotation: 4, duration: 0.16, ease: "steps(4)", transformOrigin: "0 50%" }, at(2, 2));
+        tl.fromTo("#h-x2", { scaleX: 0, rotation: -5 }, { scaleX: 1, rotation: -5, duration: 0.16, ease: "steps(4)", transformOrigin: "0 50%" }, at(2, 2.5));
+        tl.to(["#h-1", "#h-2", "#h-x1", "#h-x2"], { x: -1700, duration: 0.3, ease: "power4.in" }, at(2, 3));
+        tl.to("#hook-bg", { backgroundColor: "#8fd6f2", duration: 0.001 }, at(3, 0));
+        tl.to("#rays", { opacity: 0, duration: 0.001 }, at(3, 0));
+        tl.from(["#cloud-h1", "#cloud-h2"], { x: -1800, duration: 0.6, ease: "power3.out", stagger: 0.1 }, at(3, 0));
+        tl.from("#h-3", { x: 1500, duration: 0.28, ease: "power4.out" }, at(3, 0));
+        shake(at(3, 0) + 0.02, 14, 5);
+        tl.from("#h-4", { scale: 0.1, opacity: 0, duration: 0.5, ease: "back.out(3)", transformOrigin: "0 50%" }, at(3, 1));
+        shake(at(3, 1) + 0.05, 22, 7);
+        tl.from("#h-owl", { y: 900, duration: 0.5, ease: "back.out(2)" }, at(3, 2));
+        tl.from("#h-cat", { x: -1400, duration: 0.6, ease: "back.out(1.6)" }, at(3, 2.5));
+        tl.from("#h-bird", { y: -800, opacity: 0, duration: 0.4, ease: "bounce.out" }, at(3, 3));
+        pop("#h-tag", at(3, 3));
+        tl.to(["#h-owl", "#h-cat"], { y: "-=36", duration: BEAT / 2, ease: "steps(2)", yoyo: true, repeat: 1 }, at(3, 3.4));
+
+        /* ───── 2. 선생님이 퀘스트를 내요 ───── */
+        var ta = at(4, 0);
+        tl.from("#a-step", { x: -900, duration: 0.3, ease: "power3.out" }, ta + 0.1);
+        tl.from("#a-t1", { x: -1200, duration: 0.3, ease: "power3.out" }, ta + 0.2);
+        tl.from("#a-t2", { x: -1400, duration: 0.3, ease: "power3.out" }, ta + 0.35);
+        tl.fromTo("#a-frame", { y: 1400, rotationX: 30, rotationZ: -4, transformPerspective: 2200 }, { y: 0, rotationX: 0, rotationZ: -0.8, transformPerspective: 2200, duration: 0.7, ease: "power3.out" }, ta);
+        tl.to("#a-frame", { rotationZ: 0.6, duration: 6, ease: "sine.inOut" }, ta + 0.8);
+        var camMoves = [
+          [at(4, 2), 0.675, 0.38, 1.9],
+          [at(5, 0), 0.675, 0.2, 2.4],
+          [at(5, 2), 0.415, 0.69, 2.1],
+          [at(6, 0), 0.5, 0.87, 2.3],
+          [at(6, 2), 0.5, 0.5, 1],
+        ];
+        camMoves.forEach(function (m) {
+          var v = zoomTo(960, 600, m[1], m[2], m[3]);
+          tl.to("#a-cam", { x: v.x, y: v.y, scale: v.scale, duration: 0.3, ease: "power3.inOut" }, m[0]);
+        });
+        var pillTimes = [at(4, 2), at(5, 0), at(5, 2), at(6, 0), at(6, 2)];
+        pillTimes.forEach(function (tp, i) {
+          var id = "#a-p" + (i + 1);
+          tl.from(id, { x: -1300, duration: 0.28, ease: "power3.out" }, tp);
+          tl.fromTo(id, { backgroundColor: "#ffd23f" }, { backgroundColor: "#fbf1d6", duration: 0.2, ease: "steps(3)" }, tp + BEAT * 0.9);
+          if (i < pillTimes.length - 1) {
+            tl.to(id, { x: 1300, duration: 0.2, ease: "power3.in" }, pillTimes[i + 1] - 0.06);
+          }
+          shake(tp, 6, 3);
+        });
+        ["#a-h1", "#a-h2", "#a-h3"].forEach(function (id, i) {
+          var tp = at(6, 3) + i * (BEAT / 2);
+          tl.from(id, { y: 400, opacity: 0, duration: 0.3, ease: "back.out(2.2)" }, tp);
+        });
+        ["#a-scroll1", "#a-scroll2", "#a-scroll3"].forEach(function (id, i) {
+          var tp = at(6, 3.5) + i * (BEAT / 2);
+          var tx = [-290, 0, 290][i];
+          tl.fromTo(id, { opacity: 0, x: 0, y: 0, scale: 1.4 }, { opacity: 1, duration: 0.01 }, tp);
+          tl.to(id, { x: tx, duration: 0.45, ease: "power1.out" }, tp);
+          tl.to(id, { y: 620, scale: 0.8, duration: 0.45, ease: "power2.in" }, tp);
+          tl.to(id, { opacity: 0, duration: 0.01 }, tp + 0.45);
+          tl.to("#a-h" + (i + 1), { y: -34, duration: 0.1, ease: "steps(2)", yoyo: true, repeat: 1 }, tp + 0.45);
+        });
+        pop("#a-done", at(7, 2.5));
+        shake(at(7, 2.5), 9, 4);
+
+        /* ───── 3. 사진 찍어 인증! ───── */
+        var tp0 = at(8, 0);
+        var dotsHost = $("#p-dots");
+        for (var pd = 0; pd < 46; pd++) {
+          box(dotsHost, "left:" + Math.round(rand() * 1050) + "px;top:" + Math.round(rand() * 1890) + "px;width:14px;height:14px;background:#1fa38a;");
+        }
+        tl.fromTo("#p-phone", { y: 1400, rotation: 8, scale: 1.5 }, { y: 0, rotation: -3, scale: 1.5, duration: 0.6, ease: "back.out(1.4)", transformOrigin: "50% 0" }, tp0);
+        tl.from("#p-step", { x: 1100, duration: 0.3, ease: "power3.out" }, tp0 + 0.2);
+        tl.from("#p-t1", { scale: 3, opacity: 0, duration: 0.22, ease: "steps(3)", transformOrigin: "0 50%" }, at(8, 1));
+        shake(at(8, 1), 14, 5);
+        tl.from("#p-t2", { scale: 3, opacity: 0, duration: 0.22, ease: "steps(3)", transformOrigin: "0 50%" }, at(8, 2));
+        shake(at(8, 2), 16, 5);
+        tl.set("#p-i2", { opacity: 0 }, 0);
+        tl.set("#p-i3", { opacity: 0 }, 0);
+        tl.set(["#p-tap", "#p-hl1", "#p-hl2"], { opacity: 0 }, 0);
+        pop("#p-f1", at(9, 0));
+        tl.fromTo("#p-tap", { opacity: 1, scale: 0.4, x: 0, y: 0 }, { opacity: 0, scale: 2.2, x: 0, y: 0, duration: 0.4, ease: "steps(5)" }, at(9, 1));
+        pop("#p-note", at(9, 1.5));
+        tl.fromTo("#p-poly", { y: -1300, rotation: 24, opacity: 1 }, { y: 0, rotation: -7, duration: 0.5, ease: "bounce.out" }, at(9, 3));
+        tl.set("#p-poly", { opacity: 0 }, 0);
+        tl.to("#p-poly", { opacity: 1, duration: 0.01 }, at(9, 3));
+        flash(at(9, 3), 0.85, 0.35);
+        tl.from("#p-click", { scale: 0.2, opacity: 0, rotation: -14, duration: 0.3, ease: "back.out(3)" }, at(9, 3.2));
+        shake(at(9, 3), 12, 5);
+        tl.from("#p-cam", { scale: 0.1, opacity: 0, duration: 0.3, ease: "back.out(3)" }, at(9, 3.4));
+        tl.to("#p-poly", { x: -495, y: 0, scale: 0.34, rotation: 10, duration: 0.45, ease: "power3.in" }, at(10, 2));
+        tl.to("#p-poly", { opacity: 0, duration: 0.01 }, at(10, 2) + 0.45);
+        tl.to("#p-click", { opacity: 0, duration: 0.01 }, at(10, 1));
+        tl.to("#p-cam", { opacity: 0, duration: 0.01 }, at(10, 1));
+        tl.to("#p-i2", { opacity: 1, duration: 0.2, ease: "steps(4)" }, at(10, 2) + 0.4);
+        tl.to("#p-i1", { opacity: 0, duration: 0.01 }, at(10, 2) + 0.6);
+        pop("#p-f2", at(10, 2));
+        tl.to("#p-hl1", { opacity: 1, duration: 0.01 }, at(10, 3));
+        tl.to("#p-hl1", { opacity: 0, duration: BEAT / 2, ease: "steps(2)", repeat: 1, yoyo: true }, at(10, 3) + 0.01);
+        tl.to("#p-hl1", { opacity: 0, duration: 0.01 }, at(11, 1));
+        tl.to("#p-hl2", { opacity: 1, duration: 0.01 }, at(11, 1));
+        tl.to("#p-hl2", { scale: 1.06, duration: BEAT / 2, ease: "steps(2)", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, at(11, 1));
+        tl.fromTo("#p-tap", { opacity: 1, scale: 0.4, x: 102, y: -78 }, { opacity: 0, scale: 2.2, x: 102, y: -78, duration: 0.4, ease: "steps(5)" }, at(11, 2));
+        tl.to("#p-hl2", { opacity: 0, duration: 0.01 }, at(11, 2));
+        pop("#p-f3", at(11, 2));
+        tl.to("#p-i3", { opacity: 1, duration: 0.2, ease: "steps(4)" }, at(11, 2) + 0.25);
+        pop("#p-done", at(11, 2.5), { rotation: -8 });
+        shake(at(11, 2.5), 10, 4);
+        tl.fromTo("#p-mail", { x: 0, y: 0, opacity: 0, scale: 1.4 }, { opacity: 1, duration: 0.01 }, at(11, 3));
+        tl.to("#p-mail", { x: 1200, y: -80, duration: 0.3, ease: "power2.in" }, at(11, 3));
+
+        /* ───── 4. 선생님 확인! ───── */
+        var tr = at(12, 0);
+        tl.set("#r-win", { opacity: 0 }, 0);
+        tl.set("#r-bg2", { opacity: 0 }, 0);
+        tl.set("#r-rays", { opacity: 0 }, 0);
+        tl.from("#r-frame", { y: 1400, duration: 0.5, ease: "power3.out" }, tr);
+        var zv = zoomTo(1000, 625, 0.4225, 0.8, 2.7);
+        tl.to("#r-cam", { x: zv.x, y: zv.y, scale: zv.scale, duration: 0.6, ease: "power3.inOut" }, tr + 0.4);
+        tl.fromTo("#r-scan", { y: 0 }, { y: 613, duration: 1.6, ease: "steps(20)" }, tr + 0.5);
+        tl.from("#r-owl", { x: -600, duration: 0.5, ease: "power3.out" }, tr + 0.3);
+        pop("#r-say", tr + 0.8);
+        tl.from("#r-btns", { y: 400, opacity: 0, duration: 0.3, ease: "power3.out" }, at(12, 2));
+        tl.to("#r-sel", { x: 340, duration: 0.01 }, at(12, 2.5));
+        tl.to("#r-sel", { x: -340, duration: 0.01 }, at(12, 3));
+        tl.to("#r-b1", { scale: 1.12, duration: 0.1, ease: "steps(2)", transformOrigin: "50% 50%" }, at(12, 3));
+        tl.to("#r-wait", { opacity: 0.3, duration: 0.05 }, at(12, 3.5));
+        tl.to("#r-wait", { opacity: 0, duration: 0.01 }, at(13, 0));
+        tl.to("#r-bg1", { opacity: 0, duration: 0.01 }, at(13, 0));
+        tl.to("#r-bg2", { opacity: 1, duration: 0.01 }, at(13, 0));
+        tl.to("#r-rays", { opacity: 1, duration: 0.01 }, at(13, 0));
+        tl.to("#r-win", { opacity: 1, duration: 0.01 }, at(13, 0));
+        tl.to("#r-rays", { rotation: 40, duration: 6, ease: "steps(40)", transformOrigin: "50% 50%" }, at(13, 0));
+        flash(at(13, 0), 1, 0.45);
+        shake(at(13, 0) + 0.02, 38, 9);
+        tl.fromTo("#r-stamp", { scale: 4.5, rotation: 14, opacity: 0 }, { scale: 1, rotation: -8, opacity: 1, duration: 0.14, ease: "power4.in" }, at(13, 0) - 0.02);
+        tl.fromTo("#r-ring", { scale: 0.2, opacity: 1 }, { scale: 3.2, opacity: 0, duration: 0.6, ease: "steps(8)", transformOrigin: "50% 50%" }, at(13, 0) + 0.1);
+        tl.to("#r-stamp", { scale: 1.05, rotation: -7, duration: BEAT, ease: "steps(2)", yoyo: true, repeat: 5, transformOrigin: "50% 50%" }, at(13, 1));
+        var fbChars = typed($("#r-fbtxt"), "풀이 과정이 깔끔해요! 최고!");
+        pop("#r-tag", at(13, 1));
+        tl.from("#r-fb", { x: -1200, duration: 0.3, ease: "power3.out" }, at(13, 1.5));
+        tl.from("#r-fbowl", { scale: 0.1, opacity: 0, duration: 0.25, ease: "back.out(3)" }, at(13, 1.8));
+        tl.from(fbChars, { opacity: 0, duration: 0.01, stagger: BEAT / 4 / 1.6 }, at(13, 2));
+        tl.from("#r-xp", { y: 700, opacity: 0, duration: 0.35, ease: "power3.out" }, at(13, 3));
+        tl.fromTo("#r-xpfill", { scaleX: 0.28 }, { scaleX: 1, duration: BEAT * 2, ease: "steps(16)" }, at(14, 0));
+        tl.from("#r-lvl", { scale: 0.2, opacity: 0, rotation: -10, duration: 0.3, ease: "back.out(3)", transformOrigin: "0 50%" }, at(14, 2));
+        shake(at(14, 2), 14, 5);
+        flash(at(14, 2), 0.5, 0.3);
+        tl.from(["#r-coin", "#r-coint"], { y: 90, opacity: 0, duration: 0.3, ease: "back.out(3)", stagger: 0.12 }, at(14, 3));
+        tl.to("#r-coin", { y: -16, duration: BEAT / 4, ease: "steps(2)", yoyo: true, repeat: 1 }, at(14, 3.5));
+
+        var conf = $("#r-confetti");
+        var colors = ["#ff7aa2", "#1fa38a", "#4a8ac9", "#fbf1d6", "#e2483d", "#10302f"];
+        for (var cf = 0; cf < 64; cf++) {
+          var piece = box(conf, "left:540px;top:430px;width:" + (cf % 3 === 0 ? 24 : 16) + "px;height:" + (cf % 3 === 0 ? 24 : 16) + "px;background:" + colors[cf % colors.length] + ";border:3px solid " + INK + ";box-sizing:border-box;");
+          var ang = rand() * Math.PI * 2;
+          var dist = 240 + rand() * 640;
+          tl.fromTo(piece, { x: 0, y: 0, opacity: 1, rotation: 0 }, { x: Math.cos(ang) * dist, y: Math.sin(ang) * dist * 1.2 - 140, rotation: rand() * 540, duration: 0.55, ease: "power3.out" }, at(13, 0) + 0.04);
+          tl.to(piece, { y: "+=" + (700 + rand() * 600), opacity: 0, duration: 1 + rand() * 0.6, ease: "power1.in" }, at(13, 0) + 0.6);
+        }
+        for (var cn = 0; cn < 10; cn++) {
+          var coin = document.createElement("img");
+          coin.src = "assets/sprites/icon-coin.svg";
+          coin.alt = "";
+          coin.className = "spr";
+          coin.style.cssText = "left:" + Math.round(40 + rand() * 900) + "px;top:-120px;width:84px;height:84px;";
+          conf.appendChild(coin);
+          tl.fromTo(coin, { y: 0, opacity: 1 }, { y: 2150, duration: 0.8 + rand() * 0.2, ease: "power1.in" }, at(14, 2) + cn * 0.05);
+          tl.to(coin, { opacity: 0, duration: 0.01 }, at(14, 2) + cn * 0.05 + 1);
+        }
+
+        var rankRows = [
+          { id: "#rk1", name: "새싹팀", color: "#4aa86a", len: 700, order: 2 },
+          { id: "#rk2", name: "별빛팀", color: "#ff7aa2", len: 860, order: 1 },
+          { id: "#rk3", name: "물결팀", color: "#4a8ac9", len: 520, order: 3 },
+        ];
+        var tk = at(15, 0);
+        rankRows.forEach(function (row, i) {
+          var host = $(row.id);
+          host.innerHTML = "";
+          var lab = box(host, "left:0;top:0;font-size:68px;color:#10302f;line-height:1;font-style:normal;", "");
+          lab.textContent = row.name;
+          var track = box(host, "left:0;top:92px;width:960px;height:108px;background:#10302f;");
+          var bar = box(track, "left:8px;top:8px;width:" + row.len + "px;height:92px;background:" + row.color + ";transform-origin:0 0;");
+          tl.from(host, { x: -1500, duration: 0.3, ease: "power3.out" }, tk + i * (BEAT / 4));
+          tl.fromTo(bar, { scaleX: 0.05 }, { scaleX: 1, duration: BEAT * 2, ease: "steps(10)" }, tk + 0.3 + i * (BEAT / 4));
+          if (row.order === 1) {
+            var medal = document.createElement("img");
+            medal.src = "assets/sprites/icon-medal.svg";
+            medal.alt = "";
+            medal.className = "spr";
+            medal.style.cssText = "left:872px;top:92px;width:78px;height:100px;";
+            host.appendChild(medal);
+            tl.from(medal, { y: -500, opacity: 0, duration: 0.35, ease: "bounce.out" }, tk + 1.4);
+          }
+        });
+        tl.set("#r-rank", { opacity: 0 }, 0);
+        tl.to(["#r-tag", "#r-fb", "#r-fbowl", "#r-xp", "#r-stamp"], { x: -1400, duration: 0.3, ease: "power4.in" }, at(14, 3.6));
+        tl.to("#r-rank", { opacity: 1, duration: 0.01 }, at(14, 3.9));
+        tl.from("#r-rank .stroke", { scale: 2.4, opacity: 0, duration: 0.24, ease: "steps(3)", transformOrigin: "0 50%" }, at(14, 3.95));
+        pop("#rk-note", at(15, 2));
+
+        /* ───── 5. 세 개의 공간 ───── */
+        var ts = at(16, 0);
+        flash(ts, 0.9, 0.3);
+        tl.from("#sp-t", { y: -300, duration: 0.3, ease: "power4.out" }, ts);
+        tl.from("#sp-t2", { scale: 2.4, opacity: 0, duration: 0.24, ease: "steps(3)" }, ts + 0.15);
+        tl.from(["#sp-c1", "#sp-c2"], { x: -700, duration: 0.6, ease: "power2.out" }, ts);
+        ["#sp-k1", "#sp-k2", "#sp-k3"].forEach(function (id, i) {
+          tl.from(id, { x: i === 1 ? 1300 : -1300, rotation: i === 1 ? 6 : -6, duration: 0.5, ease: "back.out(1.7)" }, ts + i * BEAT);
+          tl.to(id, { y: -18, duration: BEAT, ease: "steps(2)", yoyo: true, repeat: 3 }, ts + 2 * BEAT + i * (BEAT / 3));
+        });
+        shake(ts, 14, 6);
+        $$(".sc").forEach(function (chipEl, i) {
+          tl.from(chipEl, { y: 300, opacity: 0, duration: 0.2, ease: "back.out(2.5)" }, at(17, 0) + i * (BEAT / 2));
+        });
+        for (var sb = 0; sb < 6; sb++) {
+          shake(at(17, 2) + sb * 0.11, 3 + sb * 3, 1);
+        }
+        tl.to(["#sp-k1", "#sp-k2", "#sp-k3"], { scale: 1.08, duration: BEAT, ease: "steps(8)", transformOrigin: "50% 50%" }, at(17, 3));
+
+        /* ───── 6. 지금 플레이 ───── */
+        var tc = at(18, 0);
+        var starsB = makeStars($("#stars-b"), 70);
+        starsB.slice(0, 26).forEach(function (s, i) {
+          var t1 = tc + 0.1 + rand() * 3;
+          tl.to(s, { opacity: 0.15, duration: 0.02 }, t1);
+          tl.to(s, { opacity: 1, duration: 0.02 }, t1 + 0.25 + (i % 3) * 0.1);
+        });
+        flash(tc, 1, 0.35);
+        shake(tc + 0.02, 24, 7);
+        var logoB = makeLogo($("#logo-b1"), $("#logo-b2"));
+        logoB.forEach(function (letter, i) {
+          tl.from(letter, { y: -600, opacity: 0, scale: 1.5, duration: 0.24, ease: STEP }, tc + i * (BEAT / 4));
+        });
+        tl.from("#c-play", { scale: 2.6, opacity: 0, duration: 0.22, ease: "steps(3)", transformOrigin: "50% 50%" }, at(18, 1.5));
+        tl.from("#c-play2", { scale: 2.6, opacity: 0, duration: 0.22, ease: "steps(3)", transformOrigin: "50% 50%" }, at(18, 2));
+        shake(at(18, 1.5), 16, 5);
+        shake(at(18, 2), 18, 6);
+        tl.from("#c-url", { y: 600, opacity: 0, duration: 0.35, ease: "back.out(2)" }, at(18, 3));
+        tl.from("#c-how", { opacity: 0, y: 40, duration: 0.3, ease: "power2.out" }, at(19, 0));
+        tl.from("#c-qr", { scale: 0.1, rotation: 20, opacity: 0, duration: 0.4, ease: "back.out(2.4)" }, at(19, 0));
+        tl.from("#c-btn", { x: 900, opacity: 0, duration: 0.3, ease: "back.out(2.4)" }, at(19, 0.5));
+        tl.from("#c-scan", { x: 900, duration: 0.3, ease: "power3.out" }, at(19, 1));
+        tl.to("#c-btn", { scale: 1.08, duration: BEAT / 2, ease: "steps(2)", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, at(19, 1));
+        tl.from(".c-kid", { y: 500, opacity: 0, duration: 0.35, ease: "back.out(2)", stagger: 0.12 }, at(18, 1));
+        for (var hb = 0; hb < 4; hb++) {
+          tl.to(".c-kid", { y: "-=32", duration: BEAT / 2, ease: "steps(2)", yoyo: true, repeat: 1 }, at(19, hb * 0.5));
+        }
+        var tf = at(19, 2);
+        flash(tf, 1, 0.5);
+        shake(tf, 34, 9);
+        tl.fromTo("#c-play2", { color: "#ffffff" }, { color: "#ffd23f", duration: 0.5, ease: "steps(5)", immediateRender: false }, tf);
+        var cc = $("#c-confetti");
+        for (var cg = 0; cg < 56; cg++) {
+          var pc = box(cc, "left:540px;top:1000px;width:" + (cg % 3 === 0 ? 24 : 16) + "px;height:" + (cg % 3 === 0 ? 24 : 16) + "px;background:" + ["#ffd23f", "#ff7aa2", "#1fa38a", "#fbf1d6", "#8fd6f2"][cg % 5] + ";border:3px solid " + INK + ";box-sizing:border-box;");
+          var an2 = rand() * Math.PI * 2;
+          var di2 = 260 + rand() * 640;
+          tl.fromTo(pc, { x: 0, y: 0, opacity: 1, rotation: 0 }, { x: Math.cos(an2) * di2, y: Math.sin(an2) * di2 * 1.1 - 240, rotation: rand() * 540, duration: 0.5, ease: "power3.out" }, tf + 0.03);
+          tl.to(pc, { y: "+=" + (520 + rand() * 500), opacity: 0, duration: 0.7, ease: "power1.in" }, tf + 0.55);
+        }
+        tl.to("#c-url", { scale: 1.06, duration: 0.12, ease: "steps(2)", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, tf);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines["shorts"] = tl;
+      })();
+    </script>
+    <script src="player.js"></script>
+  </body>
+</html>
