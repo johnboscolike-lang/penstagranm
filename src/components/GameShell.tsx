@@ -3,11 +3,14 @@ import Link from "next/link";
 import { useSyncExternalStore, type ReactNode } from "react";
 import clsx from "clsx";
 
+import { AudioBoot } from "@/components/audio/AudioBoot";
+import { SoundControl } from "@/components/audio/SoundControl";
 import { PixelAvatar, PixelIcon, PixelSprite } from "@/components/pixel/PixelSprite";
 import { buildOwlHeadArt } from "@/utils/art/characters";
+import type { SoundSpace } from "@/utils/audio/sound-catalog";
 import type { HudView } from "@/utils/quest-types";
 
-export type SpaceKey = "school" | "challenge" | "room";
+export type SpaceKey = "school" | "challenge" | "arena" | "room";
 export type TeacherSpaceKey = "review" | "quests" | "calendar";
 
 interface NavItem {
@@ -18,11 +21,17 @@ interface NavItem {
   badge?: number;
 }
 
-const STUDENT_NAV: NavItem[] = [
-  { key: "school", href: "/", label: "학교", icon: "school" },
-  { key: "challenge", href: "/challenge", label: "주간도전", icon: "challenge" },
-  { key: "room", href: "/myroom", label: "내공간", icon: "room" },
-];
+/**
+ * 학생용 하단 도크: 학교 · 주간도전 · 대결 · 내공간. 대결에는 받은 도전장 수가 배지로 붙는다.
+ */
+function studentNav(arenaInbox: number): NavItem[] {
+  return [
+    { key: "school", href: "/", label: "학교", icon: "school" },
+    { key: "challenge", href: "/challenge", label: "주간도전", icon: "challenge" },
+    { key: "arena", href: "/arena", label: "대결", icon: "arena", badge: arenaInbox },
+    { key: "room", href: "/myroom", label: "내공간", icon: "room" },
+  ];
+}
 
 const SIMPLE_KEY = "penstagram-simple-view";
 const simpleListeners = new Set<() => void>();
@@ -117,6 +126,7 @@ function ShellFrame({ activeKey, nav, banner, pageTitle, scene, wide, profile, c
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </Head>
       <div className="game" data-simple={simple ? "true" : "false"} data-space={spaceLabel}>
+        <AudioBoot space={spaceLabel as SoundSpace} />
         {scene}
 
         <header className="hud">
@@ -135,6 +145,7 @@ function ShellFrame({ activeKey, nav, banner, pageTitle, scene, wide, profile, c
                 <span>{coins} 코인</span>
               </div>
             ) : null}
+            <SoundControl />
             <button
               aria-pressed={simple}
               className="hud__tool pf"
@@ -221,7 +232,7 @@ export function GameShell({ space, banner, pageTitle, hud, scene, wide, children
       activeKey={space}
       banner={banner}
       coins={hud.coins}
-      nav={STUDENT_NAV}
+      nav={studentNav(hud.arenaInbox)}
       pageTitle={pageTitle}
       profile={profile}
       scene={scene}
@@ -293,6 +304,12 @@ export function PublicShell({ pageTitle, scene, children }: PublicShellProps) {
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </Head>
       <div className="game" data-simple="false" data-space="public">
+        <AudioBoot space="public" />
+        <div className="hud hud--public">
+          <div className="hud__tools">
+            <SoundControl />
+          </div>
+        </div>
         {scene}
         <main className="stage stage--center">
           <div className="stage__col">{children}</div>

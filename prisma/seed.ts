@@ -2,9 +2,11 @@ import { deflateSync } from "node:zlib";
 
 import { PrismaClient, PhotoSlot } from "@prisma/client";
 
+import { applyElo, decideOutcome, flipOutcome, rewardFor, scoreAnswers, START_RATING } from "../src/utils/arena-rules";
 import { addDaysToKey, getKstDateKey, getSchoolDayKeys, getWeekStartKey, isSchoolDay } from "../src/utils/kst";
 import { rowsToSvgMarkup, svgToDataUri } from "../src/utils/pixel";
 import { DEFAULT_PROMISE_PLAN, FIRST_PAGE_STARTS, listUnitNumbers } from "../src/utils/quest-plan";
+import { generateQuestions, type QuizCategory } from "../src/utils/quiz-bank";
 
 // 로컬 SQLite 데모는 별도 설정 없이도 실행되도록 기본 경로를 채운다.
 process.env.DATABASE_URL ??= "file:./dev.db";
@@ -352,6 +354,104 @@ async function seedQuestDemo(
 }
 
 /**
+ * 대결장이 첫날부터 살아 있도록 끝난 대결 몇 판과 도토리에게 온 도전장 한 장을 넣는다.
+ */
+async function seedArenaDemo(studentsByName: Map<string, string>, myId: string, todayKey: string): Promise<void> {
+  const idOf = (name: string): string => studentsByName.get(name) ?? myId;
+  const ratings = new Map<string, number>();
+  const ratingOf = (id: string): number => ratings.get(id) ?? START_RATING;
+
+  const makeAnswers = (correctCount: number, answerIndexes: number[], baseMs: number) =>
+    answerIndexes.map((answerIndex, index) => ({ choice: index < correctCount ? answerIndex : (answerIndex + 1) % 4, ms: baseMs + index * 350 }));
+
+  const playDone = async (
+    challengerName: string,
+    opponentName: string,
+    category: QuizCategory,
+    seed: number,
+    challengerCorrect: number,
+    opponentCorrect: number,
+    finishedKey: string,
+  ) => {
+    const questions = generateQuestions(category, seed);
+    const indexes = questions.map((question) => question.answerIndex);
+    const challengerAnswers = makeAnswers(challengerCorrect, indexes, 3200);
+    const opponentAnswers = makeAnswers(opponentCorrect, indexes, 3800);
+    const challengerScore = scoreAnswers(indexes, challengerAnswers);
+    const opponentScore = scoreAnswers(indexes, opponentAnswers);
+    const challengerId = idOf(challengerName);
+    const opponentId = idOf(opponentName);
+    const outcome = decideOutcome(challengerScore.score, opponentScore.score);
+    const elo = applyElo(ratingOf(challengerId), ratingOf(opponentId), outcome);
+    ratings.set(challengerId, elo.challenger);
+    ratings.set(opponentId, elo.opponent);
+    const challengerReward = rewardFor(outcome, 0);
+    const opponentReward = rewardFor(flipOutcome(outcome), 0);
+
+    await prisma.duel.create({
+      data: {
+        challengerId,
+        opponentId,
+        category,
+        questions: JSON.stringify(questions),
+        status: "DONE",
+        dateKey: finishedKey,
+        challengerAnswers: JSON.stringify(challengerAnswers),
+        challengerCorrect: challengerScore.correct,
+        challengerScore: challengerScore.score,
+        challengerMs: challengerScore.totalMs,
+        opponentAnswers: JSON.stringify(opponentAnswers),
+        opponentCorrect: opponentScore.correct,
+        opponentScore: opponentScore.score,
+        opponentMs: opponentScore.totalMs,
+        outcome,
+        ratingDelta: elo.delta,
+        challengerRatingAfter: elo.challenger,
+        opponentRatingAfter: elo.opponent,
+        challengerXp: challengerReward.xp,
+        challengerCoins: challengerReward.coins,
+        opponentXp: opponentReward.xp,
+        opponentCoins: opponentReward.coins,
+        finishedKey,
+        finishedAt: new Date(`${finishedKey}T03:00:00Z`),
+      },
+    });
+  };
+
+  const yesterday = addDaysToKey(todayKey, -1);
+  await playDone("김도윤", "한서윤", "MATH", 101, 5, 4, yesterday);
+  await playDone("최민재", "정유나", "ENGLISH", 202, 4, 4, yesterday);
+  await playDone("박하은", "이준서", "MIX", 303, 3, 5, yesterday);
+  await playDone("도토리", "김도윤", "MIX", 404, 4, 5, todayKey);
+  await playDone("정유나", "도토리", "ENGLISH", 505, 3, 4, todayKey);
+  await playDone("강시우", "임재현", "MATH", 606, 5, 2, todayKey);
+
+  // 도토리에게 온 도전장: 한서윤이 먼저 풀어 놓고 답을 기다린다.
+  const pendingQuestions = generateQuestions("MATH", 707);
+  const pendingIndexes = pendingQuestions.map((question) => question.answerIndex);
+  const pendingAnswers = makeAnswers(4, pendingIndexes, 3000);
+  const pendingScore = scoreAnswers(pendingIndexes, pendingAnswers);
+  await prisma.duel.create({
+    data: {
+      challengerId: idOf("한서윤"),
+      opponentId: myId,
+      category: "MATH",
+      questions: JSON.stringify(pendingQuestions),
+      status: "PENDING",
+      dateKey: todayKey,
+      challengerAnswers: JSON.stringify(pendingAnswers),
+      challengerCorrect: pendingScore.correct,
+      challengerScore: pendingScore.score,
+      challengerMs: pendingScore.totalMs,
+    },
+  });
+
+  for (const [studentId, rating] of ratings) {
+    await prisma.student.update({ where: { id: studentId }, data: { rating } });
+  }
+}
+
+/**
  * Resets demo data and inserts seed content for the local prototype.
  */
 async function main(): Promise<void> {
@@ -361,6 +461,8 @@ async function main(): Promise<void> {
     return;
   }
 
+  await prisma.duel.deleteMany();
+  await prisma.classSetting.deleteMany();
   await prisma.uploadedFile.deleteMany();
   await prisma.questProof.deleteMany();
   await prisma.purchase.deleteMany();
@@ -478,6 +580,7 @@ async function main(): Promise<void> {
   });
 
   await seedQuestDemo(studentsByName, myId, todayKey, thisMonday);
+  await seedArenaDemo(studentsByName, myId, todayKey);
 
   const previousSchoolDays = dayKeys.filter((dayKey) => dayKey < todayKey && isSchoolDay(dayKey));
   const postDays = [

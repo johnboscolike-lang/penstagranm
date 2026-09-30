@@ -11,6 +11,8 @@ export interface HudView {
   xpForNext: number;
   totalXp: number;
   coins: number;
+  /** 받은 도전장(대결) 수 */
+  arenaInbox: number;
 }
 
 export interface ProofView {

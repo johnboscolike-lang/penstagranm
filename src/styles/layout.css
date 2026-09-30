@@ -684,6 +684,34 @@
   width: min(1040px, 100%);
 }
 
+/* ───────── 중간 폭: 배너가 도구 줄과 겹치지 않게 흐름 안으로 ───────── */
+@media (min-width: 900px) and (max-width: 1499px) {
+  .hud__title {
+    position: static;
+    flex: 0 1 auto;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 2px 12px;
+    transform: none;
+    font-size: 18px;
+  }
+
+  .hud__title .px--icon {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .hud__tool-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 /* ───────── 좁은 화면 ───────── */
 @media (max-width: 1199px) {
   .stage--wide .stage__col {
@@ -722,6 +750,7 @@
   }
 
   .hud {
+    flex-wrap: wrap;
     gap: 6px;
     padding: 8px 10px;
   }
@@ -733,9 +762,14 @@
   .hud__profile {
     flex: 1 1 auto;
     gap: 6px;
-    min-width: 0;
+    min-width: 164px;
     max-width: 230px;
     padding-right: 6px;
+  }
+
+  .hud__tools {
+    gap: 6px;
+    margin-left: auto;
   }
 
   .hud__avatar {
@@ -793,5 +827,113 @@
 
   body {
     background: #f4e6c2;
+  }
+}
+
+/* ───────── 소리 설정 ───────── */
+.sound {
+  position: relative;
+}
+
+.sound__panel {
+  --b: 2px;
+  --frame: var(--frame-hud);
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 10px);
+  right: 0;
+  display: grid;
+  gap: 10px;
+  width: min(300px, 86vw);
+  padding: 8px 6px;
+  color: var(--cream);
+}
+
+.sound__row {
+  display: grid;
+  gap: 6px;
+}
+
+.sound__switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 2px solid var(--cream);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cream);
+  font-weight: 700;
+  text-align: left;
+}
+
+.sound__switch[aria-pressed="false"] {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.sound__range {
+  width: 100%;
+  height: 28px;
+  accent-color: var(--gold, #ffd23f);
+}
+
+.sound__hint {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.hud--public {
+  justify-content: flex-end;
+}
+
+/* ───────── 대결장 장면 ───────── */
+.scene--arena {
+  --scene-ground: 40%;
+}
+
+.scene--arena .scene__sky {
+  background: linear-gradient(180deg, #4f63c9 0%, #b78bd9 38%, #ffb98a 68%, #ffe6b0 100%);
+}
+
+.arena-ring {
+  position: absolute;
+  left: 16%;
+  bottom: 6%;
+  z-index: 3;
+  width: 58%;
+  height: 26%;
+  border: 4px solid #6b4a2a;
+  border-radius: 50%;
+  background: #e8cf8f;
+  box-shadow: 0 6px 0 rgba(58, 42, 36, 0.35);
+}
+
+.arena-ring__inner {
+  position: absolute;
+  inset: 12%;
+  border: 3px dashed rgba(107, 74, 42, 0.5);
+  border-radius: 50%;
+}
+
+.arena-vs {
+  --b: 2px;
+  --frame: var(--frame-hud);
+  position: absolute;
+  left: 44%;
+  bottom: 26%;
+  z-index: 12;
+  padding: 0 10px;
+  color: var(--gold, #ffd23f);
+  font-size: 22px;
+  font-weight: 700;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+  animation: vs-pulse 1.4s steps(2) infinite;
+}
+
+@keyframes vs-pulse {
+  50% {
+    transform: scale(1.12);
   }
 }

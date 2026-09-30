@@ -4,6 +4,7 @@ import clsx from "clsx";
 import type { ArtSpec } from "@/utils/art/canvas";
 import { getCharacterArt, getHeadArt, getStudentArt, type CharacterName } from "@/utils/art/characters";
 import { getIconSpec, MEDAL_PALETTES } from "@/utils/art/icons";
+import { KENNEY_TILE, kenneyUrl, type KenneyName } from "@/utils/art/kenney";
 import { getSpriteUrl, SPRITE_SIZES } from "@/utils/art/manifest";
 import { measurePixelRows, rowsToRects } from "@/utils/pixel";
 
@@ -123,4 +124,33 @@ interface StudentProps {
  */
 export function StudentSprite({ hairKey, bag = 0, scale = 1, className }: StudentProps) {
   return <PixelSprite art={getStudentArt(hairKey, bag)} className={className} scale={scale} />;
+}
+
+interface KenneySpriteProps {
+  name: KenneyName;
+  scale?: number;
+  flip?: boolean;
+  label?: string;
+  className?: string;
+}
+
+/**
+ * 공개(CC0) 도트 캐릭터를 게임 도트 크기에 맞춰 보여 준다. (16×16 원본)
+ */
+export function KenneySprite({ name, scale = 1, flip, label, className }: KenneySpriteProps) {
+  const vars: SpriteVars = { "--w": KENNEY_TILE, "--h": KENNEY_TILE, "--m": scale };
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- 도트는 최적화 대신 원본 픽셀을 그대로 보여 준다.
+    <img
+      alt={label ?? ""}
+      aria-hidden={label ? undefined : true}
+      className={clsx("px", "px--img", flip && "px--flip", className)}
+      draggable={false}
+      height={KENNEY_TILE}
+      src={kenneyUrl(name)}
+      style={vars}
+      width={KENNEY_TILE}
+    />
+  );
 }

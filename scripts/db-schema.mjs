@@ -114,6 +114,49 @@ export function applySchema(database) {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "Purchase_studentId_itemKey_key"
       ON "Purchase" ("studentId", "itemKey");
+    CREATE TABLE IF NOT EXISTS "Duel" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "challengerId" TEXT NOT NULL,
+      "opponentId" TEXT NOT NULL,
+      "category" TEXT NOT NULL,
+      "questions" TEXT NOT NULL,
+      "status" TEXT NOT NULL DEFAULT 'CHALLENGER_TURN',
+      "dateKey" TEXT NOT NULL,
+      "challengerAnswers" TEXT,
+      "challengerCorrect" INTEGER,
+      "challengerScore" INTEGER,
+      "challengerMs" INTEGER,
+      "opponentStartedAt" DATETIME,
+      "opponentAnswers" TEXT,
+      "opponentCorrect" INTEGER,
+      "opponentScore" INTEGER,
+      "opponentMs" INTEGER,
+      "outcome" TEXT,
+      "ratingDelta" INTEGER NOT NULL DEFAULT 0,
+      "challengerRatingAfter" INTEGER,
+      "opponentRatingAfter" INTEGER,
+      "challengerXp" INTEGER NOT NULL DEFAULT 0,
+      "challengerCoins" INTEGER NOT NULL DEFAULT 0,
+      "opponentXp" INTEGER NOT NULL DEFAULT 0,
+      "opponentCoins" INTEGER NOT NULL DEFAULT 0,
+      "finishedKey" TEXT,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "finishedAt" DATETIME,
+      CONSTRAINT "Duel_challengerId_fkey"
+        FOREIGN KEY ("challengerId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT "Duel_opponentId_fkey"
+        FOREIGN KEY ("opponentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS "Duel_challengerId_idx" ON "Duel" ("challengerId");
+    CREATE INDEX IF NOT EXISTS "Duel_opponentId_idx" ON "Duel" ("opponentId");
+    CREATE INDEX IF NOT EXISTS "Duel_status_idx" ON "Duel" ("status");
+    CREATE INDEX IF NOT EXISTS "Duel_finishedKey_idx" ON "Duel" ("finishedKey");
+    CREATE TABLE IF NOT EXISTS "ClassSetting" (
+      "key" TEXT NOT NULL PRIMARY KEY,
+      "value" TEXT NOT NULL
+    );
     CREATE TABLE IF NOT EXISTS "Post" (
       "id" TEXT NOT NULL PRIMARY KEY,
       "authorName" TEXT NOT NULL,
@@ -159,6 +202,7 @@ export function applySchema(database) {
   addMissingColumns(database, "Post", [
     ["studentId", 'TEXT REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],
   ]);
+  addMissingColumns(database, "Student", [["rating", "INTEGER NOT NULL DEFAULT 1000"]]);
   addMissingColumns(database, "DailyPromise", [
     ["scope", "TEXT NOT NULL DEFAULT 'DAY'"],
     ["questId", 'TEXT REFERENCES "Quest" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],

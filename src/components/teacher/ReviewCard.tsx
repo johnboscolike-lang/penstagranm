@@ -3,6 +3,7 @@ import { useState } from "react";
 import clsx from "clsx";
 
 import { PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { playSfx } from "@/utils/audio/audio-engine";
 import { buildUnitLabel } from "@/utils/quest-plan";
 import { DECISION_LABELS, REVIEW_DECISIONS, REVIEW_LABELS, type ReviewDecision } from "@/utils/quest-review";
 import { listUnitNumbers } from "@/utils/quest-plan";
@@ -47,8 +48,10 @@ export function ReviewCard({ item, compact = false }: ReviewCardProps) {
       const payload = (await response.json().catch(() => null)) as { message?: string } | null;
       if (!response.ok) {
         setMessage(payload?.message ?? "저장하지 못했어요.");
+        playSfx("wrong");
         return;
       }
+      playSfx(decision === "CONFIRMED" ? "stamp" : "bell");
       void router.replace(router.asPath, undefined, { scroll: false });
     } catch {
       setMessage("네트워크 연결을 확인해 주세요.");
@@ -99,7 +102,7 @@ export function ReviewCard({ item, compact = false }: ReviewCardProps) {
 
       <div className="review__actions">
         {REVIEW_DECISIONS.map((decision) => (
-          <button className={clsx("btn btn--small", DECISION_STYLE[decision])} disabled={busy} key={decision} onClick={() => void decide(decision)} type="button">
+          <button className={clsx("btn btn--small", DECISION_STYLE[decision])} data-sfx="none" disabled={busy} key={decision} onClick={() => void decide(decision)} type="button">
             {decision === "CONFIRMED" ? <PixelIcon name="check" /> : null}
             {DECISION_LABELS[decision]}
           </button>

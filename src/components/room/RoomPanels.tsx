@@ -4,6 +4,7 @@ import { useState } from "react";
 import clsx from "clsx";
 
 import { PixelAvatar, PixelIcon, SceneSprite } from "@/components/pixel/PixelSprite";
+import { playSfx } from "@/utils/audio/audio-engine";
 import type { WeekNews } from "@/utils/quest-board";
 import { formatScore } from "@/utils/quest-rules";
 import type { HudView } from "@/utils/quest-types";
@@ -153,8 +154,10 @@ export function YardShop({ coins, ownedItemKeys }: YardShopProps) {
       const payload = (await response.json().catch(() => null)) as { message?: string } | null;
       if (!response.ok) {
         setMessage({ tone: "error", text: payload?.message ?? "구매하지 못했어요." });
+        playSfx("wrong");
         return;
       }
+      playSfx("buy");
       setMessage({ tone: "ok", text: `${name}을(를) 앞마당에 놓았어요!` });
       void router.replace(router.asPath, undefined, { scroll: false });
     } catch {
@@ -190,6 +193,7 @@ export function YardShop({ coins, ownedItemKeys }: YardShopProps) {
               ) : (
                 <button
                   className="btn btn--small btn--gold btn--block"
+                  data-sfx="none"
                   disabled={!affordable || busyKey !== null}
                   onClick={() => void buy(item.key, item.name)}
                   type="button"

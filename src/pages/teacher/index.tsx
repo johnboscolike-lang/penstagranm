@@ -2,9 +2,11 @@ import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { TeacherShell } from "@/components/GameShell";
 import { TeacherScene } from "@/components/scenes/TeacherScene";
+import { ArenaControl } from "@/components/teacher/ArenaControl";
 import { ClassOverview } from "@/components/teacher/ClassOverview";
 import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { ReviewCard } from "@/components/teacher/ReviewCard";
+import { getArenaTeacherSummary } from "@/utils/arena-repository";
 import { guardPage } from "@/utils/auth-guard";
 import { getKstDateKey } from "@/utils/kst";
 import type { ReviewItemView, StudentOverviewView } from "@/utils/quest-types";
@@ -15,6 +17,7 @@ interface TeacherPageProps {
   queue: ReviewItemView[];
   recent: ReviewItemView[];
   overview: StudentOverviewView[];
+  arena: Awaited<ReturnType<typeof getArenaTeacherSummary>>;
 }
 
 /**
@@ -26,15 +29,16 @@ export const getServerSideProps: GetServerSideProps<TeacherPageProps> = async (c
     return guard.result;
   }
 
-  const [queue, recent, overview] = await Promise.all([listReviewQueue(), listRecentReviews(), getClassOverview(getKstDateKey())]);
+  const todayKey = getKstDateKey();
+  const [queue, recent, overview, arena] = await Promise.all([listReviewQueue(), listRecentReviews(), getClassOverview(todayKey), getArenaTeacherSummary(todayKey)]);
 
-  return { props: { teacherName: guard.session.name, queue, recent, overview } };
+  return { props: { teacherName: guard.session.name, queue, recent, overview, arena } };
 };
 
 /**
  * 교무실 확인함: 제출된 퀘스트를 보고 수행 확인 / 다시 시도 / 도움 필요를 정한다.
  */
-export default function TeacherPage({ teacherName, queue, recent, overview }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function TeacherPage({ teacherName, queue, recent, overview, arena }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <TeacherShell
       active="review"
@@ -66,6 +70,8 @@ export default function TeacherPage({ teacherName, queue, recent, overview }: In
       </section>
 
       <ClassOverview students={overview} />
+
+      <ArenaControl {...arena} />
 
       {recent.length > 0 ? (
         <section aria-labelledby="recent-title" className="panel pf">

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import clsx from "clsx";
 
 import { PixelIcon } from "@/components/pixel/PixelSprite";
+import { playSfx } from "@/utils/audio/audio-engine";
 import { resizeImageFile } from "@/utils/image-resize";
 import { buildUnitLabel, getSubjectTone, listUnitNumbers } from "@/utils/quest-plan";
 import {
@@ -93,6 +94,7 @@ export function PromiseBoard({ today }: PromiseBoardProps) {
     const optimistic = done ? [...before.confirmedUnitNos, unitNo] : before.confirmedUnitNos.filter((value) => value !== unitNo);
     setCards((current) => ({ ...current, [promiseId]: { ...before, confirmedUnitNos: optimistic } }));
     setMessage(null);
+    playSfx(done ? "tile" : "toggle");
 
     try {
       const response = await fetch("/api/promise-units", {
@@ -103,9 +105,15 @@ export function PromiseBoard({ today }: PromiseBoardProps) {
       if (!response.ok) {
         setCards((current) => ({ ...current, [promiseId]: before }));
         setMessage(await readError(response, "기록하지 못했어요. 잠시 뒤에 다시 눌러 주세요."));
+        playSfx("wrong");
         return;
       }
-      applyCardState(promiseId, ((await response.json()) as { card: CardState }).card);
+      const { card } = (await response.json()) as { card: CardState };
+      applyCardState(promiseId, card);
+      const planned = [...today.promises, ...today.weekly].find((promise) => promise.id === promiseId)?.unitCount ?? 0;
+      if (done && planned > 0 && card.confirmedUnitNos.length >= planned) {
+        playSfx("powerup");
+      }
     } catch {
       setCards((current) => ({ ...current, [promiseId]: before }));
       setMessage("네트워크 연결을 확인하고 다시 눌러 주세요.");
@@ -125,9 +133,11 @@ export function PromiseBoard({ today }: PromiseBoardProps) {
       const response = await fetch("/api/proofs", { method: "POST", body: formData });
       if (!response.ok) {
         setMessage(await readError(response, "사진을 올리지 못했어요."));
+        playSfx("wrong");
         return;
       }
       applyCardState(promiseId, ((await response.json()) as { card: CardState }).card);
+      playSfx("pop");
     } catch {
       setMessage("네트워크 연결을 확인하고 다시 올려 주세요.");
     } finally {
@@ -173,9 +183,11 @@ export function PromiseBoard({ today }: PromiseBoardProps) {
       });
       if (!response.ok) {
         setMessage(await readError(response, "제출하지 못했어요."));
+        playSfx("wrong");
         return;
       }
       applyCardState(promiseId, ((await response.json()) as { card: CardState }).card);
+      playSfx("submit");
     } catch {
       setMessage("네트워크 연결을 확인하고 다시 눌러 주세요.");
     } finally {
@@ -330,6 +342,7 @@ function PromiseCardView({ promise, state, busy, onToggle, onUploadProof, onDele
               aria-label={`${label}${promise.unitKind === "PAGE" ? "쪽" : "번"} ${done ? "완료, 누르면 취소" : "기록하기"}`}
               aria-pressed={done}
               className={clsx("tile pf", done && "tile--done")}
+              data-sfx="none"
               disabled={!editable}
               key={unitNo}
               onClick={() => onToggle(unitNo)}
@@ -426,7 +439,7 @@ function PromiseCardView({ promise, state, busy, onToggle, onUploadProof, onDele
             <p className="msg">제출했어요. 선생님이 확인하면 알려 드릴게요. 칸을 고치면 다시 제출해야 해요.</p>
           ) : (
             <>
-              <button className="btn btn--block btn--gold" disabled={busy || !submitCheck.ok} onClick={onSubmit} type="button">
+              <button className="btn btn--block btn--gold" data-sfx="none" disabled={busy || !submitCheck.ok} onClick={onSubmit} type="button">
                 <PixelIcon name="bell" />
                 <span>{state.reviewStatus === "RETRY" ? "다시 제출하기" : "선생님께 제출하기"}</span>
               </button>

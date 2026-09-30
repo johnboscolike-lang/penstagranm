@@ -154,10 +154,10 @@ async function loadPromiseRecordsSince(fromKey: string): Promise<PromiseRecord[]
 
 /**
  * Sums a student's lifetime XP and earned coins: day cards by the daily formulas (one reflection bonus per posting day)
- * plus the weekly-quest reward of every weekly card.
+ * plus the weekly-quest reward of every weekly card and the arena rewards of finished duels.
  */
 async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<{ xp: number; earnedCoins: number }> {
-  const [rows, posts] = await Promise.all([
+  const [rows, posts, asChallenger, asOpponent] = await Promise.all([
     client.dailyPromise.findMany({
       where: { studentId },
       select: {
@@ -172,6 +172,8 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
       },
     }),
     client.post.findMany({ where: { studentId }, select: { createdAt: true } }),
+    client.duel.aggregate({ where: { challengerId: studentId, status: "DONE" }, _sum: { challengerXp: true, challengerCoins: true } }),
+    client.duel.aggregate({ where: { opponentId: studentId, status: "DONE" }, _sum: { opponentXp: true, opponentCoins: true } }),
   ]);
 
   const dayRows = rows.filter((row) => row.scope !== "WEEK");
@@ -202,6 +204,10 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
     earnedCoins += reward.coins;
   });
 
+  // 대결장 보상: 이기든 지든 참여 보상이 있고, 하루 횟수 제한은 대결이 끝날 때 이미 반영돼 있다.
+  xp += (asChallenger._sum.challengerXp ?? 0) + (asOpponent._sum.opponentXp ?? 0);
+  earnedCoins += (asChallenger._sum.challengerCoins ?? 0) + (asOpponent._sum.opponentCoins ?? 0);
+
   return { xp, earnedCoins };
 }
 
@@ -227,7 +233,10 @@ export async function getStudentTotals(studentId: string): Promise<{ xp: number;
  * Builds the profile capsule data (level, XP bar, coins) shown on every screen.
  */
 async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<HudView> {
-  const totals = await getStudentTotals(me.id);
+  const [totals, arenaInbox] = await Promise.all([
+    getStudentTotals(me.id),
+    prisma.duel.count({ where: { opponentId: me.id, status: "PENDING", opponentScore: null } }),
+  ]);
   const level = calcLevel(totals.xp);
 
   return {
@@ -239,6 +248,7 @@ async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<Hud
     xpForNext: level.xpForNext,
     totalXp: totals.xp,
     coins: totals.coins,
+    arenaInbox,
   };
 }
 

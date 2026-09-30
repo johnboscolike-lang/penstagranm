@@ -78,6 +78,10 @@ model Student {
   purchases Purchase[]
   posts     Post[]
   quests    Quest[]
+  /// 대결장 레이팅 (기본 1000)
+  rating    Int            @default(1000)
+  duelsChallenged Duel[]   @relation("DuelChallenger")
+  duelsReceived   Duel[]   @relation("DuelOpponent")
 }
 
 /// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
@@ -173,4 +177,50 @@ model UploadedFile {
   size      Int
   data      Bytes
   createdAt DateTime @default(now())
+}
+
+/// 친구와 같은 문제 5개를 각자 풀어 겨루는 비동기 퀴즈 대결. questions 는 정답 위치가 든 JSON 이라 화면에는 정답 없이 보낸다.
+model Duel {
+  id                    String    @id @default(cuid())
+  challengerId          String
+  opponentId            String
+  category              String
+  questions             String
+  /// CHALLENGER_TURN(도전자가 푸는 중) | PENDING(상대를 기다림) | DONE | DECLINED | EXPIRED
+  status                String    @default("CHALLENGER_TURN")
+  dateKey               String
+  challengerAnswers     String?
+  challengerCorrect     Int?
+  challengerScore       Int?
+  challengerMs          Int?
+  opponentStartedAt     DateTime?
+  opponentAnswers       String?
+  opponentCorrect       Int?
+  opponentScore         Int?
+  opponentMs            Int?
+  /// 도전자 기준 WIN | LOSE | DRAW
+  outcome               String?
+  ratingDelta           Int       @default(0)
+  challengerRatingAfter Int?
+  opponentRatingAfter   Int?
+  challengerXp          Int       @default(0)
+  challengerCoins       Int       @default(0)
+  opponentXp            Int       @default(0)
+  opponentCoins         Int       @default(0)
+  finishedKey           String?
+  createdAt             DateTime  @default(now())
+  finishedAt            DateTime?
+  challenger            Student   @relation("DuelChallenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  opponent              Student   @relation("DuelOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+
+  @@index([challengerId])
+  @@index([opponentId])
+  @@index([status])
+  @@index([finishedKey])
+}
+
+/// 학급 전체에 적용되는 켜고 끄는 설정 (예: 대결장 열기).
+model ClassSetting {
+  key   String @id
+  value String
 }

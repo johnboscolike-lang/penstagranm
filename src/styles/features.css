@@ -1468,3 +1468,509 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ───────── 대결장 ───────── */
+.league {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 2px solid var(--ink);
+  background: #fff8e0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.league--seed {
+  background: #e6dcc8;
+}
+
+.league--sprout {
+  background: #d4f2c8;
+}
+
+.league--flower {
+  background: #ffd9e6;
+}
+
+.league--fruit {
+  background: #ffe3a6;
+}
+
+.league--star {
+  background: #cfe1ff;
+}
+
+.arena-me {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  padding: 12px;
+}
+
+.arena-me__rating {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.arena-me__rating strong {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--teal-d, #137565);
+}
+
+.arena-me p {
+  margin: 0;
+}
+
+.arena-me__record {
+  font-weight: 700;
+}
+
+.arena-me__quota b {
+  color: var(--teal-d, #137565);
+}
+
+.arena-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arena-row {
+  --b: 2px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.arena-row__main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.arena-row__main .muted {
+  font-size: 12px;
+}
+
+.arena-row__main .league {
+  justify-self: start;
+}
+
+.arena-row__actions {
+  display: grid;
+  gap: 4px;
+}
+
+.arena-row__why {
+  grid-column: 1 / -1;
+  font-size: 12px;
+}
+
+.arena-row--win {
+  background: #e9f9e3;
+}
+
+.arena-row--lose {
+  background: #f7ece6;
+}
+
+.arena-cats {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.arena-cat {
+  display: grid;
+  gap: 0;
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  background: #fff8e0;
+  cursor: pointer;
+}
+
+.arena-cat input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.arena-cat--on {
+  background: #d4f2c8;
+  box-shadow: 0 0 0 3px var(--gold, #ffd23f);
+}
+
+.arena-empty {
+  margin: 4px 0;
+  text-align: center;
+}
+
+.arena-sub {
+  margin: 14px 0 6px;
+  font-size: 15px;
+}
+
+.arena-teams,
+.arena-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arena-rank {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.arena-rank__row {
+  display: grid;
+  grid-template-columns: 26px auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 2px solid transparent;
+}
+
+.arena-rank__row--me {
+  border-color: var(--teal, #1fa38a);
+  background: rgba(31, 163, 138, 0.12);
+}
+
+.arena-rank__no {
+  font-weight: 700;
+  text-align: center;
+}
+
+.arena-rank__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ───────── 대결 진행 ───────── */
+.duel {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  background: rgba(13, 37, 48, 0.78);
+  overflow-y: auto;
+}
+
+.duel__card {
+  --b: 3px;
+  --frame: var(--frame-parchment);
+  width: min(560px, 100%);
+  max-height: calc(100vh - 24px);
+  padding: 10px 10px 16px;
+  overflow-y: auto;
+  background: var(--cream, #fbf1d6);
+}
+
+.duel__players {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.duel__player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.duel__player--rival {
+  justify-content: flex-end;
+}
+
+.duel__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.duel__dot {
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--ink);
+  background: #fff8e0;
+}
+
+.duel__dot--now {
+  background: var(--gold, #ffd23f);
+  animation: vs-pulse 1s steps(2) infinite;
+}
+
+.duel__dot--ok {
+  background: #4aa86a;
+}
+
+.duel__dot--no {
+  background: #e2483d;
+}
+
+.duel__intro {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 28px 8px;
+  text-align: center;
+}
+
+.duel__intro p {
+  margin: 0;
+}
+
+.duel__vs {
+  font-size: 84px;
+  line-height: 1;
+  color: #e2483d;
+  text-shadow: 4px 4px 0 var(--ink);
+  animation: duel-pop 0.5s steps(4) both;
+}
+
+.duel__count {
+  font-size: 120px;
+  line-height: 1;
+  color: var(--teal-d, #137565);
+  text-shadow: 4px 4px 0 var(--ink);
+  animation: duel-pop 0.5s steps(4) both;
+}
+
+@keyframes duel-pop {
+  from {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.duel__body {
+  display: grid;
+  gap: 10px;
+}
+
+.duel__timer {
+  height: 16px;
+  border: 3px solid var(--ink);
+  background: #fff8e0;
+}
+
+.duel__timer-fill {
+  height: 100%;
+  background: var(--teal, #1fa38a);
+  transition: width 0.1s linear;
+}
+
+.duel__timer--low .duel__timer-fill {
+  background: #e2483d;
+}
+
+.duel__kind {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.duel__prompt {
+  margin: 4px 0 6px;
+  font-size: 30px;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.duel__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.duel__choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 62px;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: #fff8e0;
+  box-shadow: 0 4px 0 var(--ink);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.duel__choice:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.duel__label {
+  color: var(--teal-d, #137565);
+}
+
+.duel__choice--right {
+  background: #a9e8a0;
+  animation: duel-pop 0.3s steps(3) both;
+}
+
+.duel__choice--wrong {
+  background: #ffb0a5;
+}
+
+.duel__choice--dim {
+  opacity: 0.5;
+}
+
+.duel__note {
+  min-height: 1.4em;
+  margin: 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.duel__note--ok {
+  color: #2b8a4a;
+}
+
+.duel__note--no {
+  color: #c2382d;
+}
+
+.duel__result {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+}
+
+.duel__result p {
+  margin: 0;
+}
+
+.duel__outcome {
+  margin: 4px 0 0;
+  font-size: 44px;
+  text-shadow: 3px 3px 0 var(--ink);
+  animation: duel-pop 0.5s steps(4) both;
+}
+
+.duel__outcome--win {
+  color: var(--gold, #ffd23f);
+}
+
+.duel__outcome--lose {
+  color: #8db3d8;
+}
+
+.duel__outcome--draw,
+.duel__outcome--wait {
+  color: var(--cream, #fbf1d6);
+}
+
+.duel__scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.duel__score {
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border: 3px solid var(--ink);
+  background: #fff8e0;
+}
+
+.duel__score strong {
+  font-size: 22px;
+}
+
+.duel__rewards {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 12px;
+  border: 3px solid var(--ink);
+  background: #fff3c4;
+  list-style: none;
+  text-align: left;
+}
+
+.duel__rewards li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.duel__review {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+  font-size: 14px;
+}
+
+.duel__review li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 2px solid var(--ink);
+}
+
+.duel__review--ok {
+  background: #e4f7dc;
+}
+
+.duel__review--no {
+  background: #fde7e2;
+}
+
+.duel__review-mark {
+  font-weight: 700;
+  text-align: center;
+}
+
+.duel__outcome,
+.duel__result h2 {
+  color-scheme: light;
+}
+
+@media (max-width: 480px) {
+  .duel__prompt {
+    font-size: 24px;
+  }
+
+  .duel__choice {
+    min-height: 56px;
+    font-size: 17px;
+  }
+}

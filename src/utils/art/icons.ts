@@ -52,6 +52,59 @@ function medal(): ArtSpec {
 }
 
 /**
+ * Builds two crossed swords (16x16) for the arena tab.
+ */
+function arena(): ArtSpec {
+  const canvas = new PixelCanvas(16, 16);
+  canvas.line(2, 1, 10, 9, "b").line(3, 1, 11, 9, "b").line(2, 2, 10, 10, "s");
+  canvas.line(13, 1, 5, 9, "b").line(12, 1, 4, 9, "b").line(13, 2, 5, 10, "s");
+  canvas.rect(8, 9, 4, 1, "Y").rect(3, 9, 4, 1, "Y");
+  canvas.line(11, 10, 13, 13, "h").line(4, 10, 2, 13, "h");
+  canvas.set(13, 14, "Y").set(2, 14, "Y").set(14, 14, "Y").set(1, 14, "Y");
+  canvas.set(2, 0, "W").set(13, 0, "W");
+  canvas.outline("K");
+
+  return { rows: canvas.toRows(), palette: { K: "#2a2f45", b: "#dfe7f5", s: "#8f9bb8", Y: "#ffd84a", h: "#9b5a34", W: "#ffffff" } };
+}
+
+/**
+ * Builds a golden trophy cup (12x13).
+ */
+function trophy(): ArtSpec {
+  const canvas = new PixelCanvas(12, 13);
+  canvas.rect(2, 0, 8, 6, "Y").rect(3, 6, 6, 1, "Y").rect(4, 7, 4, 1, "y");
+  canvas.rect(5, 8, 2, 2, "y").rect(3, 10, 6, 2, "y");
+  canvas.rect(3, 1, 1, 4, "W").rect(4, 1, 1, 1, "W");
+  canvas.set(0, 1, "Y").set(0, 2, "Y").set(0, 3, "Y").set(1, 3, "Y").set(11, 1, "Y").set(11, 2, "Y").set(11, 3, "Y").set(10, 3, "Y");
+  canvas.rect(5, 2, 2, 2, "R");
+  canvas.outline("K");
+
+  return { rows: canvas.toRows(), palette: { K: "#7a4f12", Y: "#ffd84a", y: "#e6a91f", W: "#fff6c4", R: "#ff8a6a" } };
+}
+
+/**
+ * Builds a streak flame (10x12).
+ */
+function flame(): ArtSpec {
+  return {
+    rows: [
+      ".....K....",
+      "....KrK...",
+      "...KrrK.K.",
+      "..KrrOrKrK",
+      "..KrOOOrrK",
+      ".KrOOYOOrK",
+      ".KrOYYYOrK",
+      ".KrOYWYYOK",
+      "..KrOYYOrK",
+      "..KrrOOrK.",
+      "...KKKKK..",
+    ],
+    palette: { K: "#7a2a12", r: "#ff6a4a", O: "#ff9a3a", Y: "#ffd84a", W: "#fff6c4" },
+  };
+}
+
+/**
  * Builds a diagonal pencil (14x14) for the "record today" button.
  */
 function pencil(): ArtSpec {
@@ -346,6 +399,56 @@ export const ICON_SPECS: Readonly<Record<string, ArtSpec>> = {
       "....KK........",
     ],
     palette: { K: INK, Y: "#ffd84a", R: "#ff8a6a" },
+  },
+  arena: arena(),
+  trophy: trophy(),
+  flame: flame(),
+  note: {
+    rows: [
+      "......KKK.",
+      "......KwKK",
+      "......K.KK",
+      "......K..K",
+      "......K...",
+      "......K...",
+      "..KKK.K...",
+      ".KyyyKK...",
+      "KyyyyyK...",
+      "KyyyyyK...",
+      ".KyyyK....",
+      "..KKK.....",
+    ],
+    palette: { K: "#3a2a5a", y: "#b88cff", w: "#e6d4ff" },
+  },
+  speaker: {
+    rows: [
+      "....KK........",
+      "...KgK....K...",
+      "KKKKgK.....K..",
+      "KggggK.K...K..",
+      "KggggK..K..K..",
+      "KggggK..K..K..",
+      "KggggK.K...K..",
+      "KKKKgK.....K..",
+      "...KgK....K...",
+      "....KK........",
+    ],
+    palette: { K: "#3a2a24", g: "#f2c14e" },
+  },
+  mute: {
+    rows: [
+      "....KK........",
+      "...KgK........",
+      "KKKKgK..R...R.",
+      "KggggK...R.R..",
+      "KggggK....R...",
+      "KggggK...R.R..",
+      "KggggK..R...R.",
+      "KKKKgK........",
+      "...KgK........",
+      "....KK........",
+    ],
+    palette: { K: "#3a2a24", g: "#b9b3a6", R: "#e2483d" },
   },
   sparkle: {
     rows: ["...K...", "...K...", "..KWK..", "KKWWWKK", "..KWK..", "...K...", "...K..."],
