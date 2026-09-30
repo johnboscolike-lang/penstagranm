@@ -1,15 +1,20 @@
 import { Character, SceneSprite, StudentSprite } from "@/components/pixel/PixelSprite";
 import { LanternGlow, PetalField, Prop } from "@/components/scenes/Prop";
+import { PetProp } from "@/components/scenes/PetProp";
 
 interface SchoolSceneProps {
   hairKey: string;
+  /** 쓰고 있는 모자 */
+  hatKey?: string | null;
+  /** 함께 다니는 펫 */
+  petKey?: string | null;
   bubble?: string;
 }
 
 /**
  * 학교 장면: 담쟁이 덮인 교실 건물, 도서관 계단, 급식실, 등교하는 친구들.
  */
-export function SchoolScene({ hairKey, bubble }: SchoolSceneProps) {
+export function SchoolScene({ hairKey, hatKey, petKey, bubble }: SchoolSceneProps) {
   return (
     <div aria-hidden className="scene scene--school">
       <div className="scene__sky" />
@@ -102,8 +107,9 @@ export function SchoolScene({ hairKey, bubble }: SchoolSceneProps) {
       </Prop>
 
       <Prop shadow x={44} y={12} z={10}>
-        <Character hairKey={hairKey} name="hero" scale={1.6} />
+        <Character hairKey={hairKey} hatKey={hatKey} name="hero" scale={1.6} />
       </Prop>
+      <PetProp petKey={petKey} scale={1.5} x={50.5} y={11} z={10} />
       <Prop anim="breathe" flip shadow x={37.5} y={11} z={10}>
         <Character name="cat" scale={1.6} />
       </Prop>

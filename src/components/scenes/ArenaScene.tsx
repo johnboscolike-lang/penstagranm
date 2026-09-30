@@ -1,15 +1,20 @@
 import { Character, KenneySprite, SceneSprite, StudentSprite } from "@/components/pixel/PixelSprite";
 import { LanternGlow, PetalField, Prop } from "@/components/scenes/Prop";
+import { PetProp } from "@/components/scenes/PetProp";
 
 interface ArenaSceneProps {
   hairKey: string;
+  /** 쓰고 있는 모자 */
+  hatKey?: string | null;
+  /** 함께 다니는 펫 */
+  petKey?: string | null;
 }
 
 /**
  * 대결장 장면: 노을빛 하늘 아래 모래 링, 깃발과 등불, 그리고 마주 선 두 캐릭터.
  * 관중과 박쥐는 넓은 화면에서만 보여 준다.
  */
-export function ArenaScene({ hairKey }: ArenaSceneProps) {
+export function ArenaScene({ hairKey, hatKey, petKey }: ArenaSceneProps) {
   return (
     <div aria-hidden className="scene scene--arena">
       <div className="scene__sky" />
@@ -57,8 +62,9 @@ export function ArenaScene({ hairKey }: ArenaSceneProps) {
       </Prop>
 
       <Prop anim="breathe" shadow x={30} y={16} z={8}>
-        <Character hairKey={hairKey} name="hero" scale={1.9} />
+        <Character hairKey={hairKey} hatKey={hatKey} name="hero" scale={1.9} />
       </Prop>
+      <PetProp petKey={petKey} scale={1.7} x={37.5} y={15} z={8} />
       <div className="arena-vs pf">VS</div>
       <Prop anim="bob" flip shadow x={58} y={16} z={8}>
         <KenneySprite name="slime" scale={3.4} />

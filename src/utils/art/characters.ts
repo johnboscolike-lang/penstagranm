@@ -1,4 +1,5 @@
 import { PixelCanvas, type ArtSpec } from "@/utils/art/canvas";
+import { overlayHat } from "@/utils/art/hats";
 import { COLOR, getHairColors } from "@/utils/art/palette";
 
 const HEAD_ROWS = [
@@ -249,19 +250,19 @@ export type CharacterName = "hero" | "cat" | "owl" | "bird";
 /**
  * Returns the cached head-only avatar for a hair key.
  */
-export function getHeadArt(hairKey: string | null | undefined): ArtSpec {
+export function getHeadArt(hairKey: string | null | undefined, hatKey?: string | null): ArtSpec {
   const key = hairKey ?? "silver";
 
-  return cached(`head:${key}`, () => buildHeadArt(key));
+  return cached(`head:${key}:${hatKey ?? ""}`, () => overlayHat(buildHeadArt(key), hatKey));
 }
 
 /**
  * Returns a cached named character sprite.
  */
-export function getCharacterArt(name: CharacterName, hairKey = "silver"): ArtSpec {
+export function getCharacterArt(name: CharacterName, hairKey = "silver", hatKey?: string | null): ArtSpec {
   switch (name) {
     case "hero":
-      return cached(`hero:${hairKey}`, () => buildHeroArt(hairKey));
+      return cached(`hero:${hairKey}:${hatKey ?? ""}`, () => overlayHat(buildHeroArt(hairKey), hatKey, 2, 0));
     case "cat":
       return cached("cat", buildCatArt);
     case "owl":

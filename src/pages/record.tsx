@@ -34,7 +34,7 @@ export default function RecordPage({ hud }: InferGetServerSidePropsType<typeof g
       banner="오늘 기록하기"
       hud={hud}
       pageTitle="오늘 기록하기"
-      scene={<RecordScene hairKey={hud.hairKey} />}
+      scene={<RecordScene hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} />}
       space="challenge"
     >
       <PostComposer />

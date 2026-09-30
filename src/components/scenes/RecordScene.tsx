@@ -1,14 +1,19 @@
 import { Character, SceneSprite } from "@/components/pixel/PixelSprite";
 import { LanternGlow, PetalField, Prop } from "@/components/scenes/Prop";
+import { PetProp } from "@/components/scenes/PetProp";
 
 interface RecordSceneProps {
   hairKey: string;
+  /** 쓰고 있는 모자 */
+  hatKey?: string | null;
+  /** 함께 다니는 펫 */
+  petKey?: string | null;
 }
 
 /**
  * 기록실 장면: 따뜻한 조명 아래 책장과 책상이 있는 공부방.
  */
-export function RecordScene({ hairKey }: RecordSceneProps) {
+export function RecordScene({ hairKey, hatKey, petKey }: RecordSceneProps) {
   return (
     <div aria-hidden className="scene scene--record">
       <div className="scene__sky" />
@@ -35,8 +40,9 @@ export function RecordScene({ hairKey }: RecordSceneProps) {
         <Character name="cat" scale={1.6} />
       </Prop>
       <Prop anim="breathe" shadow x={37} y={12} z={8}>
-        <Character hairKey={hairKey} name="hero" scale={1.7} />
+        <Character hairKey={hairKey} hatKey={hatKey} name="hero" scale={1.7} />
       </Prop>
+      <PetProp petKey={petKey} scale={1.5} x={44} y={11} z={8} />
       <div className="bubble pf" style={{ left: "29%", bottom: "38%" }}>
         오늘 한 일을 네 컷으로 남겨 볼까?
       </div>

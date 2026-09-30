@@ -4,11 +4,13 @@ import { TeacherShell } from "@/components/GameShell";
 import { TeacherScene } from "@/components/scenes/TeacherScene";
 import { ArenaControl } from "@/components/teacher/ArenaControl";
 import { ClassOverview } from "@/components/teacher/ClassOverview";
+import { RaidControl } from "@/components/teacher/RaidControl";
 import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { ReviewCard } from "@/components/teacher/ReviewCard";
 import { getArenaTeacherSummary } from "@/utils/arena-repository";
+import { getRaidTeacherSummary } from "@/utils/boss-repository";
 import { guardPage } from "@/utils/auth-guard";
-import { getKstDateKey } from "@/utils/kst";
+import { getKstDateKey, getWeekStartKey } from "@/utils/kst";
 import type { ReviewItemView, StudentOverviewView } from "@/utils/quest-types";
 import { getClassOverview, listRecentReviews, listReviewQueue } from "@/utils/teacher-repository";
 
@@ -18,6 +20,8 @@ interface TeacherPageProps {
   recent: ReviewItemView[];
   overview: StudentOverviewView[];
   arena: Awaited<ReturnType<typeof getArenaTeacherSummary>>;
+  raid: Awaited<ReturnType<typeof getRaidTeacherSummary>>;
+  weekKey: string;
 }
 
 /**
@@ -30,15 +34,21 @@ export const getServerSideProps: GetServerSideProps<TeacherPageProps> = async (c
   }
 
   const todayKey = getKstDateKey();
-  const [queue, recent, overview, arena] = await Promise.all([listReviewQueue(), listRecentReviews(), getClassOverview(todayKey), getArenaTeacherSummary(todayKey)]);
+  const [queue, recent, overview, arena, raid] = await Promise.all([
+    listReviewQueue(),
+    listRecentReviews(),
+    getClassOverview(todayKey),
+    getArenaTeacherSummary(todayKey),
+    getRaidTeacherSummary(todayKey),
+  ]);
 
-  return { props: { teacherName: guard.session.name, queue, recent, overview, arena } };
+  return { props: { teacherName: guard.session.name, queue, recent, overview, arena, raid, weekKey: getWeekStartKey(todayKey) } };
 };
 
 /**
  * 교무실 확인함: 제출된 퀘스트를 보고 수행 확인 / 다시 시도 / 도움 필요를 정한다.
  */
-export default function TeacherPage({ teacherName, queue, recent, overview, arena }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function TeacherPage({ teacherName, queue, recent, overview, arena, raid, weekKey }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <TeacherShell
       active="review"
@@ -70,6 +80,8 @@ export default function TeacherPage({ teacherName, queue, recent, overview, aren
       </section>
 
       <ClassOverview students={overview} />
+
+      <RaidControl summary={raid} weekKey={weekKey} />
 
       <ArenaControl {...arena} />
 

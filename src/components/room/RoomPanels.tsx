@@ -49,7 +49,7 @@ export function ProfileCard({ hud, emblem }: ProfileCardProps) {
       </h2>
       <div className="profile card card--mint pf">
         <div className="profile__face">
-          <PixelAvatar hairKey={hud.hairKey} label={`${hud.name} 아바타`} scale={2.2} />
+          <PixelAvatar hairKey={hud.hairKey} hatKey={hud.hatKey} label={`${hud.name} 아바타`} scale={2.2} />
         </div>
         <div className="profile__main">
           <strong className="profile__name">{hud.name}</strong>

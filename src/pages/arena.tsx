@@ -33,7 +33,7 @@ export const getServerSideProps: GetServerSideProps<ArenaPageProps> = async (con
  */
 export default function ArenaPage({ hud, overview }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <GameShell banner="퀴즈 대결장" hud={hud} pageTitle="대결" scene={<ArenaScene hairKey={hud.hairKey} />} space="arena">
+    <GameShell banner="퀴즈 대결장" hud={hud} pageTitle="대결" scene={<ArenaScene hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} />} space="arena">
       <ArenaPanel overview={overview} />
     </GameShell>
   );

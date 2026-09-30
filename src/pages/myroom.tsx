@@ -1,10 +1,13 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { GameShell } from "@/components/GameShell";
+import { ClosetPanel } from "@/components/room/ClosetPanel";
 import { guardPage } from "@/utils/auth-guard";
 import { PostCard } from "@/components/PostCard";
 import { ProfileCard, RecordsHeader, WeekNewsCard, YardShop } from "@/components/room/RoomPanels";
 import { RoomScene } from "@/components/scenes/RoomScene";
+import { getCloset } from "@/utils/closet-repository";
+import type { ClosetView } from "@/utils/closet-types";
 import { getFeedPosts } from "@/utils/repository";
 import { getLastWeekNewsView, getOwnedItemKeys, getPageBase, loadRoster } from "@/utils/quest-repository";
 import type { WeekNews } from "@/utils/quest-board";
@@ -16,6 +19,7 @@ interface MyRoomPageProps {
   emblem: string;
   news: WeekNews;
   ownedItemKeys: string[];
+  closet: ClosetView;
   posts: PostView[];
 }
 
@@ -29,9 +33,10 @@ export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async (co
   }
 
   const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
-  const [news, ownedItemKeys, posts, roster] = await Promise.all([
+  const [news, ownedItemKeys, closet, posts, roster] = await Promise.all([
     getLastWeekNewsView(todayKey, meId),
     getOwnedItemKeys(meId),
+    getCloset(meId),
     getFeedPosts(),
     loadRoster(meId),
   ]);
@@ -42,6 +47,7 @@ export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async (co
       emblem: roster.teams.find((team) => team.id === roster.me.teamId)?.emblem ?? "star",
       news,
       ownedItemKeys,
+      closet,
       posts,
     },
   };
@@ -55,6 +61,7 @@ export default function MyRoomPage({
   emblem,
   news,
   ownedItemKeys,
+  closet,
   posts,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
@@ -62,11 +69,12 @@ export default function MyRoomPage({
       banner="쌓이는 성장"
       hud={hud}
       pageTitle="내공간"
-      scene={<RoomScene hairKey={hud.hairKey} hasMail={news.badge !== null || news.voucherEarned} ownedItemKeys={ownedItemKeys} />}
+      scene={<RoomScene hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} hasMail={news.badge !== null || news.voucherEarned} ownedItemKeys={ownedItemKeys} />}
       space="room"
     >
       <ProfileCard emblem={emblem} hud={hud} />
       <WeekNewsCard news={news} />
+      <ClosetPanel closet={closet} coins={hud.coins} hairKey={hud.hairKey} />
       <YardShop coins={hud.coins} ownedItemKeys={ownedItemKeys} />
       <section aria-label="성장 기록" className="records" id="records">
         <RecordsHeader count={posts.length} />

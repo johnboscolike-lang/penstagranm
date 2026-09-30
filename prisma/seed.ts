@@ -2,6 +2,8 @@ import { deflateSync } from "node:zlib";
 
 import { PrismaClient, PhotoSlot } from "@prisma/client";
 
+import { BOSS_REWARD, bossForWeek } from "../src/utils/boss-rules";
+import { hatPurchaseKey } from "../src/utils/cosmetics";
 import { applyElo, decideOutcome, flipOutcome, rewardFor, scoreAnswers, START_RATING } from "../src/utils/arena-rules";
 import { addDaysToKey, getKstDateKey, getSchoolDayKeys, getWeekStartKey, isSchoolDay } from "../src/utils/kst";
 import { rowsToSvgMarkup, svgToDataUri } from "../src/utils/pixel";
@@ -461,6 +463,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  await prisma.bossReward.deleteMany();
   await prisma.duel.deleteMany();
   await prisma.classSetting.deleteMany();
   await prisma.uploadedFile.deleteMany();
@@ -581,6 +584,13 @@ async function main(): Promise<void> {
 
   await seedQuestDemo(studentsByName, myId, todayKey, thisMonday);
   await seedArenaDemo(studentsByName, myId, todayKey);
+  // 도토리는 지난 보스 두 마리를 이겨 펫을 만났고, 고양이 귀 모자를 쓰고 첫 펫과 함께 다닌다.
+  const oldWeeks = [addDaysToKey(thisMonday, -14), addDaysToKey(thisMonday, -21)];
+  await prisma.bossReward.createMany({ data: oldWeeks.map((weekKey) => ({ studentId: myId, weekKey, xp: BOSS_REWARD.xp, coins: BOSS_REWARD.coins })) });
+  await prisma.purchase.create({ data: { studentId: myId, itemKey: hatPurchaseKey("ears"), cost: 25 } });
+  await prisma.student.update({ where: { id: myId }, data: { hatKey: "ears", petKey: bossForWeek(oldWeeks[0]).key } });
+  // 데모 데이터는 칸이 넉넉히 채워져 있어서, 보스가 한창 싸우는 모습이 보이도록 어려움으로 둔다.
+  await prisma.classSetting.create({ data: { key: "raidLevel", value: "hard" } });
 
   const previousSchoolDays = dayKeys.filter((dayKey) => dayKey < todayKey && isSchoolDay(dayKey));
   const postDays = [

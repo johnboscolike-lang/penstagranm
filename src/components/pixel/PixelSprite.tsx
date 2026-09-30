@@ -86,6 +86,8 @@ export function PixelIcon({ name, scale = 1, label, className, medalRank }: Pixe
 
 interface PixelAvatarProps {
   hairKey: string | null | undefined;
+  /** 쓰고 있는 모자 (없으면 생략) */
+  hatKey?: string | null;
   scale?: number;
   label?: string;
   className?: string;
@@ -94,13 +96,15 @@ interface PixelAvatarProps {
 /**
  * Head-only avatar recolored by hair key.
  */
-export function PixelAvatar({ hairKey, scale = 1, label, className }: PixelAvatarProps) {
-  return <PixelSprite art={getHeadArt(hairKey)} className={className} label={label} scale={scale} />;
+export function PixelAvatar({ hairKey, hatKey, scale = 1, label, className }: PixelAvatarProps) {
+  return <PixelSprite art={getHeadArt(hairKey, hatKey)} className={className} label={label} scale={scale} />;
 }
 
 interface CharacterProps {
   name: CharacterName;
   hairKey?: string;
+  /** 영웅이 쓰고 있는 모자 */
+  hatKey?: string | null;
   scale?: number;
   className?: string;
 }
@@ -108,8 +112,8 @@ interface CharacterProps {
 /**
  * Full-body character used in scenes (hero, cat, owl, bird).
  */
-export function Character({ name, hairKey, scale = 1, className }: CharacterProps) {
-  return <PixelSprite art={getCharacterArt(name, hairKey)} className={className} scale={scale} />;
+export function Character({ name, hairKey, hatKey, scale = 1, className }: CharacterProps) {
+  return <PixelSprite art={getCharacterArt(name, hairKey, hatKey)} className={className} scale={scale} />;
 }
 
 interface StudentProps {

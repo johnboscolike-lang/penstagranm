@@ -74,7 +74,7 @@ export default function CalendarPage({
   }
 
   return (
-    <GameShell banner="우리반 일정 달력" hud={viewer.hud} pageTitle="일정 달력" scene={<SchoolScene hairKey={viewer.hud.hairKey} />} space="school" wide>
+    <GameShell banner="우리반 일정 달력" hud={viewer.hud} pageTitle="일정 달력" scene={<SchoolScene hairKey={viewer.hud.hairKey} hatKey={viewer.hud.hatKey} petKey={viewer.hud.petKey} />} space="school" wide>
       {calendar}
     </GameShell>
   );

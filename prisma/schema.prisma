@@ -80,8 +80,12 @@ model Student {
   quests    Quest[]
   /// 대결장 레이팅 (기본 1000)
   rating    Int            @default(1000)
+  /// 쓰고 있는 모자와 함께 다니는 펫 (없으면 비어 있음)
+  hatKey    String?
+  petKey    String?
   duelsChallenged Duel[]   @relation("DuelChallenger")
   duelsReceived   Duel[]   @relation("DuelOpponent")
+  bossRewards     BossReward[]
 }
 
 /// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
@@ -217,6 +221,19 @@ model Duel {
   @@index([opponentId])
   @@index([status])
   @@index([finishedKey])
+}
+
+/// 학급 보스를 쓰러뜨린 주에 학생이 한 번씩 받는 보상. (학생, 주) 조합은 하나뿐이다.
+model BossReward {
+  id        String   @id @default(cuid())
+  studentId String
+  weekKey   String
+  xp        Int
+  coins     Int
+  claimedAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, weekKey])
 }
 
 /// 학급 전체에 적용되는 켜고 끄는 설정 (예: 대결장 열기).

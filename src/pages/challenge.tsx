@@ -70,7 +70,7 @@ export default function ChallengePage({
       banner="매주 월요일 새 출발"
       hud={hud}
       pageTitle="주간도전"
-      scene={<ChallengeScene bubble={feedback} hairKey={hud.hairKey} litTiles={litTiles} teamName={hud.teamName} totalTiles={BRIDGE_TILES} />}
+      scene={<ChallengeScene bubble={feedback} hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} litTiles={litTiles} teamName={hud.teamName} totalTiles={BRIDGE_TILES} />}
       space="challenge"
     >
       <ChallengePanel board={board} initialTab={initialTab} myTeamId={myTeamId} today={today} />

@@ -13,6 +13,14 @@ export interface HudView {
   coins: number;
   /** 받은 도전장(대결) 수 */
   arenaInbox: number;
+  /** 쓰고 있는 모자(없으면 null) */
+  hatKey: string | null;
+  /** 함께 다니는 펫(없으면 null) */
+  petKey: string | null;
+  /** 연속으로 약속 칸을 채운 등교일 수 */
+  streak: number;
+  /** 오늘도 이미 채웠는지 */
+  streakToday: boolean;
 }
 
 export interface ProofView {

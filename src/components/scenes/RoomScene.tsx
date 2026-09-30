@@ -1,5 +1,6 @@
 import { Character, PixelIcon, SceneSprite } from "@/components/pixel/PixelSprite";
 import { PetalField, Prop } from "@/components/scenes/Prop";
+import { PetProp } from "@/components/scenes/PetProp";
 import type { ShopItemKey } from "@/utils/shop-items";
 
 interface YardSlot {
@@ -24,6 +25,10 @@ export const YARD_SLOTS: Readonly<Record<ShopItemKey, YardSlot>> = {
 
 interface RoomSceneProps {
   hairKey: string;
+  /** 쓰고 있는 모자 */
+  hatKey?: string | null;
+  /** 함께 다니는 펫 */
+  petKey?: string | null;
   ownedItemKeys: string[];
   hasMail: boolean;
 }
@@ -31,7 +36,7 @@ interface RoomSceneProps {
 /**
  * 내공간 장면: 아늑한 집과 앞마당. 코인으로 산 꾸미기 아이템이 자리에 나타난다.
  */
-export function RoomScene({ hairKey, ownedItemKeys, hasMail }: RoomSceneProps) {
+export function RoomScene({ hairKey, hatKey, petKey, ownedItemKeys, hasMail }: RoomSceneProps) {
   const owned = new Set(ownedItemKeys);
 
   return (
@@ -90,8 +95,9 @@ export function RoomScene({ hairKey, ownedItemKeys, hasMail }: RoomSceneProps) {
       ) : null}
 
       <Prop anim="breathe" shadow x={39} y={13} z={10}>
-        <Character hairKey={hairKey} name="hero" scale={1.6} />
+        <Character hairKey={hairKey} hatKey={hatKey} name="hero" scale={1.6} />
       </Prop>
+      <PetProp petKey={petKey} scale={1.4} x={45.5} y={11} z={10} />
       <Prop anim="breathe" shadow x={33} y={10} z={10}>
         <Character name="cat" scale={1.5} />
       </Prop>

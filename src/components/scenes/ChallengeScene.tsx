@@ -2,9 +2,14 @@ import clsx from "clsx";
 
 import { Character, SceneSprite, StudentSprite } from "@/components/pixel/PixelSprite";
 import { PetalField, Prop } from "@/components/scenes/Prop";
+import { PetProp } from "@/components/scenes/PetProp";
 
 interface ChallengeSceneProps {
   hairKey: string;
+  /** 쓰고 있는 모자 */
+  hatKey?: string | null;
+  /** 함께 다니는 펫 */
+  petKey?: string | null;
   litTiles: number;
   totalTiles: number;
   teamName: string;
@@ -14,7 +19,7 @@ interface ChallengeSceneProps {
 /**
  * 주간도전 장면: 도서관 테라스, 폭포, 그리고 팀 점수만큼 빛나는 다리.
  */
-export function ChallengeScene({ hairKey, litTiles, totalTiles, teamName, bubble }: ChallengeSceneProps) {
+export function ChallengeScene({ hairKey, hatKey, petKey, litTiles, totalTiles, teamName, bubble }: ChallengeSceneProps) {
   return (
     <div aria-hidden className="scene scene--challenge">
       <div className="scene__sky" />
@@ -92,8 +97,9 @@ export function ChallengeScene({ hairKey, litTiles, totalTiles, teamName, bubble
       </div>
 
       <Prop anim="breathe" shadow x={39} y={17} z={8}>
-        <Character hairKey={hairKey} name="hero" scale={1.6} />
+        <Character hairKey={hairKey} hatKey={hatKey} name="hero" scale={1.6} />
       </Prop>
+      <PetProp petKey={petKey} scale={1.4} x={45.5} y={15} z={8} />
       <Prop flip shadow x={34.5} y={14} z={8}>
         <Character name="cat" scale={1.5} />
       </Prop>

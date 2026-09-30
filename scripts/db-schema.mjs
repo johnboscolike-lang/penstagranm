@@ -153,6 +153,19 @@ export function applySchema(database) {
     CREATE INDEX IF NOT EXISTS "Duel_opponentId_idx" ON "Duel" ("opponentId");
     CREATE INDEX IF NOT EXISTS "Duel_status_idx" ON "Duel" ("status");
     CREATE INDEX IF NOT EXISTS "Duel_finishedKey_idx" ON "Duel" ("finishedKey");
+    CREATE TABLE IF NOT EXISTS "BossReward" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "weekKey" TEXT NOT NULL,
+      "xp" INTEGER NOT NULL,
+      "coins" INTEGER NOT NULL,
+      "claimedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "BossReward_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "BossReward_studentId_weekKey_key"
+      ON "BossReward" ("studentId", "weekKey");
     CREATE TABLE IF NOT EXISTS "ClassSetting" (
       "key" TEXT NOT NULL PRIMARY KEY,
       "value" TEXT NOT NULL
@@ -202,7 +215,11 @@ export function applySchema(database) {
   addMissingColumns(database, "Post", [
     ["studentId", 'TEXT REFERENCES "Student" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],
   ]);
-  addMissingColumns(database, "Student", [["rating", "INTEGER NOT NULL DEFAULT 1000"]]);
+  addMissingColumns(database, "Student", [
+    ["rating", "INTEGER NOT NULL DEFAULT 1000"],
+    ["hatKey", "TEXT"],
+    ["petKey", "TEXT"],
+  ]);
   addMissingColumns(database, "DailyPromise", [
     ["scope", "TEXT NOT NULL DEFAULT 'DAY'"],
     ["questId", 'TEXT REFERENCES "Quest" ("id") ON DELETE SET NULL ON UPDATE CASCADE'],

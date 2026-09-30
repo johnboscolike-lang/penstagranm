@@ -1,8 +1,11 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 
+import { BossPanel } from "@/components/boss/BossPanel";
 import { PixelIcon } from "@/components/pixel/PixelSprite";
 import { guardPage } from "@/utils/auth-guard";
+import { getRaidView } from "@/utils/boss-repository";
+import type { RaidView } from "@/utils/boss-types";
 import { GameShell } from "@/components/GameShell";
 import { SchoolPanel } from "@/components/school/SchoolPanel";
 import { SchoolScene } from "@/components/scenes/SchoolScene";
@@ -13,6 +16,7 @@ import { buildSchoolPanelData, type SchoolPanelData } from "@/utils/school-view"
 interface SchoolPageProps {
   hud: HudView;
   school: SchoolPanelData;
+  raid: RaidView;
   promisesDone: number;
   promisesTotal: number;
   isSchoolDay: boolean;
@@ -28,12 +32,13 @@ export const getServerSideProps: GetServerSideProps<SchoolPageProps> = async (co
   }
 
   const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
-  const [schedule, today] = await Promise.all([getUpcomingSchedule(todayKey, 4), getTodayView(meId, todayKey)]);
+  const [schedule, today, raid] = await Promise.all([getUpcomingSchedule(todayKey, 4), getTodayView(meId, todayKey), getRaidView(meId, todayKey)]);
 
   return {
     props: {
       hud,
       school: buildSchoolPanelData(new Date(), schedule),
+      raid,
       promisesDone: today.promises.filter((promise) => promise.confirmedUnitNos.length === promise.unitCount).length,
       promisesTotal: today.promises.length,
       isSchoolDay: today.isSchoolDay,
@@ -47,6 +52,7 @@ export const getServerSideProps: GetServerSideProps<SchoolPageProps> = async (co
 export default function SchoolPage({
   hud,
   school,
+  raid,
   promisesDone,
   promisesTotal,
   isSchoolDay,
@@ -56,10 +62,12 @@ export default function SchoolPage({
       banner="현실의 학교가 게임 속으로"
       hud={hud}
       pageTitle="학교"
-      scene={<SchoolScene bubble="오늘 학교 소식부터 확인해 볼까?" hairKey={hud.hairKey} />}
+      scene={<SchoolScene bubble="오늘 학교 소식부터 확인해 볼까?" hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} />}
       space="school"
     >
       <SchoolPanel data={school} />
+
+      <BossPanel raid={raid} />
 
       <Link className="teaser card card--mint pf" href="/challenge">
         <PixelIcon name="challenge" scale={1.4} />

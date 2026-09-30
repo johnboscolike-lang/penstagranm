@@ -31,6 +31,9 @@ import { calcDailyResult, calcLevel, calcWeeklyQuestReward, type PromiseProgress
 import { assignQuestSlots, isDailyQuestDue, isWeeklyQuestDue, pickQuestRange } from "@/utils/quest-schedule";
 import type { CardState, HudView, ProofView, PromiseView, TodayView, UpcomingScheduleView } from "@/utils/quest-types";
 import { prisma } from "@/utils/prisma";
+import { HAT_KEYS } from "@/utils/art/hats";
+import { calcStreak } from "@/utils/streak";
+import { findHatByPurchaseKey, hatPurchaseKey, isHatKey, isPetKey, unlockedPetKeys } from "@/utils/cosmetics";
 import { calcCoinBalance, findShopItem } from "@/utils/shop-items";
 
 const HISTORY_WEEKS = 6;
@@ -157,7 +160,7 @@ async function loadPromiseRecordsSince(fromKey: string): Promise<PromiseRecord[]
  * plus the weekly-quest reward of every weekly card and the arena rewards of finished duels.
  */
 async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<{ xp: number; earnedCoins: number }> {
-  const [rows, posts, asChallenger, asOpponent] = await Promise.all([
+  const [rows, posts, asChallenger, asOpponent, bossRewards] = await Promise.all([
     client.dailyPromise.findMany({
       where: { studentId },
       select: {
@@ -174,6 +177,7 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
     client.post.findMany({ where: { studentId }, select: { createdAt: true } }),
     client.duel.aggregate({ where: { challengerId: studentId, status: "DONE" }, _sum: { challengerXp: true, challengerCoins: true } }),
     client.duel.aggregate({ where: { opponentId: studentId, status: "DONE" }, _sum: { opponentXp: true, opponentCoins: true } }),
+    client.bossReward.aggregate({ where: { studentId }, _sum: { xp: true, coins: true } }),
   ]);
 
   const dayRows = rows.filter((row) => row.scope !== "WEEK");
@@ -208,6 +212,10 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
   xp += (asChallenger._sum.challengerXp ?? 0) + (asOpponent._sum.opponentXp ?? 0);
   earnedCoins += (asChallenger._sum.challengerCoins ?? 0) + (asOpponent._sum.opponentCoins ?? 0);
 
+  // 학급 보스를 쓰러뜨리고 받은 보상.
+  xp += bossRewards._sum.xp ?? 0;
+  earnedCoins += bossRewards._sum.coins ?? 0;
+
   return { xp, earnedCoins };
 }
 
@@ -229,14 +237,63 @@ export async function getStudentTotals(studentId: string): Promise<{ xp: number;
   return { xp: totals.xp, coins: calcCoinBalance(totals.earnedCoins, spent) };
 }
 
+export interface Wardrobe {
+  found: boolean;
+  /** 쓰고 있는 모자·펫. 가지고 있지 않은 값이 남아 있으면 쓰지 않은 것으로 본다. */
+  hatKey: string | null;
+  petKey: string | null;
+  ownedHatKeys: Set<string>;
+  ownedPetKeys: Set<string>;
+}
+
+/**
+ * 학생이 가진 모자(구매 기록)와 펫(보스 보상 기록), 그리고 지금 쓰고 있는 것을 한꺼번에 읽는다.
+ */
+export async function loadWardrobe(client: DbClient, studentId: string): Promise<Wardrobe> {
+  const [student, purchases, rewards] = await Promise.all([
+    client.student.findUnique({ where: { id: studentId }, select: { hatKey: true, petKey: true } }),
+    client.purchase.findMany({ where: { studentId, itemKey: { startsWith: "hat:" } }, select: { itemKey: true } }),
+    client.bossReward.findMany({ where: { studentId }, select: { weekKey: true } }),
+  ]);
+  const ownedPurchases = new Set(purchases.map((purchase) => purchase.itemKey));
+  const ownedHatKeys = new Set(HAT_KEYS.filter((key) => ownedPurchases.has(hatPurchaseKey(key))));
+  const ownedPetKeys = new Set(unlockedPetKeys(rewards.map((reward) => reward.weekKey)));
+
+  return {
+    found: student !== null,
+    hatKey: isHatKey(student?.hatKey) && ownedHatKeys.has(student.hatKey) ? student.hatKey : null,
+    petKey: isPetKey(student?.petKey) && ownedPetKeys.has(student.petKey) ? student.petKey : null,
+    ownedHatKeys,
+    ownedPetKeys,
+  };
+}
+
+const STREAK_LOOKBACK_DAYS = 120;
+
+/**
+ * 학생이 약속 칸을 하나라도 채운 날짜들(선생님이 다시 시도로 돌려보낸 카드는 제외)을 모은다.
+ */
+async function loadActiveDays(client: DbClient, studentId: string, todayKey: string): Promise<Set<string>> {
+  const rows = await client.dailyPromise.findMany({
+    where: { studentId, scope: "DAY", dateKey: { gte: addDaysToKey(todayKey, -STREAK_LOOKBACK_DAYS), lte: todayKey } },
+    select: { dateKey: true, unitStart: true, unitCount: true, reviewStatus: true, units: { select: { unitNo: true } } },
+  });
+
+  return new Set(rows.filter((row) => countsTowardScore(toReviewStatus(row.reviewStatus)) && countConfirmed(row) > 0).map((row) => row.dateKey));
+}
+
 /**
  * Builds the profile capsule data (level, XP bar, coins) shown on every screen.
  */
 async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<HudView> {
-  const [totals, arenaInbox] = await Promise.all([
+  const todayKey = getKstDateKey();
+  const [totals, arenaInbox, look, activeDays] = await Promise.all([
     getStudentTotals(me.id),
     prisma.duel.count({ where: { opponentId: me.id, status: "PENDING", opponentScore: null } }),
+    loadWardrobe(prisma, me.id),
+    loadActiveDays(prisma, me.id, todayKey),
   ]);
+  const streak = calcStreak(activeDays, todayKey);
   const level = calcLevel(totals.xp);
 
   return {
@@ -249,6 +306,10 @@ async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<Hud
     totalXp: totals.xp,
     coins: totals.coins,
     arenaInbox,
+    hatKey: look.hatKey,
+    petKey: look.petKey,
+    streak: streak.count,
+    streakToday: streak.includesToday,
   };
 }
 
@@ -711,7 +772,7 @@ export async function getOwnedItemKeys(studentId: string): Promise<string[]> {
  * Buys a shop item with coins. Only coins are spent; XP and level stay untouched.
  */
 export async function purchaseItem(studentId: string, itemKey: string): Promise<{ coins: number }> {
-  const item = findShopItem(itemKey);
+  const item = findShopItem(itemKey) ?? findHatByPurchaseKey(itemKey);
   if (!item) {
     throw new QuestError("UNKNOWN_ITEM", "없는 아이템이에요.");
   }

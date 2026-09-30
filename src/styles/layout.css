@@ -149,6 +149,17 @@
   filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.3));
 }
 
+.hud__coin,
+.hud__tool {
+  white-space: nowrap;
+}
+
+.hud__title h1 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .hud__title .px--icon:last-child {
   transform: scaleX(-1);
 }
@@ -684,8 +695,8 @@
   width: min(1040px, 100%);
 }
 
-/* ───────── 중간 폭: 배너가 도구 줄과 겹치지 않게 흐름 안으로 ───────── */
-@media (min-width: 900px) and (max-width: 1499px) {
+/* ───────── 중간 폭: 긴 배너가 도구 줄과 겹치지 않게 흐름 안으로 (넓은 화면은 가운데 고정) ───────── */
+@media (min-width: 900px) and (max-width: 1799px) {
   .hud__title {
     position: static;
     flex: 0 1 auto;
@@ -701,7 +712,7 @@
   }
 }
 
-@media (min-width: 900px) and (max-width: 1199px) {
+@media (min-width: 900px) and (max-width: 1399px) {
   .hud__tool-label {
     position: absolute;
     width: 1px;
@@ -935,5 +946,135 @@
 @keyframes vs-pulse {
   50% {
     transform: scale(1.12);
+  }
+}
+
+/* ───────── 연속 실천 표시 ───────── */
+.hud__streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  color: #ffd9a8;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+.hud__streak .px--icon {
+  --u: 2px;
+}
+
+.hud__streak--on {
+  color: #ffb45c;
+  opacity: 1;
+}
+
+/* ───────── 알림과 색종이 ───────── */
+.toasts {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: 132px;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 24px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.toast {
+  --b: 3px;
+  --frame: var(--frame-parchment);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border: 0;
+  background: var(--cream, #fbf1d6);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 4px 0 rgba(58, 42, 36, 0.35));
+  animation: toast-in 0.35s steps(5, end);
+}
+
+.toast--levelup {
+  background: #fff1b8;
+}
+
+.toast--coin {
+  background: #fff8e0;
+}
+
+.toast--streak {
+  background: #ffe6c8;
+}
+
+.toast__text {
+  display: grid;
+  gap: 1px;
+}
+
+.toast__text small {
+  color: rgba(58, 42, 36, 0.75);
+  font-size: 12px;
+}
+
+.confetti {
+  position: fixed;
+  z-index: 119;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti__piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  animation: confetti-fall 2.4s linear both;
+}
+
+@keyframes toast-in {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(105vh) translateX(40px) rotate(540deg);
+  }
+}
+
+@media (max-width: 899px) {
+  .toasts {
+    bottom: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confetti {
+    display: none;
+  }
+
+  .toast {
+    animation: none;
   }
 }

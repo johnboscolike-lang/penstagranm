@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useSyncExternalStore, type ReactNode } from "react";
 import clsx from "clsx";
 
+import { HudEvents } from "@/components/toast/HudEvents";
+import { ToastHost } from "@/components/toast/ToastHost";
 import { AudioBoot } from "@/components/audio/AudioBoot";
 import { SoundControl } from "@/components/audio/SoundControl";
 import { PixelAvatar, PixelIcon, PixelSprite } from "@/components/pixel/PixelSprite";
@@ -107,6 +109,8 @@ interface ShellFrameProps {
   profile: ReactNode;
   coins?: number;
   spaceLabel: string;
+  /** 학생 화면에서만 레벨·코인·연속 실천 알림을 켠다. */
+  hud?: HudView;
   children: ReactNode;
 }
 
@@ -114,7 +118,7 @@ interface ShellFrameProps {
  * The shared frame of every screen: world scene, HUD (profile, banner, tools), stage, and bottom dock.
  * 게임 화면이 어려운 사용자를 위해 "간단히 보기"로 장면을 끄고 같은 기능을 목록으로 볼 수 있다.
  */
-function ShellFrame({ activeKey, nav, banner, pageTitle, scene, wide, profile, coins, spaceLabel, children }: ShellFrameProps) {
+function ShellFrame({ activeKey, nav, banner, pageTitle, scene, wide, profile, coins, spaceLabel, hud, children }: ShellFrameProps) {
   const simple = useSyncExternalStore(subscribeSimpleView, readSimpleView, () => false);
 
   return (
@@ -127,6 +131,12 @@ function ShellFrame({ activeKey, nav, banner, pageTitle, scene, wide, profile, c
       </Head>
       <div className="game" data-simple={simple ? "true" : "false"} data-space={spaceLabel}>
         <AudioBoot space={spaceLabel as SoundSpace} />
+        {hud ? (
+          <>
+            <HudEvents hud={hud} />
+            <ToastHost />
+          </>
+        ) : null}
         {scene}
 
         <header className="hud">
@@ -203,12 +213,17 @@ export function GameShell({ space, banner, pageTitle, hud, scene, wide, children
   const profile = (
     <div className="hud__profile pf">
       <div className="hud__avatar">
-        <PixelAvatar hairKey={hud.hairKey} label={`${hud.name} 아바타`} scale={1.4} />
+        <PixelAvatar hairKey={hud.hairKey} hatKey={hud.hatKey} label={`${hud.name} 아바타`} scale={1.4} />
       </div>
       <div className="hud__info">
         <div className="hud__name">
           <span>{hud.name}</span>
           <span className="hud__lv">Lv.{hud.level}</span>
+          {hud.streak >= 2 ? (
+            <span aria-label={`${hud.streak}일 연속 실천`} className={hud.streakToday ? "hud__streak hud__streak--on" : "hud__streak"} title={hud.streakToday ? "오늘도 실천했어요!" : "오늘 하나만 채워도 이어져요"}>
+              <PixelIcon name="flame" /> {hud.streak}
+            </span>
+          ) : null}
         </div>
         <div
           aria-label={`경험치 ${hud.xpInLevel} / ${hud.xpForNext}`}
@@ -232,6 +247,7 @@ export function GameShell({ space, banner, pageTitle, hud, scene, wide, children
       activeKey={space}
       banner={banner}
       coins={hud.coins}
+      hud={hud}
       nav={studentNav(hud.arenaInbox)}
       pageTitle={pageTitle}
       profile={profile}
