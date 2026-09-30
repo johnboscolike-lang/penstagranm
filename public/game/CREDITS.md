@@ -6,14 +6,14 @@
 
 | 위치 | 원본 팩 | 쓰임 |
 |---|---|---|
-| `kenney/*.png` | [Tiny Dungeon](https://kenney.nl/assets/tiny-dungeon) (16×16 도트) | 보스·펫·대결 캐릭터 |
+| `kenney/*.png` | [Tiny Dungeon](https://kenney.nl/assets/tiny-dungeon) (16×16 도트) | 학급 보스·펫·대결 상대 |
 | `sfx/*.mp3` | [Interface Sounds](https://kenney.nl/assets/interface-sounds), [RPG Audio](https://kenney.nl/assets/rpg-audio), [Digital Audio](https://kenney.nl/assets/digital-audio), [Impact Sounds](https://kenney.nl/assets/impact-sounds), [Music Jingles](https://kenney.nl/assets/music-jingles) | 효과음. 소리 크기를 맞춰 mp3로 바꿨다 |
 
 `scripts/assets/import-kenney.mjs`가 어떤 원본을 어떤 이름으로 옮겼는지 그대로 적어 두었다.
 
 ## 직접 만든 에셋
 
-- 도트 캐릭터·소품·아이콘: `src/utils/art` 안의 문자 격자(ASCII)에서 만든다. 외부 이미지를 쓰지 않는다.
+- 도트 캐릭터·모자·소품·아이콘: `src/utils/art` 안의 문자 격자(ASCII)에서 만든다.
 - 배경 음악(`bgm/*.mp3`): `scripts/audio/make-bgm.mjs`가 코드로 합성한다. 외부 음원·샘플이 없다.
 - 글꼴: 갈무리(Galmuri, OFL 1.1) — `public/fonts/README.md` 참고.
 
