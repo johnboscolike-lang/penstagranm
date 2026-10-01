@@ -1,5 +1,5 @@
 /**
- * OpenGameArt의 CC0 배경 음악 3곡(배틀·보스·미니게임)을 받아 둔 원본 WAV에서 게임용 mp3로 바꾼다.
+ * OpenGameArt의 CC0 배경 음악 2곡(배틀·미니게임)을 받아 둔 원본 WAV에서 게임용 mp3로 바꾼다.
  * 사용법: node scripts/audio/import-cc0-bgm.mjs <원본 폴더> [출력 폴더(기본 public/game/bgm)] [곡 이름...]
  *   원본 폴더 안에 TRACKS 표의 `source` 경로(예: x_glizzy/Grizzly Dwarf Battle LOOP.wav)가 있어야 한다.
  * 변환 방식(make-bgm.mjs와 같은 ffmpeg/libmp3lame 계열):
@@ -46,15 +46,6 @@ export const TRACKS = [
     license: "CC0",
     page: "https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack",
     use: "대결(아레나) 전투 음악",
-  },
-  {
-    name: "boss",
-    source: "epic_boss.wav",
-    title: "Epic Boss Battle [Seamlessly Looping]",
-    author: "Juhani Junkala",
-    license: "CC0",
-    page: "https://opengameart.org/content/boss-battle-music",
-    use: "주간 학급 보스 음악",
   },
   {
     name: "play",

@@ -162,7 +162,7 @@ async function loadPromiseRecordsSince(fromKey: string): Promise<PromiseRecord[]
  * plus the weekly-quest reward of every weekly card and the arena rewards of finished duels.
  */
 async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<{ xp: number; earnedCoins: number }> {
-  const [rows, posts, asChallenger, asOpponent, bossRewards] = await Promise.all([
+  const [rows, posts, asChallenger, asOpponent, bossRewards, miniGames] = await Promise.all([
     client.dailyPromise.findMany({
       where: { studentId },
       select: {
@@ -180,6 +180,7 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
     client.duel.aggregate({ where: { challengerId: studentId, status: "DONE" }, _sum: { challengerXp: true, challengerCoins: true } }),
     client.duel.aggregate({ where: { opponentId: studentId, status: "DONE" }, _sum: { opponentXp: true, opponentCoins: true } }),
     client.bossReward.aggregate({ where: { studentId }, _sum: { xp: true, coins: true } }),
+    client.miniGameRun.aggregate({ where: { studentId, status: "DONE" }, _sum: { xp: true, coins: true } }),
   ]);
 
   const dayRows = rows.filter((row) => row.scope !== "WEEK");
@@ -217,6 +218,10 @@ async function calcLifetimeTotals(client: DbClient, studentId: string): Promise<
   // 학급 보스를 쓰러뜨리고 받은 보상.
   xp += bossRewards._sum.xp ?? 0;
   earnedCoins += bossRewards._sum.coins ?? 0;
+
+  // 몬스터 사냥 미니게임 보상 (하루 보상 횟수는 결과를 받을 때 이미 지켜졌다).
+  xp += miniGames._sum.xp ?? 0;
+  earnedCoins += miniGames._sum.coins ?? 0;
 
   return { xp, earnedCoins };
 }

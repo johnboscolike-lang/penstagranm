@@ -63,6 +63,8 @@ export const CREATURE_PET_NAMES: Readonly<Record<CreatureName, string>> = {
   elephant: "코끼리",
   cow: "얼룩소",
   giraffe: "기린",
+  goat: "하얀염소",
+  monkey: "개구쟁이 원숭이",
 };
 
 /** 보스를 쓰러뜨리고 보상을 받으면 그 보스가 친구(펫)가 되고, 업적을 이루면 동물 친구가 생긴다. */

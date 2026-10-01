@@ -4,7 +4,7 @@
  */
 export const CC0_TILE = 16;
 
-export const CREATURE_NAMES = ["chicken", "sheep", "rabbit", "fox", "squirrel", "raccoon", "frog", "turtle", "owl", "polarbear", "tiger", "elephant", "cow", "giraffe"] as const;
+export const CREATURE_NAMES = ["chicken", "sheep", "rabbit", "fox", "squirrel", "raccoon", "frog", "turtle", "owl", "polarbear", "tiger", "elephant", "cow", "giraffe", "goat", "monkey"] as const;
 
 /** 응원·칭찬이 되는 이모트만 둔다. (놀림이 될 수 있는 것은 넣지 않는다) */
 export const EMOTE_NAMES = ["heart", "hearts", "star", "stars", "happy", "idea", "music", "exclamation"] as const;

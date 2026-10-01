@@ -202,6 +202,24 @@ export function applySchema(database) {
       ON "WordCard" ("studentId", "word");
     CREATE INDEX IF NOT EXISTS "WordCard_studentId_due_idx"
       ON "WordCard" ("studentId", "due");
+    CREATE TABLE IF NOT EXISTS "MiniGameRun" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "dateKey" TEXT NOT NULL,
+      "startedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "finishedAt" DATETIME,
+      "status" TEXT NOT NULL DEFAULT 'STARTED',
+      "score" INTEGER NOT NULL DEFAULT 0,
+      "hits" INTEGER NOT NULL DEFAULT 0,
+      "misses" INTEGER NOT NULL DEFAULT 0,
+      "xp" INTEGER NOT NULL DEFAULT 0,
+      "coins" INTEGER NOT NULL DEFAULT 0,
+      CONSTRAINT "MiniGameRun_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS "MiniGameRun_studentId_dateKey_idx"
+      ON "MiniGameRun" ("studentId", "dateKey");
     CREATE TABLE IF NOT EXISTS "ClassSetting" (
       "key" TEXT NOT NULL PRIMARY KEY,
       "value" TEXT NOT NULL

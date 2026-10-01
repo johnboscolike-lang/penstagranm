@@ -89,6 +89,8 @@ describe("기록 모으기", () => {
       emotesSent: 0,
       wordsLearned: 0,
       wordsMastered: 0,
+      miniGamePlays: 0,
+      miniGameBest: 0,
     });
   });
 

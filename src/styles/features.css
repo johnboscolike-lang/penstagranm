@@ -2439,3 +2439,77 @@
 .words__next {
   font-size: 11px;
 }
+
+/* ───────── 몬스터 사냥 ───────── */
+.hunt {
+  display: grid;
+  gap: 10px;
+}
+
+.hunt__stage {
+  display: grid;
+  justify-items: center;
+  padding: 4px;
+  border: 3px solid var(--ink);
+  background: #98d4f0;
+}
+
+.hunt__canvas {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  aspect-ratio: 3 / 4;
+  image-rendering: pixelated;
+  touch-action: manipulation;
+}
+
+.hunt__loading {
+  margin: 0;
+  padding: 20px 10px;
+  text-align: center;
+}
+
+.hunt__intro,
+.hunt__result {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.hunt__intro p,
+.hunt__result p,
+.hunt__result h3 {
+  margin: 0;
+}
+
+.hunt__result h3 {
+  font-size: 26px;
+}
+
+.hunt__cast {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hunt__cast-item {
+  animation: boss-bob 1.3s steps(2, end) infinite;
+}
+
+.hunt__cast-item:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.hunt__cast-item:nth-child(3) {
+  animation-delay: -0.6s;
+}
+
+.hunt__cast-item:nth-child(4) {
+  animation-delay: -0.9s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hunt__cast-item {
+    animation: none;
+  }
+}

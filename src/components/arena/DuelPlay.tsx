@@ -5,7 +5,8 @@ import { Cc0Sprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprit
 import { EMOTE_LABELS, EMOTE_NAMES, isEmoteName } from "@/utils/art/cc0";
 import type { AnswerFeedback } from "@/utils/arena-repository";
 import type { DuelResultView, DuelStartView } from "@/utils/arena-types";
-import { playSfx } from "@/utils/audio/audio-engine";
+import { getAudioEngine, playSfx } from "@/utils/audio/audio-engine";
+import { bgmForSpace } from "@/utils/audio/sound-catalog";
 
 const INTRO_MS = 1700;
 const COUNT_STEP_MS = 700;
@@ -108,6 +109,14 @@ export function DuelPlay({ start, onClose }: DuelPlayProps) {
       cancelled = true;
     };
   }, [result, stage, start.answered, start.duelId, start.questions.length]);
+
+  useEffect(() => {
+    // 대결이 시작되면 로비의 신나는 전투 음악 대신 긴장감 있는 곡으로 바꾸고, 닫으면 로비 음악으로 돌아간다.
+    const engine = getAudioEngine();
+    engine?.setTrack("arena");
+
+    return () => engine?.setTrack(bgmForSpace("arena"));
+  }, []);
 
   useEffect(() => {
     if (stage !== "intro") {

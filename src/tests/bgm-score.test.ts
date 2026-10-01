@@ -14,8 +14,8 @@ describe("배경 음악 악보", () => {
     expect(() => noteToMidi("H9")).toThrow();
   });
 
-  it("악보의 곡 이름이 앱이 쓰는 곡 목록과 같다", () => {
-    expect(TRACKS.map((track) => track.name).sort()).toEqual([...BGM_TRACKS].sort());
+  it("악보의 곡 이름은 모두 앱이 쓰는 곡 목록에 있다 (외부 CC0 곡은 악보 없이 파일만 있다)", () => {
+    TRACKS.forEach((track) => expect(BGM_TRACKS as readonly string[], track.name).toContain(track.name));
   });
 
   it.each(TRACKS)("$name: 마디마다 멜로디가 8칸을 채우고 화음이 모두 정의돼 있다", (track) => {

@@ -465,6 +465,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  await prisma.miniGameRun.deleteMany();
   await prisma.wordCard.deleteMany();
   await prisma.achievement.deleteMany();
   await prisma.bossReward.deleteMany();

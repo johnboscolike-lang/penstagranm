@@ -88,6 +88,7 @@ model Student {
   bossRewards     BossReward[]
   achievements    Achievement[]
   wordCards       WordCard[]
+  miniGameRuns    MiniGameRun[]
 }
 
 /// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
@@ -274,6 +275,24 @@ model WordCard {
 
   @@unique([studentId, word])
   @@index([studentId, due])
+}
+
+/// 몬스터 사냥 미니게임 한 판. STARTED(시작함) → DONE(결과를 받음). 결과는 서버가 앞뒤를 확인해서 받는다.
+model MiniGameRun {
+  id         String    @id @default(cuid())
+  studentId  String
+  dateKey    String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  status     String    @default("STARTED")
+  score      Int       @default(0)
+  hits       Int       @default(0)
+  misses     Int       @default(0)
+  xp         Int       @default(0)
+  coins      Int       @default(0)
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, dateKey])
 }
 
 /// 학급 전체에 적용되는 켜고 끄는 설정 (예: 대결장 열기).

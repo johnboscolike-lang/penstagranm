@@ -26,6 +26,10 @@ export interface AchievementMetrics {
   wordsLearned: number;
   /** 기억이 오래 가도록 익힌 단어 수 */
   wordsMastered: number;
+  /** 끝낸 몬스터 사냥 판 수 */
+  miniGamePlays: number;
+  /** 몬스터 사냥 최고 점수 */
+  miniGameBest: number;
 }
 
 export type MetricKey = keyof AchievementMetrics;
@@ -58,6 +62,8 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
   { key: "record-keeper", title: "기록 장인", hint: "네 컷 성장 기록을 3개 올려요", metric: "posts", target: 3, icon: "lifePot", pet: "owl" },
   { key: "word-collector", title: "단어 수집가", hint: "영어 단어를 20개 만나요", metric: "wordsLearned", target: 20, icon: "sushi", pet: "cow" },
   { key: "word-master", title: "단어 박사", hint: "영어 단어 10개를 오래 기억해요", metric: "wordsMastered", target: 10, icon: "gemYellow", pet: "giraffe" },
+  { key: "monster-hunter", title: "몬스터 사냥꾼", hint: "몬스터 사냥을 5판 끝내요", metric: "miniGamePlays", target: 5, icon: "gemGreen", pet: "monkey" },
+  { key: "hunt-master", title: "사냥 달인", hint: "몬스터 사냥에서 150점을 넘겨요", metric: "miniGameBest", target: 150, icon: "fortuneCookie", pet: "goat" },
 ];
 
 /**
@@ -113,4 +119,6 @@ export const EMPTY_METRICS: AchievementMetrics = {
   emotesSent: 0,
   wordsLearned: 0,
   wordsMastered: 0,
+  miniGamePlays: 0,
+  miniGameBest: 0,
 };

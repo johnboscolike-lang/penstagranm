@@ -28,6 +28,8 @@ export const CREATURES = {
   elephant: 159,
   cow: 152,
   giraffe: 160,
+  goat: 153,
+  monkey: 169,
 };
 
 /** Kenney Emotes Pack(Pixel/Style 1, 말풍선 있는 것) 파일 → 게임 안 이름. 응원·칭찬이 되는 것만 골랐다(놀림이 될 수 있는 HAHA·눈물·화남은 뺐다). */

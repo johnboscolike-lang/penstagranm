@@ -32,7 +32,7 @@ export const SFX_NAMES = [
 
 export type SfxName = (typeof SFX_NAMES)[number];
 
-export const BGM_TRACKS = ["school", "challenge", "room", "arena", "teacher"] as const;
+export const BGM_TRACKS = ["school", "challenge", "room", "arena", "teacher", "battle", "play"] as const;
 
 export type BgmTrack = (typeof BGM_TRACKS)[number];
 
@@ -58,7 +58,7 @@ const TRACK_BY_SPACE: Readonly<Record<SoundSpace, BgmTrack>> = {
   challenge: "challenge",
   practice: "challenge",
   room: "room",
-  arena: "arena",
+  arena: "battle",
   teacher: "teacher",
   public: "school",
 };
