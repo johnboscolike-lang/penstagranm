@@ -5,7 +5,8 @@ import clsx from "clsx";
 import { DuelPlay, DuelResultPanel } from "@/components/arena/DuelPlay";
 import { LeagueBadge } from "@/components/arena/LeagueBadge";
 import { Portal } from "@/components/Portal";
-import { PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { Cc0Sprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { EMOTE_LABELS, isEmoteName } from "@/utils/art/cc0";
 import type { ArenaOverview, DuelResultView, DuelStartView } from "@/utils/arena-types";
 import { MAX_CHALLENGES_PER_DAY, QUESTION_COUNT } from "@/utils/arena-rules";
 import { QUIZ_CATEGORIES, type QuizCategory } from "@/utils/quiz-bank";
@@ -235,6 +236,7 @@ export function ArenaPanel({ overview }: ArenaPanelProps) {
                     {item.ratingDelta}
                   </span>
                 </div>
+                {isEmoteName(item.rivalEmote) ? <Cc0Sprite className="arena-row__emote" kind="emotes" label={`${item.opponentName}의 응원: ${EMOTE_LABELS[item.rivalEmote]}`} name={item.rivalEmote} scale={2} /> : null}
                 <button className="btn btn--small" disabled={busy !== null} onClick={() => void review(item.duelId)} type="button">
                   정답 보기
                 </button>

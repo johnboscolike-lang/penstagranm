@@ -11,6 +11,18 @@
 
 `scripts/assets/import-kenney.mjs`가 어떤 원본을 어떤 이름으로 옮겼는지 그대로 적어 두었다.
 
+## 공개(CC0) 에셋 — 그 밖의 제작자 (확인일 2026-10-01)
+
+팩 안의 라이선스 파일(License.txt / LICENSE.txt)에서 CC0 1.0임을 직접 확인했다. 표기는 필수가 아니지만 고마운 마음으로 남긴다.
+
+| 위치 | 원본 팩 | 제작자 | 쓰임 |
+|---|---|---|---|
+| `cc0/creatures/*.png` | [Tiny Creatures](https://opengameart.org/content/tiny-creatures) 1.0 (16×16 도트, 검은 배경을 투명으로 바꿈) | Clint Bellanger (clintbellanger.net) | 동물 펫 12종 |
+| `cc0/emotes/*.png` | [Emotes Pack](https://kenney.nl/assets/emotes-pack) Pixel/Style 1 | Kenney | 대결 뒤 응원 이모트 8종 (응원·칭찬이 되는 것만 골랐다) |
+| `cc0/items/*.png` | [The Ninja Adventure Asset Pack](https://pixel-boy.itch.io/ninja-adventure-asset-pack) 의 Items | Pixel-boy, AAA | 업적 아이콘 16종 (작은 그림은 16×16 가운데에 놓았다) |
+
+`scripts/assets/import-cc0-extra.mjs`가 어떤 원본을 어떤 이름으로 옮겼는지 그대로 적어 두었다. 같은 팩의 글꼴·음악은 출처를 따로 확인하지 못해서 가져오지 않았다.
+
 ## 직접 만든 에셋
 
 - 도트 캐릭터·모자·소품·아이콘: `src/utils/art` 안의 문자 격자(ASCII)에서 만든다.

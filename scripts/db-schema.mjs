@@ -140,6 +140,8 @@ export function applySchema(database) {
       "opponentXp" INTEGER NOT NULL DEFAULT 0,
       "opponentCoins" INTEGER NOT NULL DEFAULT 0,
       "finishedKey" TEXT,
+      "challengerEmote" TEXT,
+      "opponentEmote" TEXT,
       "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "finishedAt" DATETIME,
       CONSTRAINT "Duel_challengerId_fkey"
@@ -219,6 +221,10 @@ export function applySchema(database) {
     ["rating", "INTEGER NOT NULL DEFAULT 1000"],
     ["hatKey", "TEXT"],
     ["petKey", "TEXT"],
+  ]);
+  addMissingColumns(database, "Duel", [
+    ["challengerEmote", "TEXT"],
+    ["opponentEmote", "TEXT"],
   ]);
   addMissingColumns(database, "DailyPromise", [
     ["scope", "TEXT NOT NULL DEFAULT 'DAY'"],

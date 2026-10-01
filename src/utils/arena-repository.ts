@@ -26,6 +26,7 @@ import type {
   DuelStartView,
   LeagueView,
 } from "@/utils/arena-types";
+import { isEmoteName } from "@/utils/art/cc0";
 import { formatKstMonthDay, getKstDateKey, getWeekStartKey } from "@/utils/kst";
 import { prisma } from "@/utils/prisma";
 import { QuestError, type DbClient } from "@/utils/quest-repository";
@@ -145,6 +146,8 @@ interface DuelRow {
   opponentXp: number;
   opponentCoins: number;
   finishedKey: string | null;
+  challengerEmote: string | null;
+  opponentEmote: string | null;
   createdAt: Date;
   finishedAt: Date | null;
 }
@@ -197,6 +200,8 @@ function buildResultView(duel: DuelRow, meId: string, me: PlayerRow, rival: Play
     xp: done ? (isChallenger ? duel.challengerXp : duel.opponentXp) : 0,
     coins: done ? (isChallenger ? duel.challengerCoins : duel.opponentCoins) : 0,
     review: done ? review : null,
+    myEmote: (isChallenger ? duel.challengerEmote : duel.opponentEmote) ?? null,
+    rivalEmote: done ? ((isChallenger ? duel.opponentEmote : duel.challengerEmote) ?? null) : null,
   };
 }
 
@@ -259,6 +264,7 @@ export async function createDuel(input: { challengerId: string; opponentId: stri
       category: input.category,
       questions: JSON.stringify(questions),
       dateKey: todayKey,
+      createdAt: now,
     },
   });
 
@@ -495,6 +501,32 @@ export async function getDuelResult(input: { studentId: string; duelId: string }
 }
 
 /**
+ * 끝난 대결에서 친구에게 응원 이모트를 하나 보낸다. 다시 보내면 바뀐다.
+ * 놀림이 되지 않도록 응원·칭찬 이모트만 받는다.
+ */
+export async function reactToDuel(input: { studentId: string; duelId: string; emote: string }): Promise<DuelResultView> {
+  if (!isEmoteName(input.emote)) {
+    throw new QuestError("INVALID", "보낼 수 없는 이모트예요.");
+  }
+  const duel = await prisma.duel.findUnique({ where: { id: input.duelId } });
+  if (!duel) {
+    throw new QuestError("NOT_FOUND", "대결을 찾을 수 없어요.");
+  }
+  if (duel.challengerId !== input.studentId && duel.opponentId !== input.studentId) {
+    throw new QuestError("FORBIDDEN", "내가 참여한 대결이 아니에요.");
+  }
+  if (duel.status !== "DONE") {
+    throw new QuestError("LOCKED", "승부가 난 뒤에 응원을 보낼 수 있어요.");
+  }
+  await prisma.duel.update({
+    where: { id: duel.id },
+    data: duel.challengerId === input.studentId ? { challengerEmote: input.emote } : { opponentEmote: input.emote },
+  });
+
+  return getDuelResult({ studentId: input.studentId, duelId: input.duelId });
+}
+
+/**
  * 대결장 화면에 필요한 모든 것을 모은다: 내 리그, 도전장, 결과, 상대 목록, 순위, 이번 주 팀 승수.
  */
 export async function getArenaOverview(meId: string, todayKey: string, now: Date = new Date()): Promise<ArenaOverview> {
@@ -621,6 +653,7 @@ export async function getArenaOverview(meId: string, todayKey: string, now: Date
         xp: isChallenger ? duel.challengerXp : duel.opponentXp,
         coins: isChallenger ? duel.challengerCoins : duel.opponentCoins,
         finishedLabel: duel.finishedAt ? formatKstMonthDay(duel.finishedAt) : "",
+        rivalEmote: (isChallenger ? duel.opponentEmote : duel.challengerEmote) ?? null,
       };
     });
 

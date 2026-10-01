@@ -212,6 +212,9 @@ model Duel {
   opponentXp            Int       @default(0)
   opponentCoins         Int       @default(0)
   finishedKey           String?
+  /// 끝난 뒤 서로에게 보낸 응원 이모트 (EMOTE_NAMES 중 하나)
+  challengerEmote       String?
+  opponentEmote         String?
   createdAt             DateTime  @default(now())
   finishedAt            DateTime?
   challenger            Student   @relation("DuelChallenger", fields: [challengerId], references: [id], onDelete: Cascade)

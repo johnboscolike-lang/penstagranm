@@ -50,6 +50,8 @@ export interface ArenaResultView {
   xp: number;
   coins: number;
   finishedLabel: string;
+  /** 친구가 보내 준 응원 이모트 (없으면 null) */
+  rivalEmote: string | null;
 }
 
 export interface ArenaRankRow {
@@ -137,4 +139,7 @@ export interface DuelResultView {
   xp: number;
   coins: number;
   review: DuelReviewItem[] | null;
+  /** 내가 보낸 응원 이모트와 친구가 보낸 응원 이모트 (없으면 null) */
+  myEmote: string | null;
+  rivalEmote: string | null;
 }

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 
-import { PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { Cc0Sprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { EMOTE_LABELS, EMOTE_NAMES, isEmoteName } from "@/utils/art/cc0";
 import type { AnswerFeedback } from "@/utils/arena-repository";
 import type { DuelResultView, DuelStartView } from "@/utils/arena-types";
 import { playSfx } from "@/utils/audio/audio-engine";
@@ -308,7 +309,73 @@ const OUTCOME_COPY = {
 } as const;
 
 /**
- * 대결 결과: 점수, 레이팅 변화, 받은 보상, 문제별 정답 풀이.
+ * 끝난 대결에서 친구에게 응원 이모트를 보내는 줄. 응원·칭찬이 되는 이모트만 있다.
+ */
+function EmoteBar({ duelId, rivalName, mine, theirs }: { duelId: string; rivalName: string; mine: string | null; theirs: string | null }) {
+  const [sent, setSent] = useState<string | null>(mine);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  /**
+   * 이모트를 서버에 보내고, 성공하면 고른 것을 표시한다.
+   */
+  async function send(emote: string): Promise<void> {
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/arena/react", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ duelId, emote }) });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+        setError(payload?.message ?? "이모트를 보내지 못했어요.");
+        playSfx("wrong");
+
+        return;
+      }
+      setSent(emote);
+      playSfx("pop");
+    } catch {
+      setError("네트워크 연결을 확인해 주세요.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="emote-bar">
+      {isEmoteName(theirs) ? (
+        <p className="emote-bar__got">
+          <Cc0Sprite kind="emotes" label={EMOTE_LABELS[theirs]} name={theirs} scale={2} /> {rivalName}이(가) 응원을 보냈어요!
+        </p>
+      ) : null}
+      <p className="muted emote-bar__title">{rivalName}에게 응원을 보내요</p>
+      <div aria-label="응원 이모트" className="emote-bar__row" role="group">
+        {EMOTE_NAMES.map((name) => (
+          <button
+            aria-label={EMOTE_LABELS[name]}
+            aria-pressed={sent === name}
+            className={clsx("emote-bar__btn", sent === name && "emote-bar__btn--on")}
+            data-sfx="none"
+            disabled={busy}
+            key={name}
+            onClick={() => void send(name)}
+            title={EMOTE_LABELS[name]}
+            type="button"
+          >
+            <Cc0Sprite kind="emotes" name={name} scale={2} />
+          </button>
+        ))}
+      </div>
+      {error ? (
+        <p className="msg msg--error" role="status">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * 대결 결과: 점수, 레이팅 변화, 받은 보상, 응원 이모트, 문제별 정답 풀이.
  */
 export function DuelResultPanel({ result, onClose }: DuelResultPanelProps) {
   const copy = result.outcome ? OUTCOME_COPY[result.outcome] : null;
@@ -361,6 +428,8 @@ export function DuelResultPanel({ result, onClose }: DuelResultPanelProps) {
         </ul>
       ) : null}
       {result.state === "DONE" && result.xp === 0 && result.coins === 0 ? <p className="muted">오늘 받을 수 있는 대결 보상은 다 받았어요. 점수는 그대로 반영돼요.</p> : null}
+
+      {result.state === "DONE" && result.rival ? <EmoteBar duelId={result.duelId} mine={result.myEmote} rivalName={result.rival.name} theirs={result.rivalEmote} /> : null}
 
       {result.review ? (
         <ol className="duel__review">

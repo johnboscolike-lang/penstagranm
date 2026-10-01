@@ -4,6 +4,7 @@ import clsx from "clsx";
 import type { ArtSpec } from "@/utils/art/canvas";
 import { getCharacterArt, getHeadArt, getStudentArt, type CharacterName } from "@/utils/art/characters";
 import { getIconSpec, MEDAL_PALETTES } from "@/utils/art/icons";
+import { CC0_TILE, cc0Url, type Cc0Kind } from "@/utils/art/cc0";
 import { KENNEY_TILE, kenneyUrl, type KenneyName } from "@/utils/art/kenney";
 import { getSpriteUrl, SPRITE_SIZES } from "@/utils/art/manifest";
 import { measurePixelRows, rowsToRects } from "@/utils/pixel";
@@ -155,6 +156,36 @@ export function KenneySprite({ name, scale = 1, flip, label, className }: Kenney
       src={kenneyUrl(name)}
       style={vars}
       width={KENNEY_TILE}
+    />
+  );
+}
+
+interface Cc0SpriteProps {
+  kind: Cc0Kind;
+  name: string;
+  scale?: number;
+  flip?: boolean;
+  label?: string;
+  className?: string;
+}
+
+/**
+ * 공개(CC0) 동물·이모트·아이템 도트를 게임 도트 크기에 맞춰 보여 준다. (16×16 원본)
+ */
+export function Cc0Sprite({ kind, name, scale = 1, flip, label, className }: Cc0SpriteProps) {
+  const vars: SpriteVars = { "--w": CC0_TILE, "--h": CC0_TILE, "--m": scale };
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element -- 도트는 최적화 대신 원본 픽셀을 그대로 보여 준다.
+    <img
+      alt={label ?? ""}
+      aria-hidden={label ? undefined : true}
+      className={clsx("px", "px--img", flip && "px--flip", className)}
+      draggable={false}
+      height={CC0_TILE}
+      src={cc0Url(kind, name)}
+      style={vars}
+      width={CC0_TILE}
     />
   );
 }

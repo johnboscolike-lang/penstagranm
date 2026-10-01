@@ -336,3 +336,52 @@ describe("순위와 팀 승수", () => {
     expect(summary.pending).toBe(0);
   });
 });
+
+describe("응원 이모트", () => {
+  it("끝난 대결에서 서로 이모트를 보내면 상대 화면에 보이고, 다시 보내면 바뀐다", async () => {
+    await prisma.duel.deleteMany({});
+    await prisma.student.updateMany({ data: { rating: 1000 } });
+    const { duelId } = await playFullDuel("a", "c", "all", "none");
+
+    const first = await arena.reactToDuel({ studentId: ids.a, duelId, emote: "star" });
+    expect(first.myEmote).toBe("star");
+    expect(first.rivalEmote).toBeNull();
+
+    const theirs = await arena.reactToDuel({ studentId: ids.c, duelId, emote: "hearts" });
+    expect(theirs.myEmote).toBe("hearts");
+    expect(theirs.rivalEmote).toBe("star");
+
+    const changed = await arena.reactToDuel({ studentId: ids.a, duelId, emote: "music" });
+    expect(changed.myEmote).toBe("music");
+    expect(changed.rivalEmote).toBe("hearts");
+
+    const overview = await arena.getArenaOverview(ids.c, TODAY, NOW);
+    expect(overview.results[0].rivalEmote).toBe("music");
+  });
+
+  it("응원·칭찬이 되는 이모트만 보낼 수 있다", async () => {
+    const duel = await prisma.duel.findFirstOrThrow({ where: { status: "DONE" } });
+
+    for (const emote of ["laugh", "anger", "faceSad", "<script>", ""]) {
+      await expect(arena.reactToDuel({ studentId: duel.challengerId, duelId: duel.id, emote })).rejects.toMatchObject({ code: "INVALID" });
+    }
+  });
+
+  it("참여하지 않은 학생이나 아직 끝나지 않은 대결에는 보낼 수 없다", async () => {
+    const done = await prisma.duel.findFirstOrThrow({ where: { status: "DONE" } });
+    await expect(arena.reactToDuel({ studentId: ids.e, duelId: done.id, emote: "heart" })).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(arena.reactToDuel({ studentId: ids.a, duelId: "없는대결", emote: "heart" })).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+    const open = await arena.createDuel({ challengerId: ids.e, opponentId: ids.f, category: "MATH", now: NOW });
+    await expect(arena.reactToDuel({ studentId: ids.e, duelId: open.duelId, emote: "heart" })).rejects.toMatchObject({ code: "LOCKED" });
+    await prisma.duel.delete({ where: { id: open.duelId } });
+  });
+
+  it("상대가 보낸 이모트는 승부가 나기 전에는 결과에 보이지 않는다", async () => {
+    const duel = await prisma.duel.findFirstOrThrow({ where: { status: "DONE" } });
+    const view = await arena.getDuelResult({ studentId: duel.challengerId, duelId: duel.id });
+
+    expect(view.state).toBe("DONE");
+    expect(Object.keys(view)).toEqual(expect.arrayContaining(["myEmote", "rivalEmote"]));
+  });
+});
