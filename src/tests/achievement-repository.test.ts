@@ -87,6 +87,8 @@ describe("기록 모으기", () => {
       hatsOwned: 0,
       posts: 0,
       emotesSent: 0,
+      wordsLearned: 0,
+      wordsMastered: 0,
     });
   });
 

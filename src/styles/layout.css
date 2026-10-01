@@ -217,8 +217,8 @@
   display: grid;
   justify-items: center;
   gap: 2px;
-  min-width: 118px;
-  padding: 6px 12px 4px;
+  min-width: 104px;
+  padding: 6px 10px 4px;
   color: #a9cfc6;
   font-size: 13px;
   font-weight: 700;
@@ -272,6 +272,14 @@
 
 .scene--room {
   --scene-ground: 32%;
+}
+
+.scene--practice {
+  --scene-ground: 30%;
+}
+
+.scene--practice .scene__sky {
+  background: linear-gradient(180deg, #8fd0f2 0%, #d2edf7 48%, #f9f1cf 100%);
 }
 
 .scene--room .scene__sky {
@@ -828,12 +836,15 @@
 
   .dock {
     bottom: 8px;
+    gap: 2px;
+    padding: 0 4px;
   }
 
   .dock__item {
-    min-width: 84px;
-    padding: 2px 6px 0;
-    font-size: 12px;
+    min-width: 60px;
+    padding: 2px 0 0;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   body {

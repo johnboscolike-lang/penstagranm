@@ -3,6 +3,8 @@ import type { KenneyName } from "@/utils/art/kenney";
 export const MIN_BOSS_HP = 60;
 /** 끝난 대결 한 판이 참가자 한 명마다 보스에게 주는 피해 */
 export const DUEL_DAMAGE = 4;
+/** 그 주에 복습한 영어 단어 하나가 보스에게 주는 피해 */
+export const WORD_DAMAGE = 1;
 /** 보상을 받으려면 이번 주에 최소한 이만큼은 보스에게 피해를 줘야 한다. */
 export const MIN_CONTRIBUTION = 1;
 export const BOSS_REWARD = { xp: 30, coins: 8 } as const;
@@ -65,6 +67,8 @@ export interface RaidContribution {
   studentId: string;
   units: number;
   duels: number;
+  /** 그 주에 복습한 단어 수 */
+  words: number;
   damage: number;
 }
 
@@ -102,10 +106,10 @@ export function raidMaxHp(playerCount: number, hpPerStudent: number = raidLevelF
 }
 
 /**
- * 한 학생이 보스에게 준 피해: 선생님이 확인 중이거나 확인한 칸 하나가 1, 끝난 대결 한 판이 DUEL_DAMAGE.
+ * 한 학생이 보스에게 준 피해: 선생님이 확인 중이거나 확인한 칸 하나가 1, 끝난 대결 한 판이 DUEL_DAMAGE, 복습한 단어 하나가 WORD_DAMAGE.
  */
-export function damageOf(units: number, duels: number): number {
-  return Math.max(0, Math.floor(units)) + Math.max(0, Math.floor(duels)) * DUEL_DAMAGE;
+export function damageOf(units: number, duels: number, words = 0): number {
+  return Math.max(0, Math.floor(units)) + Math.max(0, Math.floor(duels)) * DUEL_DAMAGE + Math.max(0, Math.floor(words)) * WORD_DAMAGE;
 }
 
 /**
@@ -129,10 +133,10 @@ export function buildRaid(input: {
   weekKey: string;
   playerCount: number;
   hpPerStudent?: number;
-  contributions: { studentId: string; units: number; duels: number }[];
+  contributions: { studentId: string; units: number; duels: number; words?: number }[];
 }): RaidStatus {
   const ranking = input.contributions
-    .map((entry) => ({ ...entry, damage: damageOf(entry.units, entry.duels) }))
+    .map((entry) => ({ ...entry, words: entry.words ?? 0, damage: damageOf(entry.units, entry.duels, entry.words ?? 0) }))
     .sort((left, right) => right.damage - left.damage || left.studentId.localeCompare(right.studentId));
   const maxHp = raidMaxHp(input.playerCount, input.hpPerStudent);
   const damage = ranking.reduce((sum, entry) => sum + entry.damage, 0);

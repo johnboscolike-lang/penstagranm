@@ -12,7 +12,7 @@ import { buildOwlHeadArt } from "@/utils/art/characters";
 import type { SoundSpace } from "@/utils/audio/sound-catalog";
 import type { HudView } from "@/utils/quest-types";
 
-export type SpaceKey = "school" | "challenge" | "arena" | "room";
+export type SpaceKey = "school" | "challenge" | "arena" | "practice" | "room";
 export type TeacherSpaceKey = "review" | "quests" | "calendar";
 
 interface NavItem {
@@ -24,12 +24,13 @@ interface NavItem {
 }
 
 /**
- * 학생용 하단 도크: 학교 · 주간도전 · 대결 · 내공간. 대결에는 받은 도전장 수가 배지로 붙는다.
+ * 학생용 하단 도크: 학교 · 주간도전 · 연습 · 대결 · 내공간. 대결에는 받은 도전장 수가 배지로 붙는다.
  */
 function studentNav(arenaInbox: number): NavItem[] {
   return [
     { key: "school", href: "/", label: "학교", icon: "school" },
     { key: "challenge", href: "/challenge", label: "주간도전", icon: "challenge" },
+    { key: "practice", href: "/practice", label: "연습", icon: "book" },
     { key: "arena", href: "/arena", label: "대결", icon: "arena", badge: arenaInbox },
     { key: "room", href: "/myroom", label: "내공간", icon: "room" },
   ];

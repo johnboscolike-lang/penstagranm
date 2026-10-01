@@ -7,6 +7,7 @@ export interface RaidMemberView {
   hairKey: string;
   units: number;
   duels: number;
+  words: number;
   damage: number;
   isMe: boolean;
 }
@@ -28,7 +29,7 @@ export interface RaidView {
   neededPerDay: number;
   /** 피해가 큰 순서 위쪽 몇 명 */
   top: RaidMemberView[];
-  me: { units: number; duels: number; damage: number; rank: number | null };
+  me: { units: number; duels: number; words: number; damage: number; rank: number | null };
   /** 받을 수 있는 보상이 있으면 알려 준다. 이번 주와 지난주 두 곳까지. */
   rewards: RaidRewardView[];
 }

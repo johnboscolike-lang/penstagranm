@@ -87,6 +87,7 @@ model Student {
   duelsReceived   Duel[]   @relation("DuelOpponent")
   bossRewards     BossReward[]
   achievements    Achievement[]
+  wordCards       WordCard[]
 }
 
 /// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
@@ -251,6 +252,28 @@ model Achievement {
   student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, key])
+}
+
+/// 영어 단어 복습 카드 (간격 반복 FSRS). (학생, 단어) 조합은 하나뿐이다.
+model WordCard {
+  id            String    @id @default(cuid())
+  studentId     String
+  word          String
+  due           DateTime
+  stability     Float
+  difficulty    Float
+  scheduledDays Int
+  learningSteps Int       @default(0)
+  reps          Int
+  lapses        Int
+  /// 0 New, 1 Learning, 2 Review, 3 Relearning
+  state         Int
+  lastReview    DateTime?
+  createdAt     DateTime  @default(now())
+  student       Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, word])
+  @@index([studentId, due])
 }
 
 /// 학급 전체에 적용되는 켜고 끄는 설정 (예: 대결장 열기).

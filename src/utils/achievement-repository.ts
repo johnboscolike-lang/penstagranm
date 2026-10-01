@@ -5,6 +5,7 @@ import type { AchievementBoardView, AchievementToastView } from "@/utils/achieve
 import { QUESTION_COUNT } from "@/utils/arena-rules";
 import { CREATURE_PET_NAMES } from "@/utils/cosmetics";
 import { prisma } from "@/utils/prisma";
+import { MASTERED_DAYS } from "@/utils/word-review";
 import type { DbClient } from "@/utils/quest-repository";
 
 /**
@@ -12,7 +13,7 @@ import type { DbClient } from "@/utils/quest-repository";
  */
 export async function collectMetrics(client: DbClient, studentId: string, streak: number): Promise<AchievementMetrics> {
   const mine = { OR: [{ challengerId: studentId }, { opponentId: studentId }] };
-  const [student, confirmedUnits, duelsPlayed, duelWins, perfectDuels, bossClaims, hatsOwned, posts, emotesSent] = await Promise.all([
+  const [student, confirmedUnits, duelsPlayed, duelWins, perfectDuels, bossClaims, hatsOwned, posts, emotesSent, wordsLearned, wordsMastered] = await Promise.all([
     client.student.findUnique({ where: { id: studentId }, select: { rating: true } }),
     client.promiseUnit.count({ where: { promise: { studentId, NOT: { reviewStatus: "RETRY" } } } }),
     client.duel.count({ where: { status: "DONE", ...mine } }),
@@ -26,6 +27,8 @@ export async function collectMetrics(client: DbClient, studentId: string, streak
     client.duel.count({
       where: { status: "DONE", OR: [{ challengerId: studentId, challengerEmote: { not: null } }, { opponentId: studentId, opponentEmote: { not: null } }] },
     }),
+    client.wordCard.count({ where: { studentId } }),
+    client.wordCard.count({ where: { studentId, state: 2, scheduledDays: { gte: MASTERED_DAYS } } }),
   ]);
 
   return {
@@ -39,6 +42,8 @@ export async function collectMetrics(client: DbClient, studentId: string, streak
     hatsOwned,
     posts,
     emotesSent,
+    wordsLearned,
+    wordsMastered,
   };
 }
 

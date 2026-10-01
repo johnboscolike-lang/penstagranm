@@ -57,6 +57,8 @@ describe("업적 판정", () => {
     expect(earnedKeys(withMetrics({ posts: 3 }))).toEqual(["record-keeper"]);
     expect(earnedKeys(withMetrics({ streak: 3 }))).toEqual(["counting-sheep"]);
     expect(earnedKeys(withMetrics({ streak: 10 }))).toEqual(["counting-sheep", "slow-and-steady"]);
+    expect(earnedKeys(withMetrics({ wordsLearned: 20 }))).toEqual(["word-collector"]);
+    expect(earnedKeys(withMetrics({ wordsMastered: 10 }))).toEqual(["word-master"]);
   });
 
   it("진행 상황은 목표를 넘겨도 100%에서 멈추고 음수는 0으로 본다", () => {

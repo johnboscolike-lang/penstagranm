@@ -22,6 +22,10 @@ export interface AchievementMetrics {
   posts: number;
   /** 대결 뒤 친구에게 보낸 응원 이모트 수 */
   emotesSent: number;
+  /** 복습하며 만난 영어 단어 수 */
+  wordsLearned: number;
+  /** 기억이 오래 가도록 익힌 단어 수 */
+  wordsMastered: number;
 }
 
 export type MetricKey = keyof AchievementMetrics;
@@ -52,6 +56,8 @@ export const ACHIEVEMENTS: readonly AchievementDef[] = [
   { key: "boss-hunter", title: "보스 사냥꾼", hint: "학급 보스를 함께 쓰러뜨려요", metric: "bossClaims", target: 1, icon: "goldCoin", pet: "rabbit" },
   { key: "fashionista", title: "멋쟁이", hint: "모자를 3개 모아요", metric: "hatsOwned", target: 3, icon: "heart", pet: "raccoon" },
   { key: "record-keeper", title: "기록 장인", hint: "네 컷 성장 기록을 3개 올려요", metric: "posts", target: 3, icon: "lifePot", pet: "owl" },
+  { key: "word-collector", title: "단어 수집가", hint: "영어 단어를 20개 만나요", metric: "wordsLearned", target: 20, icon: "sushi", pet: "cow" },
+  { key: "word-master", title: "단어 박사", hint: "영어 단어 10개를 오래 기억해요", metric: "wordsMastered", target: 10, icon: "gemYellow", pet: "giraffe" },
 ];
 
 /**
@@ -105,4 +111,6 @@ export const EMPTY_METRICS: AchievementMetrics = {
   hatsOwned: 0,
   posts: 0,
   emotesSent: 0,
+  wordsLearned: 0,
+  wordsMastered: 0,
 };

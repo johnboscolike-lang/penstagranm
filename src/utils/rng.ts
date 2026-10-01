@@ -33,3 +33,16 @@ export function shuffled<T>(rng: () => number, items: readonly T[]): T[] {
 
   return copy;
 }
+
+/**
+ * 글자 하나를 숫자 시드로 바꾼다 (FNV-1a 32비트). 같은 글자는 언제나 같은 숫자가 된다.
+ */
+export function hashSeed(text: string): number {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+
+  return hash >>> 0;
+}

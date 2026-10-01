@@ -51,11 +51,12 @@ export const SFX_TRIM: Readonly<Partial<Record<SfxName, number>>> = {
   whoosh: 0.7,
 };
 
-export type SoundSpace = "school" | "challenge" | "room" | "arena" | "teacher" | "public";
+export type SoundSpace = "school" | "challenge" | "practice" | "room" | "arena" | "teacher" | "public";
 
 const TRACK_BY_SPACE: Readonly<Record<SoundSpace, BgmTrack>> = {
   school: "school",
   challenge: "challenge",
+  practice: "challenge",
   room: "room",
   arena: "arena",
   teacher: "teacher",

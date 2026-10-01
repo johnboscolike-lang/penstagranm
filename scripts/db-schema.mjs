@@ -180,6 +180,28 @@ export function applySchema(database) {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "Achievement_studentId_key_key"
       ON "Achievement" ("studentId", "key");
+    CREATE TABLE IF NOT EXISTS "WordCard" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "word" TEXT NOT NULL,
+      "due" DATETIME NOT NULL,
+      "stability" REAL NOT NULL,
+      "difficulty" REAL NOT NULL,
+      "scheduledDays" INTEGER NOT NULL,
+      "learningSteps" INTEGER NOT NULL DEFAULT 0,
+      "reps" INTEGER NOT NULL,
+      "lapses" INTEGER NOT NULL,
+      "state" INTEGER NOT NULL,
+      "lastReview" DATETIME,
+      "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      CONSTRAINT "WordCard_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "WordCard_studentId_word_key"
+      ON "WordCard" ("studentId", "word");
+    CREATE INDEX IF NOT EXISTS "WordCard_studentId_due_idx"
+      ON "WordCard" ("studentId", "due");
     CREATE TABLE IF NOT EXISTS "ClassSetting" (
       "key" TEXT NOT NULL PRIMARY KEY,
       "value" TEXT NOT NULL

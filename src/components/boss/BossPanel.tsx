@@ -95,7 +95,7 @@ export function BossPanel({ raid }: BossPanelProps) {
         ) : null}
       </p>
 
-      <p className="boss__how muted">칸 1개 = 피해 1 · 끝낸 대결 1판 = 피해 4. 선생님이 확인 중인 칸도 먼저 세어 줘요.</p>
+      <p className="boss__how muted">칸 1개 = 피해 1 · 끝낸 대결 1판 = 피해 4 · 복습한 단어 1개 = 피해 1. 선생님이 확인 중인 칸도 먼저 세어 줘요.</p>
 
       {raid.top.length > 0 ? (
         <ol className="boss__top" aria-label="이번 주 활약 순위">
@@ -107,6 +107,7 @@ export function BossPanel({ raid }: BossPanelProps) {
               <span className="muted boss__detail">
                 칸 {member.units}
                 {member.duels > 0 ? ` · 대결 ${member.duels}판` : ""}
+                {member.words > 0 ? ` · 단어 ${member.words}개` : ""}
               </span>
               <b>{member.damage}</b>
             </li>

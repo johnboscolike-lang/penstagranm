@@ -2382,3 +2382,60 @@
 .ach--earned {
   box-shadow: 0 0 0 3px var(--gold);
 }
+
+/* ───────── 단어 연습 ───────── */
+.words {
+  display: grid;
+  gap: 10px;
+}
+
+.words__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.words__card,
+.words__done {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 2px solid var(--ink);
+  background: #fffaf0;
+  text-align: center;
+}
+
+.words__done h3,
+.words__done p,
+.words__empty {
+  margin: 0;
+}
+
+.words__empty {
+  padding: 14px 10px;
+  border: 2px dashed var(--ink);
+  text-align: center;
+}
+
+.words__book {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.words__word {
+  display: grid;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 2px solid var(--ink);
+  background: #fff8e0;
+  font-size: 13px;
+}
+
+.words__word .muted,
+.words__next {
+  font-size: 11px;
+}

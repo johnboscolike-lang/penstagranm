@@ -3,6 +3,7 @@ import { deflateSync } from "node:zlib";
 import { PrismaClient, PhotoSlot } from "@prisma/client";
 
 import { syncAchievements } from "../src/utils/achievement-repository";
+import { reviewWord } from "../src/utils/word-review";
 import { BOSS_REWARD, bossForWeek } from "../src/utils/boss-rules";
 import { hatPurchaseKey } from "../src/utils/cosmetics";
 import { applyElo, decideOutcome, flipOutcome, rewardFor, scoreAnswers, START_RATING } from "../src/utils/arena-rules";
@@ -464,6 +465,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  await prisma.wordCard.deleteMany();
   await prisma.achievement.deleteMany();
   await prisma.bossReward.deleteMany();
   await prisma.duel.deleteMany();
@@ -591,6 +593,27 @@ async function main(): Promise<void> {
   await prisma.bossReward.createMany({ data: oldWeeks.map((weekKey) => ({ studentId: myId, weekKey, xp: BOSS_REWARD.xp, coins: BOSS_REWARD.coins })) });
   await prisma.purchase.create({ data: { studentId: myId, itemKey: hatPurchaseKey("ears"), cost: 25 } });
   await prisma.student.update({ where: { id: myId }, data: { hatKey: "ears", petKey: bossForWeek(oldWeeks[0]).key } });
+  // 도토리가 지난 며칠 동안 복습한 단어: 단어마다 간격 반복이 쌓인 모습을 보여 준다.
+  const dayMs = 86_400_000;
+  const demoWords: { word: string; answers: boolean[] }[] = [
+    { word: "apple", answers: [true, true, true] },
+    { word: "cat", answers: [true, true] },
+    { word: "dog", answers: [true, false, true] },
+    { word: "book", answers: [false, true] },
+    { word: "school", answers: [true] },
+    { word: "water", answers: [true, true, true, true] },
+  ];
+  for (const [offset, demo] of demoWords.entries()) {
+    let card = null as ReturnType<typeof reviewWord>["card"] | null;
+    let when = Date.now() - (14 - offset) * dayMs;
+    for (const correct of demo.answers) {
+      card = reviewWord(demo.word, card, correct, new Date(when)).card;
+      when = Math.min(Date.now() - dayMs, Math.max(when + dayMs, card.due.getTime()));
+    }
+    if (card) {
+      await prisma.wordCard.create({ data: { studentId: myId, createdAt: new Date(Date.now() - (14 - offset) * dayMs), ...card } });
+    }
+  }
   // 이미 기록으로 이룬 업적은 "봤음"으로 두어, 첫 화면에서 알림이 한꺼번에 쏟아지지 않게 한다.
   // (연속 실천은 화면을 열 때의 날짜로 계산하니, 지금 이어지는 연속 업적만 새 알림으로 뜬다.)
   for (const studentId of studentsByName.values()) {

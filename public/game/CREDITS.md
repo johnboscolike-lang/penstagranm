@@ -17,7 +17,7 @@
 
 | 위치 | 원본 팩 | 제작자 | 쓰임 |
 |---|---|---|---|
-| `cc0/creatures/*.png` | [Tiny Creatures](https://opengameart.org/content/tiny-creatures) 1.0 (16×16 도트, 검은 배경을 투명으로 바꿈) | Clint Bellanger (clintbellanger.net) | 동물 펫 12종 |
+| `cc0/creatures/*.png` | [Tiny Creatures](https://opengameart.org/content/tiny-creatures) 1.0 (16×16 도트, 검은 배경을 투명으로 바꿈) | Clint Bellanger (clintbellanger.net) | 동물 펫 14종 |
 | `cc0/emotes/*.png` | [Emotes Pack](https://kenney.nl/assets/emotes-pack) Pixel/Style 1 | Kenney | 대결 뒤 응원 이모트 8종 (응원·칭찬이 되는 것만 골랐다) |
 | `cc0/items/*.png` | [The Ninja Adventure Asset Pack](https://pixel-boy.itch.io/ninja-adventure-asset-pack) 의 Items | Pixel-boy, AAA | 업적 아이콘 16종 (작은 그림은 16×16 가운데에 놓았다) |
 

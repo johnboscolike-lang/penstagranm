@@ -85,7 +85,7 @@ export async function getRaidTeacherSummary(todayKey: string): Promise<{
  */
 async function loadWeekRaid(weekKey: string): Promise<WeekTally> {
   const weekEnd = addDaysToKey(weekKey, 6);
-  const [level, students, cards, duels] = await Promise.all([
+  const [level, students, cards, duels, words] = await Promise.all([
     getRaidLevel(),
     prisma.student.findMany({ select: { id: true } }),
     prisma.dailyPromise.findMany({
@@ -96,10 +96,21 @@ async function loadWeekRaid(weekKey: string): Promise<WeekTally> {
       where: { status: "DONE", finishedKey: { gte: weekKey, lte: weekEnd } },
       select: { challengerId: true, opponentId: true },
     }),
+    // 그 주(한국 시간 월요일 0시 ~ 다음 월요일 0시)에 마지막으로 복습한 단어 카드
+    prisma.wordCard.findMany({
+      where: { lastReview: { gte: new Date(`${weekKey}T00:00:00+09:00`), lt: new Date(`${addDaysToKey(weekKey, 7)}T00:00:00+09:00`) } },
+      select: { studentId: true },
+    }),
   ]);
 
-  const tally = new Map<string, { studentId: string; units: number; duels: number }>();
-  students.forEach((student) => tally.set(student.id, { studentId: student.id, units: 0, duels: 0 }));
+  const tally = new Map<string, { studentId: string; units: number; duels: number; words: number }>();
+  students.forEach((student) => tally.set(student.id, { studentId: student.id, units: 0, duels: 0, words: 0 }));
+  words.forEach((row) => {
+    const entry = tally.get(row.studentId);
+    if (entry) {
+      entry.words += 1;
+    }
+  });
   cards.forEach((card) => {
     const entry = tally.get(card.studentId);
     if (entry && countsTowardScore(toReviewStatus(card.reviewStatus))) {
@@ -187,7 +198,7 @@ export async function getRaidView(studentId: string, todayKey: string): Promise<
 
         return student ? [{ ...entry, name: student.name, hairKey: student.hairKey, isMe: entry.studentId === studentId }] : [];
       }),
-    me: { units: myEntry?.units ?? 0, duels: myEntry?.duels ?? 0, damage: myEntry?.damage ?? 0, rank: myEntry && myEntry.damage > 0 ? myIndex + 1 : null },
+    me: { units: myEntry?.units ?? 0, duels: myEntry?.duels ?? 0, words: myEntry?.words ?? 0, damage: myEntry?.damage ?? 0, rank: myEntry && myEntry.damage > 0 ? myIndex + 1 : null },
     rewards,
   };
 }
