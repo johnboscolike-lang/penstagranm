@@ -1,5 +1,3 @@
-import type { KenneyName } from "@/utils/art/kenney";
-
 export interface ClosetHatView {
   key: string;
   name: string;
@@ -14,7 +12,11 @@ export interface ClosetHatView {
 export interface ClosetPetView {
   key: string;
   name: string;
-  sprite: KenneyName;
+  /** 그림 묶음(kenney 몬스터 또는 creatures 동물)과 그림 이름 */
+  art: "kenney" | "creatures";
+  sprite: string;
+  /** 어떻게 만나는지: 학급 보스를 쓰러뜨려서 또는 업적을 이루어서 */
+  source: "boss" | "achievement";
   owned: boolean;
   equipped: boolean;
   /** 아직 못 만난 펫을 만나는 방법 */

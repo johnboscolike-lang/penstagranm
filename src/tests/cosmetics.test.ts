@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { getCharacterArt, getHeadArt } from "@/utils/art/characters";
 import { HAT_ART, HAT_KEYS, HAT_WIDTH, isHatKey, overlayHat } from "@/utils/art/hats";
+import { ACHIEVEMENTS } from "@/utils/achievement-rules";
 import { BOSSES } from "@/utils/boss-rules";
 import { HAT_ITEMS, PETS, findHatByPurchaseKey, hatPurchaseKey, isPetKey, petFor, unlockedPetKeys } from "@/utils/cosmetics";
 
@@ -79,11 +80,14 @@ describe("모자 상점", () => {
 });
 
 describe("펫", () => {
-  it("보스마다 펫이 하나씩 있다", () => {
-    expect(PETS).toHaveLength(BOSSES.length);
+  it("보스마다 펫이 하나씩, 업적마다 동물 펫이 하나씩 있고 이름이 겹치지 않는다", () => {
+    expect(PETS.filter((pet) => pet.source === "boss")).toHaveLength(BOSSES.length);
+    expect(PETS.filter((pet) => pet.source === "achievement")).toHaveLength(ACHIEVEMENTS.length);
+    expect(new Set(PETS.map((pet) => pet.key)).size).toBe(PETS.length);
     PETS.forEach((pet) => expect(isPetKey(pet.key)).toBe(true));
     expect(isPetKey("dragon")).toBe(false);
     expect(petFor("slime")?.name).toBe("말랑 슬라임");
+    expect(petFor("fox")).toMatchObject({ name: "꼬마여우", art: "creatures", source: "achievement" });
     expect(petFor("dragon")).toBeUndefined();
     expect(petFor(null)).toBeUndefined();
   });

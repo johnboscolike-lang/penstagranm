@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import clsx from "clsx";
 
-import { Character, KenneySprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
+import { Character, PetSprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
 import { playSfx } from "@/utils/audio/audio-engine";
 import type { ClosetHatView, ClosetPetView, ClosetView } from "@/utils/closet-types";
 
@@ -65,7 +65,7 @@ export function ClosetPanel({ closet, hairKey, coins }: ClosetPanelProps) {
 
       <div className="closet__preview card card--mint pf">
         <Character hairKey={hairKey} hatKey={closet.hatKey} name="hero" scale={2.4} />
-        {pet ? <KenneySprite className="closet__pet" label={`펫 ${pet.name}`} name={pet.sprite} scale={2.2} /> : null}
+        {pet ? <PetSprite art={pet.art} className="closet__pet" label={`펫 ${pet.name}`} scale={2.2} sprite={pet.sprite} /> : null}
       </div>
 
       <h3 className="closet__sub">모자</h3>
@@ -105,7 +105,7 @@ export function ClosetPanel({ closet, hairKey, coins }: ClosetPanelProps) {
       <ul className="closet__grid">
         {closet.pets.map((item) => (
           <li className={clsx("closet__item card pf", item.equipped && "closet__item--on", !item.owned && "closet__item--locked")} key={item.key}>
-            <KenneySprite className={clsx(!item.owned && "closet__silhouette")} name={item.sprite} scale={1.7} />
+            <PetSprite art={item.art} className={clsx(!item.owned && "closet__silhouette")} scale={1.4} sprite={item.sprite} ui />
             <strong>{item.owned ? item.name : "???"}</strong>
             {item.owned ? null : <span className="muted">{item.hint}</span>}
             {item.owned ? (

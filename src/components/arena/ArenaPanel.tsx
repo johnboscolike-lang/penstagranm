@@ -236,7 +236,7 @@ export function ArenaPanel({ overview }: ArenaPanelProps) {
                     {item.ratingDelta}
                   </span>
                 </div>
-                {isEmoteName(item.rivalEmote) ? <Cc0Sprite className="arena-row__emote" kind="emotes" label={`${item.opponentName}의 응원: ${EMOTE_LABELS[item.rivalEmote]}`} name={item.rivalEmote} scale={2} /> : null}
+                {isEmoteName(item.rivalEmote) ? <Cc0Sprite className="arena-row__emote" kind="emotes" label={`${item.opponentName}의 응원: ${EMOTE_LABELS[item.rivalEmote]}`} name={item.rivalEmote} scale={0.9} ui /> : null}
                 <button className="btn btn--small" disabled={busy !== null} onClick={() => void review(item.duelId)} type="button">
                   정답 보기
                 </button>

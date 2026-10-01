@@ -1,10 +1,14 @@
-export type ToastKind = "levelup" | "coin" | "streak" | "info";
+import type { Cc0Kind } from "@/utils/art/cc0";
+
+export type ToastKind = "levelup" | "coin" | "streak" | "achievement" | "info";
 
 export interface Toast {
   id: number;
   kind: ToastKind;
   title: string;
   body?: string;
+  /** 아이콘 대신 보여 줄 공개 도트 그림 (없으면 종류별 기본 아이콘) */
+  art?: { kind: Cc0Kind; name: string };
 }
 
 const LIFETIME_MS = 4200;

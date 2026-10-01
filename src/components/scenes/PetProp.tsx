@@ -1,4 +1,4 @@
-import { KenneySprite } from "@/components/pixel/PixelSprite";
+import { PetSprite } from "@/components/pixel/PixelSprite";
 import { Prop } from "@/components/scenes/Prop";
 import { petFor } from "@/utils/cosmetics";
 
@@ -21,7 +21,7 @@ export function PetProp({ petKey, x, y, z = 9, scale = 1.5 }: PetPropProps) {
 
   return (
     <Prop anim="bob" shadow x={x} y={y} z={z}>
-      <KenneySprite label={`펫 ${pet.name}`} name={pet.sprite} scale={scale} />
+      <PetSprite art={pet.art} label={`펫 ${pet.name}`} scale={scale} sprite={pet.sprite} />
     </Prop>
   );
 }

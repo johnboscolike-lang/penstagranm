@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { parseHudSnapshot, planHudEvents } from "@/utils/hud-events";
+import { MAX_ACHIEVEMENT_TOASTS, parseHudSnapshot, planAchievementToasts, planHudEvents } from "@/utils/hud-events";
 import { dismissToast, getServerToasts, getToasts, pushToast, resetToasts, subscribeToasts } from "@/utils/toast-store";
 
 const base = { level: 3, coins: 20, streak: 1 };
@@ -97,5 +97,38 @@ describe("알림 저장소", () => {
     pushToast({ kind: "info", title: "조용히" });
 
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("새 업적 알림", () => {
+  const item = (key: string, title: string) => ({ key, title, icon: "feather" as const, petName: "꼬꼬닭" });
+
+  it("처음 방문이어도 아직 알리지 않은 업적은 알린다", () => {
+    const plan = planHudEvents(null, base, [item("first-step", "첫걸음")]);
+
+    expect(plan.toasts).toHaveLength(1);
+    expect(plan.toasts[0]).toMatchObject({ kind: "achievement", title: "업적: 첫걸음", art: { kind: "items", name: "feather" } });
+    expect(plan.toasts[0].body).toContain("꼬꼬닭");
+    expect(plan.sounds).toEqual(["powerup"]);
+  });
+
+  it("업적이 없으면 아무것도 더하지 않는다", () => {
+    expect(planHudEvents(null, base, [])).toEqual({ toasts: [], sounds: [] });
+  });
+
+  it("두 개까지는 따로 알리고, 그보다 많으면 한 장으로 묶는다", () => {
+    expect(planAchievementToasts([item("a", "하나"), item("b", "둘")])).toHaveLength(MAX_ACHIEVEMENT_TOASTS);
+    const many = planAchievementToasts([item("a", "하나"), item("b", "둘"), item("c", "셋"), item("d", "넷")]);
+
+    expect(many).toHaveLength(1);
+    expect(many[0].title).toBe("새 업적 4개!");
+    expect(planAchievementToasts([])).toEqual([]);
+  });
+
+  it("레벨 업과 함께 오면 레벨 업 소리가 먼저 난다", () => {
+    const plan = planHudEvents(base, { ...base, level: 4 }, [item("first-step", "첫걸음")]);
+
+    expect(plan.toasts.map((toast) => toast.kind)).toEqual(["achievement", "levelup"]);
+    expect(plan.sounds).toEqual(["levelup", "powerup"]);
   });
 });

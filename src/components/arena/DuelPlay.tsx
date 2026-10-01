@@ -344,7 +344,7 @@ function EmoteBar({ duelId, rivalName, mine, theirs }: { duelId: string; rivalNa
     <div className="emote-bar">
       {isEmoteName(theirs) ? (
         <p className="emote-bar__got">
-          <Cc0Sprite kind="emotes" label={EMOTE_LABELS[theirs]} name={theirs} scale={2} /> {rivalName}이(가) 응원을 보냈어요!
+          <Cc0Sprite kind="emotes" label={EMOTE_LABELS[theirs]} name={theirs} scale={1} ui /> {rivalName}이(가) 응원을 보냈어요!
         </p>
       ) : null}
       <p className="muted emote-bar__title">{rivalName}에게 응원을 보내요</p>
@@ -361,7 +361,7 @@ function EmoteBar({ duelId, rivalName, mine, theirs }: { duelId: string; rivalNa
             title={EMOTE_LABELS[name]}
             type="button"
           >
-            <Cc0Sprite kind="emotes" name={name} scale={2} />
+            <Cc0Sprite kind="emotes" name={name} scale={1} ui />
           </button>
         ))}
       </div>

@@ -2304,8 +2304,8 @@
 .emote-bar__btn {
   display: grid;
   place-items: center;
-  min-width: 48px;
-  min-height: 48px;
+  min-width: 56px;
+  min-height: 56px;
   padding: 2px;
   border: 3px solid var(--ink);
   background: #fff8e0;
@@ -2329,4 +2329,56 @@
   .arena-row__emote {
     animation: none;
   }
+}
+
+/* ───────── 업적판 ───────── */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ach {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+}
+
+.ach__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--ink);
+  background: #fff8e0;
+}
+
+.ach__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.ach__text .muted {
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.ach__count {
+  font-variant-numeric: tabular-nums;
+}
+
+.ach--locked .ach__icon {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.ach--earned {
+  box-shadow: 0 0 0 3px var(--gold);
 }

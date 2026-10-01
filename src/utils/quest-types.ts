@@ -1,3 +1,4 @@
+import type { AchievementToastView } from "@/utils/achievement-types";
 import type { UnitKind } from "@/utils/quest-plan";
 import type { WeekNews } from "@/utils/quest-board";
 import type { ReviewStatus } from "@/utils/quest-review";
@@ -21,6 +22,8 @@ export interface HudView {
   streak: number;
   /** 오늘도 이미 채웠는지 */
   streakToday: boolean;
+  /** 방금 이뤄서 아직 알리지 않은 업적 */
+  newAchievements: AchievementToastView[];
 }
 
 export interface ProofView {

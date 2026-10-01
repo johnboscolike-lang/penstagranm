@@ -168,6 +168,18 @@ export function applySchema(database) {
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "BossReward_studentId_weekKey_key"
       ON "BossReward" ("studentId", "weekKey");
+    CREATE TABLE IF NOT EXISTS "Achievement" (
+      "id" TEXT NOT NULL PRIMARY KEY,
+      "studentId" TEXT NOT NULL,
+      "key" TEXT NOT NULL,
+      "unlockedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      "seen" BOOLEAN NOT NULL DEFAULT false,
+      CONSTRAINT "Achievement_studentId_fkey"
+        FOREIGN KEY ("studentId") REFERENCES "Student" ("id")
+        ON DELETE CASCADE ON UPDATE CASCADE
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS "Achievement_studentId_key_key"
+      ON "Achievement" ("studentId", "key");
     CREATE TABLE IF NOT EXISTS "ClassSetting" (
       "key" TEXT NOT NULL PRIMARY KEY,
       "value" TEXT NOT NULL

@@ -86,6 +86,7 @@ model Student {
   duelsChallenged Duel[]   @relation("DuelChallenger")
   duelsReceived   Duel[]   @relation("DuelOpponent")
   bossRewards     BossReward[]
+  achievements    Achievement[]
 }
 
 /// 약속 카드. scope=DAY 는 하루 카드(slotIndex 0~2 가 점수에 들어감), scope=WEEK 는 주간 퀘스트 카드(dateKey 가 그 주 월요일).
@@ -237,6 +238,19 @@ model BossReward {
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, weekKey])
+}
+
+/// 학생이 이룬 업적. (학생, 업적 이름) 조합은 하나뿐이라 몇 번을 확인해도 한 번만 남는다.
+model Achievement {
+  id         String   @id @default(cuid())
+  studentId  String
+  key        String
+  unlockedAt DateTime @default(now())
+  /// 알림으로 알려 주었는지
+  seen       Boolean  @default(false)
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, key])
 }
 
 /// 학급 전체에 적용되는 켜고 끄는 설정 (예: 대결장 열기).

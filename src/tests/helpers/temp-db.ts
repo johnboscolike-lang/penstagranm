@@ -16,7 +16,7 @@ export async function createTempDatabase(): Promise<{ dispose(): Promise<void> }
     process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
     const { prisma } = await import("@/utils/prisma");
     await prisma.$executeRawUnsafe(
-      'TRUNCATE TABLE "Duel","BossReward","ClassSetting","PromiseUnit","QuestProof","Purchase","DailyPromise","Quest","Comment","PostPhoto","Post","Student","Team","ScheduleItem","UploadedFile" CASCADE',
+      'TRUNCATE TABLE "Duel","BossReward","Achievement","ClassSetting","PromiseUnit","QuestProof","Purchase","DailyPromise","Quest","Comment","PostPhoto","Post","Student","Team","ScheduleItem","UploadedFile" CASCADE',
     );
 
     return {

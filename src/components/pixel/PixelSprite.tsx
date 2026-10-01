@@ -164,6 +164,8 @@ interface Cc0SpriteProps {
   kind: Cc0Kind;
   name: string;
   scale?: number;
+  /** 버튼·카드·알림 안에서 쓸 때 켠다. 도트 한 칸을 3px로 고정해 화면 크기에 따라 커지지 않는다. */
+  ui?: boolean;
   flip?: boolean;
   label?: string;
   className?: string;
@@ -172,7 +174,7 @@ interface Cc0SpriteProps {
 /**
  * 공개(CC0) 동물·이모트·아이템 도트를 게임 도트 크기에 맞춰 보여 준다. (16×16 원본)
  */
-export function Cc0Sprite({ kind, name, scale = 1, flip, label, className }: Cc0SpriteProps) {
+export function Cc0Sprite({ kind, name, scale = 1, ui, flip, label, className }: Cc0SpriteProps) {
   const vars: SpriteVars = { "--w": CC0_TILE, "--h": CC0_TILE, "--m": scale };
 
   return (
@@ -180,12 +182,34 @@ export function Cc0Sprite({ kind, name, scale = 1, flip, label, className }: Cc0
     <img
       alt={label ?? ""}
       aria-hidden={label ? undefined : true}
-      className={clsx("px", "px--img", flip && "px--flip", className)}
+      className={clsx("px", "px--img", ui && "px--ui", flip && "px--flip", className)}
       draggable={false}
       height={CC0_TILE}
       src={cc0Url(kind, name)}
       style={vars}
       width={CC0_TILE}
     />
+  );
+}
+
+interface PetSpriteProps {
+  art: "kenney" | "creatures";
+  sprite: string;
+  scale?: number;
+  /** 버튼·카드 안에서 쓸 때 켠다. (Cc0Sprite 참고) */
+  ui?: boolean;
+  flip?: boolean;
+  label?: string;
+  className?: string;
+}
+
+/**
+ * 펫 그림. 몬스터 펫은 Kenney 도트, 동물 펫은 Tiny Creatures 도트로 같은 크기(16×16)에 그린다.
+ */
+export function PetSprite({ art, sprite, scale = 1, ui, flip, label, className }: PetSpriteProps) {
+  return art === "creatures" ? (
+    <Cc0Sprite className={className} flip={flip} kind="creatures" label={label} name={sprite} scale={scale} ui={ui} />
+  ) : (
+    <KenneySprite className={clsx(ui && "px--ui", className)} flip={flip} label={label} name={sprite as KenneyName} scale={scale} />
   );
 }

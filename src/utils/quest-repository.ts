@@ -32,6 +32,8 @@ import { assignQuestSlots, isDailyQuestDue, isWeeklyQuestDue, pickQuestRange } f
 import type { CardState, HudView, ProofView, PromiseView, TodayView, UpcomingScheduleView } from "@/utils/quest-types";
 import { prisma } from "@/utils/prisma";
 import { HAT_KEYS } from "@/utils/art/hats";
+import { petsFromAchievements } from "@/utils/achievement-rules";
+import { syncAchievements } from "@/utils/achievement-repository";
 import { calcStreak } from "@/utils/streak";
 import { findHatByPurchaseKey, hatPurchaseKey, isHatKey, isPetKey, unlockedPetKeys } from "@/utils/cosmetics";
 import { calcCoinBalance, findShopItem } from "@/utils/shop-items";
@@ -250,14 +252,15 @@ export interface Wardrobe {
  * 학생이 가진 모자(구매 기록)와 펫(보스 보상 기록), 그리고 지금 쓰고 있는 것을 한꺼번에 읽는다.
  */
 export async function loadWardrobe(client: DbClient, studentId: string): Promise<Wardrobe> {
-  const [student, purchases, rewards] = await Promise.all([
+  const [student, purchases, rewards, achievements] = await Promise.all([
     client.student.findUnique({ where: { id: studentId }, select: { hatKey: true, petKey: true } }),
     client.purchase.findMany({ where: { studentId, itemKey: { startsWith: "hat:" } }, select: { itemKey: true } }),
     client.bossReward.findMany({ where: { studentId }, select: { weekKey: true } }),
+    client.achievement.findMany({ where: { studentId }, select: { key: true } }),
   ]);
   const ownedPurchases = new Set(purchases.map((purchase) => purchase.itemKey));
   const ownedHatKeys = new Set(HAT_KEYS.filter((key) => ownedPurchases.has(hatPurchaseKey(key))));
-  const ownedPetKeys = new Set(unlockedPetKeys(rewards.map((reward) => reward.weekKey)));
+  const ownedPetKeys = new Set<string>([...unlockedPetKeys(rewards.map((reward) => reward.weekKey)), ...petsFromAchievements(achievements.map((row) => row.key))]);
 
   return {
     found: student !== null,
@@ -287,13 +290,15 @@ async function loadActiveDays(client: DbClient, studentId: string, todayKey: str
  */
 async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<HudView> {
   const todayKey = getKstDateKey();
-  const [totals, arenaInbox, look, activeDays] = await Promise.all([
+  const activeDays = await loadActiveDays(prisma, me.id, todayKey);
+  const streak = calcStreak(activeDays, todayKey);
+  // 업적을 먼저 저장해야 방금 만난 동물 펫이 아래 옷장 정보에 바로 들어간다.
+  const achievements = await syncAchievements(prisma, me.id, streak.count);
+  const [totals, arenaInbox, look] = await Promise.all([
     getStudentTotals(me.id),
     prisma.duel.count({ where: { opponentId: me.id, status: "PENDING", opponentScore: null } }),
     loadWardrobe(prisma, me.id),
-    loadActiveDays(prisma, me.id, todayKey),
   ]);
-  const streak = calcStreak(activeDays, todayKey);
   const level = calcLevel(totals.xp);
 
   return {
@@ -310,6 +315,7 @@ async function buildHudView(me: StudentRecord, teams: TeamRecord[]): Promise<Hud
     petKey: look.petKey,
     streak: streak.count,
     streakToday: streak.includesToday,
+    newAchievements: achievements.fresh,
   };
 }
 

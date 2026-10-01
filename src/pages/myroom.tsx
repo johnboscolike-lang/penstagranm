@@ -1,11 +1,14 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 import { GameShell } from "@/components/GameShell";
+import { AchievementBoard } from "@/components/room/AchievementBoard";
 import { ClosetPanel } from "@/components/room/ClosetPanel";
 import { guardPage } from "@/utils/auth-guard";
 import { PostCard } from "@/components/PostCard";
 import { ProfileCard, RecordsHeader, WeekNewsCard, YardShop } from "@/components/room/RoomPanels";
 import { RoomScene } from "@/components/scenes/RoomScene";
+import { getAchievementBoard } from "@/utils/achievement-repository";
+import type { AchievementBoardView } from "@/utils/achievement-types";
 import { getCloset } from "@/utils/closet-repository";
 import type { ClosetView } from "@/utils/closet-types";
 import { getFeedPosts } from "@/utils/repository";
@@ -20,6 +23,7 @@ interface MyRoomPageProps {
   news: WeekNews;
   ownedItemKeys: string[];
   closet: ClosetView;
+  board: AchievementBoardView;
   posts: PostView[];
 }
 
@@ -33,10 +37,11 @@ export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async (co
   }
 
   const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
-  const [news, ownedItemKeys, closet, posts, roster] = await Promise.all([
+  const [news, ownedItemKeys, closet, board, posts, roster] = await Promise.all([
     getLastWeekNewsView(todayKey, meId),
     getOwnedItemKeys(meId),
     getCloset(meId),
+    getAchievementBoard(meId, hud.streak),
     getFeedPosts(),
     loadRoster(meId),
   ]);
@@ -48,6 +53,7 @@ export const getServerSideProps: GetServerSideProps<MyRoomPageProps> = async (co
       news,
       ownedItemKeys,
       closet,
+      board,
       posts,
     },
   };
@@ -62,6 +68,7 @@ export default function MyRoomPage({
   news,
   ownedItemKeys,
   closet,
+  board,
   posts,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
@@ -74,6 +81,7 @@ export default function MyRoomPage({
     >
       <ProfileCard emblem={emblem} hud={hud} />
       <WeekNewsCard news={news} />
+      <AchievementBoard board={board} />
       <ClosetPanel closet={closet} coins={hud.coins} hairKey={hud.hairKey} />
       <YardShop coins={hud.coins} ownedItemKeys={ownedItemKeys} />
       <section aria-label="성장 기록" className="records" id="records">

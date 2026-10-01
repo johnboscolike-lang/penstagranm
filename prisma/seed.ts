@@ -2,6 +2,7 @@ import { deflateSync } from "node:zlib";
 
 import { PrismaClient, PhotoSlot } from "@prisma/client";
 
+import { syncAchievements } from "../src/utils/achievement-repository";
 import { BOSS_REWARD, bossForWeek } from "../src/utils/boss-rules";
 import { hatPurchaseKey } from "../src/utils/cosmetics";
 import { applyElo, decideOutcome, flipOutcome, rewardFor, scoreAnswers, START_RATING } from "../src/utils/arena-rules";
@@ -463,6 +464,7 @@ async function main(): Promise<void> {
     return;
   }
 
+  await prisma.achievement.deleteMany();
   await prisma.bossReward.deleteMany();
   await prisma.duel.deleteMany();
   await prisma.classSetting.deleteMany();
@@ -589,6 +591,12 @@ async function main(): Promise<void> {
   await prisma.bossReward.createMany({ data: oldWeeks.map((weekKey) => ({ studentId: myId, weekKey, xp: BOSS_REWARD.xp, coins: BOSS_REWARD.coins })) });
   await prisma.purchase.create({ data: { studentId: myId, itemKey: hatPurchaseKey("ears"), cost: 25 } });
   await prisma.student.update({ where: { id: myId }, data: { hatKey: "ears", petKey: bossForWeek(oldWeeks[0]).key } });
+  // 이미 기록으로 이룬 업적은 "봤음"으로 두어, 첫 화면에서 알림이 한꺼번에 쏟아지지 않게 한다.
+  // (연속 실천은 화면을 열 때의 날짜로 계산하니, 지금 이어지는 연속 업적만 새 알림으로 뜬다.)
+  for (const studentId of studentsByName.values()) {
+    await syncAchievements(prisma, studentId, 0);
+    await prisma.achievement.updateMany({ where: { studentId }, data: { seen: true } });
+  }
   // 데모 데이터는 칸이 넉넉히 채워져 있어서, 보스가 한창 싸우는 모습이 보이도록 어려움으로 둔다.
   await prisma.classSetting.create({ data: { key: "raidLevel", value: "hard" } });
 

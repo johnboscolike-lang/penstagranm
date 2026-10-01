@@ -1,4 +1,3 @@
-import { BOSSES } from "@/utils/boss-rules";
 import type { ClosetView } from "@/utils/closet-types";
 import { HAT_ITEMS, hatPurchaseKey, petHint, PETS } from "@/utils/cosmetics";
 import { prisma } from "@/utils/prisma";
@@ -31,10 +30,12 @@ export async function getCloset(studentId: string): Promise<ClosetView> {
     pets: PETS.map((pet) => ({
       key: pet.key,
       name: pet.name,
+      art: pet.art,
       sprite: pet.sprite,
+      source: pet.source,
       owned: wardrobe.ownedPetKeys.has(pet.key),
       equipped: petKey === pet.key,
-      hint: petHint(BOSSES.find((boss) => boss.key === pet.key) ?? BOSSES[0]),
+      hint: petHint(pet),
     })),
   };
 }
