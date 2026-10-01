@@ -30,6 +30,7 @@ export interface PostView {
   authorName: string;
   authorRole: string;
   avatarUrl: string | null;
+  authorHairKey: string | null;
   lessonTitle: string;
   caption: string;
   transcript: string;

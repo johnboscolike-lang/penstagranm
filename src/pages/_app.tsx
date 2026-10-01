@@ -1,6 +1,8 @@
 import type { AppProps } from "next/app";
 
 import "@/styles/globals.css";
+import "@/styles/layout.css";
+import "@/styles/features.css";
 
 /**
  * Loads global styles for the entire pages-router application.

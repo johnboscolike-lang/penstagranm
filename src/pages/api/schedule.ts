@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 
+import { requireApiSession } from "@/utils/auth-guard";
 import { createScopedLogger } from "@/utils/logger";
 import { createScheduleItem } from "@/utils/repository";
 
@@ -18,6 +19,10 @@ const scheduleSchema = z.object({
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.status(405).json({ message: "POST 요청만 허용됩니다." });
+    return;
+  }
+
+  if (!requireApiSession(req, res, "any")) {
     return;
   }
 

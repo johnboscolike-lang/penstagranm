@@ -1,85 +1,90 @@
 import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import Link from "next/link";
 
-import { AppShell } from "@/components/AppShell";
-import { PostCard } from "@/components/PostCard";
-import { PostComposer } from "@/components/PostComposer";
-import { getFeedPosts } from "@/utils/repository";
-import type { PostView } from "@/utils/types";
+import { BossPanel } from "@/components/boss/BossPanel";
+import { PixelIcon } from "@/components/pixel/PixelSprite";
+import { guardPage } from "@/utils/auth-guard";
+import { getRaidView } from "@/utils/boss-repository";
+import type { RaidView } from "@/utils/boss-types";
+import { GameShell } from "@/components/GameShell";
+import { SchoolPanel } from "@/components/school/SchoolPanel";
+import { SchoolScene } from "@/components/scenes/SchoolScene";
+import { getPageBase, getTodayView, getUpcomingSchedule } from "@/utils/quest-repository";
+import type { HudView } from "@/utils/quest-types";
+import { buildSchoolPanelData, type SchoolPanelData } from "@/utils/school-view";
 
-interface HomePageProps {
-  posts: PostView[];
+interface SchoolPageProps {
+  hud: HudView;
+  school: SchoolPanelData;
+  raid: RaidView;
+  promisesDone: number;
+  promisesTotal: number;
+  isSchoolDay: boolean;
 }
 
 /**
- * Loads the main feed from the database on each request.
+ * Loads the school panel data and a one-line summary of today's promises.
  */
-export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
-  const posts = await getFeedPosts();
+export const getServerSideProps: GetServerSideProps<SchoolPageProps> = async (context) => {
+  const guard = guardPage(context, "student");
+  if (!guard.ok) {
+    return guard.result;
+  }
+
+  const { hud, meId, todayKey } = await getPageBase(guard.session.studentId as string);
+  const [schedule, today, raid] = await Promise.all([getUpcomingSchedule(todayKey, 4), getTodayView(meId, todayKey), getRaidView(meId, todayKey)]);
 
   return {
     props: {
-      posts,
+      hud,
+      school: buildSchoolPanelData(new Date(), schedule),
+      raid,
+      promisesDone: today.promises.filter((promise) => promise.confirmedUnitNos.length === promise.unitCount).length,
+      promisesTotal: today.promises.length,
+      isSchoolDay: today.isSchoolDay,
     },
   };
 };
 
 /**
- * Renders the Instagram-style classroom feed and post composer.
+ * 학교 공간: 공지·시간표·급식·일정을 게임 성과 없이 바로 확인하는 첫 화면.
  */
-export default function HomePage({
-  posts,
+export default function SchoolPage({
+  hud,
+  school,
+  raid,
+  promisesDone,
+  promisesTotal,
+  isSchoolDay,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <AppShell currentPath="feed">
-      <section className="hero-grid">
-        <div className="hero-card">
-          <p className="hero-card__eyebrow">INSTA-STYLE FOR CLASSROOMS</p>
-          <h2>준비-목표-필기-과제를 한 번에 기록하는 네 컷 수업 피드</h2>
-          <p>
-            수업 장면을 빠르게 아카이빙하고, 녹음 전사와 댓글로 맥락을 보강하는 교실용
-            소셜 피드입니다.
-          </p>
-        </div>
-        <div className="hero-side">
-          <div className="metric-card">
-            <strong>{posts.length}</strong>
-            <span>업로드된 수업 기록</span>
-          </div>
-          <div className="metric-card">
-            <strong>4</strong>
-            <span>고정 사진 프레임</span>
-          </div>
-        </div>
-      </section>
+    <GameShell
+      banner="현실의 학교가 게임 속으로"
+      hud={hud}
+      pageTitle="학교"
+      scene={<SchoolScene bubble="오늘 학교 소식부터 확인해 볼까?" hairKey={hud.hairKey} hatKey={hud.hatKey} petKey={hud.petKey} />}
+      space="school"
+    >
+      <SchoolPanel data={school} />
 
-      <div className="content-grid">
-        <div className="stack-column">
-          <PostComposer />
-          <section className="feed-list">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </section>
-        </div>
+      <BossPanel raid={raid} />
 
-        <aside className="panel panel--sidebar">
-          <div className="section-heading">
-            <div>
-              <p className="section-heading__eyebrow">WORKFLOW</p>
-              <h3>권장 업로드 순서</h3>
-            </div>
-          </div>
-          <ol className="guide-list">
-            <li>수업준비사진(자신 포함)으로 시작 장면을 남깁니다.</li>
-            <li>수업목표사진으로 오늘의 목표를 보여줍니다.</li>
-            <li>필기사진으로 설명 흐름을 남깁니다.</li>
-            <li>과제사진으로 마무리 과제를 정리합니다.</li>
-          </ol>
-          <p className="helper-text">
-            브라우저가 지원하면 녹음 내용이 한국어로 전사되어 게시글에 함께 저장됩니다.
-          </p>
-        </aside>
-      </div>
-    </AppShell>
+      <Link className="teaser card card--mint pf" href="/challenge">
+        <PixelIcon name="challenge" scale={1.4} />
+        <span className="teaser__text">
+          <span>
+            {isSchoolDay ? (
+              <>
+                오늘 약속 <strong>{promisesDone} / {promisesTotal}</strong> 완료
+              </>
+            ) : (
+              "주말에는 쉬어가요. 월요일에 새 출발!"
+            )}
+          </span>
+          <small>주간도전에서 약속 칸을 채워요</small>
+        </span>
+        <PixelIcon name="chevron" />
+      </Link>
+    </GameShell>
   );
 }

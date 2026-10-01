@@ -1,5 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { requireApiSession } from "@/utils/auth-guard";
+import { respondWithQuestError } from "@/utils/quest-api";
 import { createScopedLogger } from "@/utils/logger";
 import { validatePostDraft } from "@/utils/post-validation";
 import { createPost } from "@/utils/repository";
@@ -22,6 +24,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
+  const session = requireApiSession(req, res, "student");
+  if (!session?.studentId) {
+    return;
+  }
+
   try {
     const parsed = await parsePostMultipartRequest(req);
     const validation = validatePostDraft({
@@ -39,9 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    const post = await createPost(parsed);
+    const post = await createPost(parsed, session.studentId);
     res.status(201).json({ post });
   } catch (error: unknown) {
+    if (respondWithQuestError(res, error)) {
+      return;
+    }
+
     logger.error("게시글 저장 실패", error);
     res.status(500).json({ message: "게시글 저장 중 오류가 발생했습니다." });
   }

@@ -1,6 +1,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/router";
 
+import { PixelIcon } from "@/components/pixel/PixelSprite";
+
 interface ScheduleFormProps {
   selectedDateKey: string;
 }
@@ -44,7 +46,7 @@ export function ScheduleForm({ selectedDateKey }: ScheduleFormProps) {
     setTitle("");
     setNotes("");
     startTransition(() => {
-      void router.replace(router.asPath);
+      void router.replace(router.asPath, undefined, { scroll: false });
     });
   }
 
@@ -52,35 +54,31 @@ export function ScheduleForm({ selectedDateKey }: ScheduleFormProps) {
     <form className="schedule-form" onSubmit={handleSubmit}>
       <label className="field">
         <span>일정 제목</span>
-        <input
-          className="text-input"
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="예: 과제 제출 체크"
-          value={title}
-        />
+        <input className="input" maxLength={60} onChange={(event) => setTitle(event.target.value)} placeholder="예: 과제 제출 체크" value={title} />
       </label>
       <label className="field">
         <span>시간</span>
-        <input
-          className="text-input"
-          onChange={(event) => setTime(event.target.value)}
-          type="time"
-          value={time}
-        />
+        <input className="input" onChange={(event) => setTime(event.target.value)} type="time" value={time} />
       </label>
       <label className="field">
         <span>메모</span>
         <textarea
-          className="text-area"
+          className="textarea"
+          maxLength={300}
           onChange={(event) => setNotes(event.target.value)}
-          placeholder="학생 안내 사항이나 준비물을 적어두세요."
-          rows={4}
+          placeholder="준비물이나 안내 사항을 적어 두세요."
+          rows={3}
           value={notes}
         />
       </label>
-      {feedback ? <p className="form-message form-message--error">{feedback}</p> : null}
-      <button className="primary-button" disabled={isPending} type="submit">
-        일정 저장
+      {feedback ? (
+        <p className="msg msg--error" role="alert">
+          {feedback}
+        </p>
+      ) : null}
+      <button className="btn btn--block" disabled={isPending} type="submit">
+        <PixelIcon name="calendar" />
+        <span>{selectedDateKey} 일정 저장</span>
       </button>
     </form>
   );

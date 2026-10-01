@@ -13,7 +13,8 @@
     "db:push": "node scripts/init-db.mjs",
     "db:seed": "tsx prisma/seed.ts",
     "publish": "powershell -ExecutionPolicy Bypass -File scripts/auto-publish.ps1",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "node scripts/prepare-postgres.mjs && prisma generate --schema prisma/schema.postgres.prisma && prisma db push --schema prisma/schema.postgres.prisma --skip-generate && tsx prisma/seed.ts --if-empty && next build"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
