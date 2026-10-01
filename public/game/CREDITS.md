@@ -32,3 +32,24 @@
 ## 쓰지 않은 것
 
 넥슨의 메이플스토리 캐릭터·이미지는 넥슨의 저작물이라 허락 없이 게임에 넣을 수 없어서 쓰지 않았다.
+
+## 외부 CC0 배경 음악 3곡 — OpenGameArt
+
+`bgm/battle.mp3`, `bgm/boss.mp3`, `bgm/play.mp3`는 위 "직접 만든 에셋"의 합성 음악이 아니라 OpenGameArt(https://opengameart.org)에서 받은 [CC0 1.0 공개 도메인](https://creativecommons.org/publicdomain/zero/1.0/) 곡이다. 표기는 필수가 아니지만 고마운 마음으로 남긴다. (`school`·`challenge`·`room`·`arena`·`teacher` 5곡은 그대로 `make-bgm.mjs`로 합성한 곡이다.)
+
+| 파일 | 곡 제목 | 작가 | 라이선스 | 출처 페이지 | 쓰임 |
+|---|---|---|---|---|---|
+| `bgm/battle.mp3` | Grizzly Dwarf Battle (LOOP) — "Glizzy Elf Forest [RPG MUSIC PACK]" 안의 곡 | Zane Little (OpenGameArt 계정: Zane Little Music) | CC0 | [OpenGameArt — Glizzy Elf Forest [RPG MUSIC PACK]](https://opengameart.org/content/glizzy-elf-forest-rpg-music-pack) | 대결(아레나) 전투 음악 |
+| `bgm/boss.mp3` | Epic Boss Battle [Seamlessly Looping] | Juhani Junkala (OpenGameArt 업로더: SubspaceAudio) | CC0 | [OpenGameArt — Boss Battle Music](https://opengameart.org/content/boss-battle-music) | 주간 학급 보스 음악 |
+| `bgm/play.mp3` | Level 1 — "[Retro Game Music Pack]" 중 "5 Chiptunes (Action)" 묶음 | Juhani Junkala (OpenGameArt 업로더: SubspaceAudio) | CC0 | [OpenGameArt — 5 Chiptunes (Action)](https://opengameart.org/content/5-chiptunes-action) | 빠른 미니게임 음악 |
+
+### CC0라고 판단한 근거 (2026-10-01 확인)
+
+- `battle.mp3`: OGA 페이지 License(s) 필드가 CC0. 받은 압축 파일(`loops_and_intros.zip`) 안에는 별도 라이선스 문구가 없고 WAV 태그에도 라이선스 문구가 없다. 근거는 OGA 페이지 하나뿐이다.
+- `boss.mp3`: OGA 페이지 License(s) 필드가 CC0. 받은 파일은 WAV 한 개뿐이고, 그 태그에 "Loop Ready, Free to Use Anywhere"라고 적혀 있다(CC0라는 말은 없고 자유 사용 문구).
+- `play.mp3`: OGA 페이지 License(s) 필드가 CC0. 압축 파일 안 `INFO.txt`에 "These music tracks have been released under CC0 creative commons license. You can do anything you want with these tunes."라고 적혀 있다.
+
+### 변환과 확인 범위
+
+- `scripts/audio/import-cc0-bgm.mjs`가 원본 WAV에서 mp3로 바꾼다(어떤 원본을 어떤 이름으로 옮겼는지 `TRACKS` 표에 적어 두었다). loudnorm 2패스(linear)로 통합 -19 LUFS 근처에 맞추고, 96 kbps 스테레오 44.1 kHz로 인코딩한다. 앞뒤를 자르거나 페이드를 넣지 않았다.
+- 이 3곡은 귀로 들어 보며 확인하지 않았다. 음량·길이·반복 이음새는 ffmpeg 수치로만 확인했다. 곡 분위기와 반복 느낌은 사람이 직접 들어 보고 확정해야 한다.
