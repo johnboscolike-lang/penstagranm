@@ -17,6 +17,8 @@ const FADE_OUT_SECONDS = 0.5;
 const DUCK_LEVEL = 0.3;
 const MAX_ACTIVE_SFX = 12;
 const SAME_SFX_GAP_MS = 45;
+/** 디코딩된 배경 음악은 곡당 수십 MB라서 최근 이만큼만 메모리에 둔다. (효과음은 작아서 모두 둔다) */
+const MAX_CACHED_TRACKS = 2;
 
 interface ParamLike {
   value: number;
@@ -93,6 +95,9 @@ export class AudioEngine {
   private readonly buffers = new Map<string, Promise<unknown>>();
 
   private readonly lastPlayed = new Map<SfxName, number>();
+
+  /** 최근에 쓴 배경 음악 주소 (오래된 것이 앞) */
+  private readonly recentTracks: string[] = [];
 
   constructor(deps: AudioEngineDeps) {
     this.deps = deps;
@@ -255,6 +260,27 @@ export class AudioEngine {
   }
 
   /**
+   * 방금 쓴 곡을 기억해 두고, 오래 안 쓴 곡의 디코딩된 소리는 메모리에서 비운다. (다시 가면 다시 받는다)
+   * 지금 재생 중이거나 재생하려는 곡은 비우지 않는다.
+   */
+  private rememberTrack(url: string): void {
+    const index = this.recentTracks.indexOf(url);
+    if (index >= 0) {
+      this.recentTracks.splice(index, 1);
+    }
+    this.recentTracks.push(url);
+    const keep = new Set([url, this.voice ? bgmUrl(this.voice.track) : url, this.wantedTrack ? bgmUrl(this.wantedTrack) : url]);
+    while (this.recentTracks.length > MAX_CACHED_TRACKS) {
+      const oldest = this.recentTracks.find((candidate) => !keep.has(candidate));
+      if (!oldest) {
+        break;
+      }
+      this.recentTracks.splice(this.recentTracks.indexOf(oldest), 1);
+      this.buffers.delete(oldest);
+    }
+  }
+
+  /**
    * 곡을 받아 서서히 커지며 반복 재생한다.
    */
   private async startVoice(track: BgmTrack): Promise<void> {
@@ -262,7 +288,9 @@ export class AudioEngine {
     if (!context) {
       return;
     }
-    const buffer = await this.loadBuffer(bgmUrl(track));
+    const url = bgmUrl(track);
+    const buffer = await this.loadBuffer(url);
+    this.rememberTrack(url);
     const stillWanted = this.settings.musicOn && this.wantedTrack === track && !this.voice;
     if (!buffer || !stillWanted) {
       return;

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 
+import { ModalDialog } from "@/components/ModalDialog";
 import { Cc0Sprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
 import { EMOTE_LABELS, EMOTE_NAMES, isEmoteName } from "@/utils/art/cc0";
 import type { AnswerFeedback } from "@/utils/arena-repository";
@@ -197,7 +198,7 @@ export function DuelPlay({ start, onClose }: DuelPlayProps) {
   const percent = Math.round((remaining / start.questionMs) * 100);
 
   return (
-    <div aria-label="퀴즈 대결" aria-modal="true" className="duel" role="dialog">
+    <ModalDialog label="퀴즈 대결" onRequestClose={stage === "result" || stage === "error" ? () => onClose(true) : undefined}>
       <div className="duel__card pf">
         <header className="duel__players">
           <div className="duel__player">
@@ -302,7 +303,7 @@ export function DuelPlay({ start, onClose }: DuelPlayProps) {
           </div>
         ) : null}
       </div>
-    </div>
+    </ModalDialog>
   );
 }
 

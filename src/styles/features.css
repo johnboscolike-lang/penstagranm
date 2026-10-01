@@ -1675,6 +1675,24 @@
   overflow-y: auto;
 }
 
+dialog.duel {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  color: inherit;
+}
+
+dialog.duel:not([open]) {
+  display: none;
+}
+
+dialog.duel::backdrop {
+  background: transparent;
+}
+
 .duel__card {
   --b: 3px;
   --frame: var(--frame-parchment);

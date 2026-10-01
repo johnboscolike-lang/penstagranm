@@ -4,7 +4,7 @@ import clsx from "clsx";
 
 import { DuelPlay, DuelResultPanel } from "@/components/arena/DuelPlay";
 import { LeagueBadge } from "@/components/arena/LeagueBadge";
-import { Portal } from "@/components/Portal";
+import { ModalDialog } from "@/components/ModalDialog";
 import { Cc0Sprite, PixelAvatar, PixelIcon } from "@/components/pixel/PixelSprite";
 import { EMOTE_LABELS, isEmoteName } from "@/utils/art/cc0";
 import type { ArenaOverview, DuelResultView, DuelStartView } from "@/utils/arena-types";
@@ -282,28 +282,24 @@ export function ArenaPanel({ overview }: ArenaPanelProps) {
       </section>
 
       {playing ? (
-        <Portal>
-          <DuelPlay
-            key={playing.duelId}
-            onClose={(changed) => {
-              setPlaying(null);
-              if (changed) {
-                refresh();
-              }
-            }}
-            start={playing}
-          />
-        </Portal>
+        <DuelPlay
+          key={playing.duelId}
+          onClose={(changed) => {
+            setPlaying(null);
+            if (changed) {
+              refresh();
+            }
+          }}
+          start={playing}
+        />
       ) : null}
 
       {reviewing ? (
-        <Portal>
-          <div aria-label="대결 결과" aria-modal="true" className="duel" role="dialog">
-            <div className="duel__card pf">
-              <DuelResultPanel onClose={() => setReviewing(null)} result={reviewing} />
-            </div>
+        <ModalDialog label="대결 결과" onRequestClose={() => setReviewing(null)}>
+          <div className="duel__card pf">
+            <DuelResultPanel onClose={() => setReviewing(null)} result={reviewing} />
           </div>
-        </Portal>
+        </ModalDialog>
       ) : null}
     </>
   );

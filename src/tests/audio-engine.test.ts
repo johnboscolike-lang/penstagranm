@@ -94,6 +94,42 @@ async function flush(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+describe("음악 메모리 관리", () => {
+  it("최근 두 곡만 메모리에 두고, 오래 안 들른 곡은 다시 가면 다시 받는다", async () => {
+    const { engine, fetched } = setup();
+    await engine.unlock();
+
+    for (const track of ["school", "challenge", "room"] as const) {
+      engine.setTrack(track);
+      await flush();
+    }
+    expect(fetched).toEqual(["/game/bgm/school.mp3", "/game/bgm/challenge.mp3", "/game/bgm/room.mp3"]);
+
+    engine.setTrack("challenge"); // 아직 메모리에 있다
+    await flush();
+    expect(fetched).toHaveLength(3);
+
+    engine.setTrack("school"); // 오래 안 써서 비워졌다
+    await flush();
+    expect(fetched.filter((url) => url === "/game/bgm/school.mp3")).toHaveLength(2);
+  });
+
+  it("지금 재생 중인 곡은 비우지 않는다", async () => {
+    const { engine, fetched } = setup();
+    await engine.unlock();
+    engine.setTrack("school");
+    await flush();
+    engine.setTrack("challenge");
+    await flush();
+    engine.setTrack("school");
+    await flush();
+    engine.setTrack("school");
+    await flush();
+
+    expect(fetched.filter((url) => url === "/game/bgm/school.mp3")).toHaveLength(1);
+  });
+});
+
 describe("소리 엔진", () => {
   it("저장된 설정을 읽고, 바꾸면 저장하고 구독자에게 알린다", () => {
     const { engine, written } = setup(JSON.stringify({ musicOn: false }));
