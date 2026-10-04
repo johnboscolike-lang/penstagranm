@@ -147,3 +147,8 @@ src/
 ├── styles/        # 전역·레이아웃·기능별 스타일
 └── tests/         # Vitest
 ```
+
+## 공업교육론 압축 특강 영상 (`lecture/`)
+
+같은 저장소 안에 임용 대비 **공업교육론 D-30 압축 특강** 영상을 만드는 Remotion 프로젝트가 있습니다.
+Next.js 앱과는 별도 패키지이며, 기획은 `docs/lecture/01-기획서.md`, 제작 방법은 `lecture/README.md`를 보세요.
