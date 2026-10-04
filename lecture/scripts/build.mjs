@@ -9,9 +9,9 @@ import { build } from "esbuild";
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
-import { ROOT, log } from "./lib.mjs";
+import { pickLesson, ROOT, log } from "./lib.mjs";
 
-const { l01 } = await import("../src/content/l01/index.ts");
+const l01 = await pickLesson();
 const { planLesson } = await import("../src/timeline.ts");
 
 const LESSON = l01.id;
@@ -33,7 +33,7 @@ await build({
   target: "es2020",
   jsx: "automatic",
   outfile: resolve(DIST, "app.js"),
-  define: { "process.env.NODE_ENV": '"production"' },
+  define: { "process.env.NODE_ENV": '"production"', __LESSON__: JSON.stringify(LESSON) },
   logLevel: "warning",
 });
 log("app.js 번들 완료");
@@ -80,7 +80,7 @@ const fontFaces = [
 // 공유용 페이지 본문(문서 골격 없이): 아티팩트 게시에 쓴다.
 writeFileSync(
   resolve(DIST, "page.html"),
-  `<title>공업교육론 이론 1강</title>
+  `<title>공업교육론 이론 ${l01.no}강</title>
 <style>
 ${fontFaces}
 :root{color-scheme:dark}
@@ -99,7 +99,7 @@ writeFileSync(
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>공업교육론 이론 1강</title>
+<title>공업교육론 이론 ${l01.no}강</title>
 <style>
 ${fontFaces}
 html,body{margin:0;height:100%;background:#000;overflow:hidden}

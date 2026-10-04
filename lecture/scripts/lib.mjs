@@ -81,3 +81,14 @@ export async function pool(items, limit, fn) {
   await Promise.all(workers);
   return out;
 }
+
+/**
+ * 대상 강의를 고른다: `--lesson t02` 또는 환경 변수 LESSON, 기본 t01.
+ * @returns {Promise<import("../src/content/types.ts").Lesson>} 강의 대본
+ */
+export async function pickLesson() {
+  const i = process.argv.indexOf("--lesson");
+  const id = i >= 0 ? process.argv[i + 1] : process.env.LESSON || "t01";
+  const { getLesson } = await import("../src/content/lessons.ts");
+  return getLesson(id);
+}

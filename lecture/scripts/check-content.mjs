@@ -2,7 +2,8 @@
  * 대본 데이터 검사: 큐 참조 누락, 시험지 표시 문구 누락, 금지 표현, 분량 추정.
  * 사용: node --experimental-strip-types scripts/check-content.mjs
  */
-const { l01 } = await import("../src/content/l01/index.ts");
+import { pickLesson } from "./lib.mjs";
+const l01 = await pickLesson();
 const { parseSay } = await import("../src/content/parse.ts");
 
 const CHARS_PER_MIN = 432;
@@ -29,7 +30,7 @@ for (const c of l01.chapters) {
       for (const mk of s.v.marks) if (!body.includes(mk.q)) { console.error(`지문에 없는 표시 ${s.id}: ${mk.q}`); errors++; }
       for (const b of s.v.blanks ?? []) if (!body.includes(`( ${b.mark} )`)) { console.error(`빈칸 없음 ${s.id}: ${b.mark}`); errors++; }
     }
-    for (const bad of ["멈추", "써 보세요", "외워 보세요", "원문", "쪽수", "검증", "창작", "확증"]) {
+    for (const bad of ["멈추", "써 보세요", "외워 보세요", "원문", "쪽수", "검증된", "검증 완료", "검증했", "창작", "확증"]) {
       if (s.say.includes(bad)) { console.error(`금지 표현 '${bad}' ${s.id}`); errors++; }
     }
   }

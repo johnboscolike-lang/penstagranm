@@ -7,11 +7,11 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ROOT, loadEnv, log, hash, writeFile, pool } from "./lib.mjs";
+import { pickLesson, ROOT, loadEnv, log, hash, writeFile, pool } from "./lib.mjs";
 
 loadEnv();
 const KEY = process.env.ELEVENLABS_API_KEY;
-const { l01 } = await import("../src/content/l01/index.ts");
+const l01 = await pickLesson();
 const { parseSay } = await import("../src/content/parse.ts");
 
 /**

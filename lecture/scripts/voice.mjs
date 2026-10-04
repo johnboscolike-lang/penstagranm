@@ -7,9 +7,9 @@
  */
 import { existsSync, readFileSync, copyFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { ROOT, loadEnv, log, hash, writeFile, mediaDuration, pool } from "./lib.mjs";
+import { pickLesson, ROOT, loadEnv, log, hash, writeFile, mediaDuration, pool } from "./lib.mjs";
 
-const { l01 } = await import("../src/content/l01/index.ts");
+const l01 = await pickLesson();
 const { parseSay } = await import("../src/content/parse.ts");
 
 loadEnv();

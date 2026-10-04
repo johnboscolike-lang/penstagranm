@@ -8,9 +8,9 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
-import { ROOT, log, writeFile } from "./lib.mjs";
+import { pickLesson, ROOT, log, writeFile } from "./lib.mjs";
 
-const { l01 } = await import("../src/content/l01/index.ts");
+const l01 = await pickLesson();
 const { planLesson } = await import("../src/timeline.ts");
 
 const voice = JSON.parse(readFileSync(resolve(ROOT, "public/voice", l01.id, "timeline.json"), "utf8"));

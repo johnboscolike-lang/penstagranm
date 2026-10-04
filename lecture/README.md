@@ -47,7 +47,7 @@ npm run sfx        # 효과음·음악 생성, 피크 위치 측정 (public/sfx/
 npm run mix        # 내레이션 + 효과음(피크 정렬) + 배경음(덕킹) → -14 LUFS (out/t01/master.m4a)
 npm run build      # HTML 플레이어 → dist/t01 (index.html, app.js, assets/)
 npm run still -- c2s1 c4s3b@0.5 t=12   # 플레이어 화면 캡처 (out/stills/sheet.jpg)
-npm run serve      # 로컬에서 열기
+npm run serve      # 로컬에서 열기 (--lesson 으로 강 선택)
 npm test
 ```
 

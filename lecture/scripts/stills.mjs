@@ -11,9 +11,9 @@ import { createServer } from "node:http";
 import { readFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, extname } from "node:path";
 import { execFileSync } from "node:child_process";
-import { ROOT, log } from "./lib.mjs";
+import { pickLesson, ROOT, log } from "./lib.mjs";
 
-const { l01 } = await import("../src/content/l01/index.ts");
+const l01 = await pickLesson();
 const { planLesson } = await import("../src/timeline.ts");
 
 const BROWSER = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";

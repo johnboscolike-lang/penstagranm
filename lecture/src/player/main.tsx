@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { l01 } from "../content/l01/index.ts";
+import { getLesson } from "../content/lessons.ts";
 import { Stage } from "../Stage.tsx";
 import { asset } from "../lib/rt.ts";
 import { planLesson, type Plan, type VoiceTimeline } from "../timeline.ts";
@@ -8,6 +8,8 @@ import { C, FONT } from "../theme.ts";
 
 type ChapterAudio = { id: string; title: string; no: number; start: number; end: number; file: string };
 
+declare const __LESSON__: string;
+const lesson = getLesson(__LESSON__);
 const params = new URLSearchParams(location.search);
 const STILL = params.get("still") === "1";
 
@@ -25,6 +27,7 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
   const [captions, setCaptions] = useState(params.get("cap") !== "0");
   const [scale, setScale] = useState(1);
   const [ui, setUi] = useState(true);
+  const rateRef = useRef(1);
   const chIndex = useRef(0);
   const hideTimer = useRef<number | undefined>(undefined);
 
@@ -53,7 +56,7 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
           "loadedmetadata",
           () => {
             el.currentTime = local;
-            el.playbackRate = rate;
+            el.playbackRate = rateRef.current;
             if (play) void el.play();
           },
           { once: true },
@@ -127,6 +130,16 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
       else if (e.key === "]") seek(chapters[Math.min(chapters.length - 1, chapterAt(t) + 1)].start);
       else if (e.key === "[") seek(chapters[Math.max(0, chapterAt(t) - (t - chapters[chapterAt(t)].start < 2 ? 1 : 0))].start);
       else if (e.key === "c") setCaptions((x) => !x);
+      else if (e.key === "." || e.key === ",") {
+        const list = [0.9, 1, 1.25, 1.5, 2, 3];
+        const k = Math.min(list.length - 1, Math.max(0, list.indexOf(rateRef.current) + (e.key === "." ? 1 : -1)));
+        rateRef.current = list[k];
+        setRate(list[k]);
+        if (audio.current) {
+          audio.current.defaultPlaybackRate = list[k];
+          audio.current.playbackRate = list[k];
+        }
+      }
       else return;
       poke();
     };
@@ -155,7 +168,7 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
           scale: String(scale),
         }}
       >
-        <Stage plan={plan} t={t} label="이론 1강" captions={captions} />
+        <Stage plan={plan} t={t} label={`이론 ${lesson.no}강`} captions={captions} />
       </div>
       <audio ref={audio} preload="auto" onEnded={onEnded} />
 
@@ -224,12 +237,16 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
               onChange={(e) => {
                 const r = Number(e.target.value);
                 setRate(r);
-                if (audio.current) audio.current.playbackRate = r;
+                rateRef.current = r;
+                if (audio.current) {
+                  audio.current.defaultPlaybackRate = r;
+                  audio.current.playbackRate = r;
+                }
               }}
               style={selectStyle}
               aria-label="속도"
             >
-              {[0.9, 1, 1.15, 1.25, 1.5].map((r) => (
+              {[0.9, 1, 1.25, 1.5, 2, 3].map((r) => (
                 <option key={r} value={r}>
                   {r}×
                 </option>
@@ -330,7 +347,7 @@ async function boot() {
 }
 
 function App({ voice, chapters }: { voice: VoiceTimeline | null; chapters: ChapterAudio[] }) {
-  const plan = useMemo(() => planLesson(l01, voice), [voice]);
+  const plan = useMemo(() => planLesson(lesson, voice), [voice]);
   useEffect(() => {
     (window as unknown as { __ready: boolean }).__ready = true;
   }, []);
