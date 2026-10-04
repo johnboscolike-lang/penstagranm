@@ -40,7 +40,7 @@ for (const a of args) {
   }
 }
 
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".woff2": "font/woff2", ".jpg": "image/jpeg", ".m4a": "audio/mp4" };
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".woff2": "font/woff2", ".jpg": "image/jpeg", ".m4a": "audio/mp4", ".mp3": "audio/mpeg" };
 const server = createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
   const file = resolve(DIST, "." + (path === "/" ? "/index.html" : path));

@@ -51,12 +51,12 @@ const chapters = plan.chapters.map((c) => ({
   title: c.chapter.title,
   start: +c.start.toFixed(3),
   end: +c.end.toFixed(3),
-  file: `${c.chapter.id}.m4a`,
+  file: `${c.chapter.id}.mp3`,
 }));
 for (const c of chapters) {
   const out = resolve(ASSETS, "audio", c.file);
   if (keepAudio && existsSync(out)) continue;
-  execFileSync("ffmpeg", ["-v", "error", "-y", "-ss", String(c.start), "-to", String(c.end), "-i", master, "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", out]);
+  execFileSync("ffmpeg", ["-v", "error", "-y", "-ss", String(c.start), "-to", String(c.end), "-i", master, "-c:a", "libmp3lame", "-b:a", "128k", out]);
 }
 writeFileSync(resolve(ASSETS, "chapters.json"), JSON.stringify(chapters));
 log(`묶음 오디오 ${chapters.length}개`);
@@ -77,6 +77,21 @@ const fontFaces = [
   .map(([f, file, w]) => `@font-face{font-family:"${f}";src:url(assets/fonts/${file}.woff2) format("woff2");font-weight:${w};font-display:block}`)
   .join("\n");
 
+// 공유용 페이지 본문(문서 골격 없이): 아티팩트 게시에 쓴다.
+writeFileSync(
+  resolve(DIST, "page.html"),
+  `<title>공업교육론 이론 1강</title>
+<style>
+${fontFaces}
+:root{color-scheme:dark}
+html,body{height:100%;background:#000;overflow:hidden}
+body{-webkit-font-smoothing:antialiased;font-family:Pretendard,sans-serif;color:#E9F1FF}
+#root{height:100%}
+</style>
+<div id="root"></div>
+<script type="module" src="app.js"></script>
+`,
+);
 writeFileSync(
   resolve(DIST, "index.html"),
   `<!doctype html>

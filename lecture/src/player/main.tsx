@@ -191,14 +191,14 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
             left: 0,
             right: 0,
             bottom: 0,
-            padding: "28px 24px 18px",
+            padding: "28px max(16px, env(safe-area-inset-right)) calc(14px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left))",
             background: "linear-gradient(transparent, rgba(0,0,0,0.75))",
             fontFamily: FONT.kr,
             color: C.ice,
           }}
         >
           <Scrubber plan={plan} chapters={chapters} t={t} onSeek={(x) => seek(x)} />
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 10, fontSize: 15 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 10, marginTop: 10, fontSize: 15 }}>
             <Btn onClick={toggle} label={playing ? "❚❚" : "▶"} />
             <span style={{ fontFamily: FONT.num, opacity: 0.85 }}>
               {fmt(t)} / {fmt(plan.total)}
@@ -237,7 +237,10 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
             </select>
             <Btn onClick={() => setCaptions((x) => !x)} label={captions ? "자막 켬" : "자막 끔"} />
             <Btn
-              onClick={() => (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen())}
+              onClick={() => {
+                const p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+                p?.catch(() => undefined);
+              }}
               label="⛶"
             />
           </div>
