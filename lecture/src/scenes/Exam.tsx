@@ -1,5 +1,4 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { continueRender, delayRender } from "remotion";
 import type { ExamProps } from "../content/types.ts";
 import { Pointer } from "../components/Pointer.tsx";
 import { Reveal } from "../components/Reveal.tsx";
@@ -30,18 +29,12 @@ export function Exam({ v }: { v: ExamProps }) {
   const markRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const blankRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [pos, setPos] = useState<{ marks: Pos[]; blanks: Pos[] } | null>(null);
-  const [handle] = useState(() => delayRender("지문 위치 측정"));
-  const continued = useRef(false);
 
   // 빈칸이 답으로 바뀌면 줄바꿈이 달라질 수 있어 매 프레임 다시 재고, 바뀐 경우에만 갱신한다.
   useLayoutEffect(() => {
     const read = (el: HTMLSpanElement | null): Pos => (el ? { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth } : { x: 0, y: 0, w: 0 });
     const next = { marks: markRefs.current.map(read), blanks: blankRefs.current.map(read) };
     if (!pos || JSON.stringify(next) !== JSON.stringify(pos)) setPos(next);
-    else if (!continued.current) {
-      continued.current = true;
-      continueRender(handle);
-    }
   });
 
   const lines = segment(v);

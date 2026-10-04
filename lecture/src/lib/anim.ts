@@ -1,11 +1,11 @@
-import { Easing, interpolate } from "remotion";
+import { bezier, interpolate } from "./rt.ts";
 import { MORPH } from "../theme.ts";
 
 /** cubic-bezier(.45,0,.15,1) */
-export const ease = Easing.bezier(...MORPH.bezier);
+export const ease = bezier(...MORPH.bezier);
 
 /** 텍스트가 올라올 때 쓰는 감속 곡선. 바운스 없음. */
-export const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
+export const easeOut = bezier(0.16, 1, 0.3, 1);
 
 /**
  * t0에서 시작해 dur 동안 0→1로 진행하는 값.
@@ -18,7 +18,7 @@ export const easeOut = Easing.bezier(0.16, 1, 0.3, 1);
 export function prog(t: number, t0: number, dur = MORPH.seconds, fn = ease): number {
   if (!Number.isFinite(t0)) return t0 < 0 ? 1 : 0;
   if (dur <= 0) return t >= t0 ? 1 : 0;
-  return interpolate(t, [t0, t0 + dur], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: fn });
+  return interpolate(t, [t0, t0 + dur], [0, 1], fn);
 }
 
 /**

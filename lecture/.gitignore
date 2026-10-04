@@ -5,3 +5,4 @@ public/voice
 public/sfx
 public/music
 .env*
+dist

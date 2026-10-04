@@ -1,5 +1,5 @@
 import React from "react";
-import { Img, staticFile } from "remotion";
+import { asset } from "../lib/rt.ts";
 import type { Rect } from "../lib/anim.ts";
 import { C } from "../theme.ts";
 
@@ -34,8 +34,9 @@ export function Panel({ rect, paper, presence }: Props) {
         boxShadow: `0 ${shadow * 0.5}px ${shadow * 2}px rgba(0,0,0,${0.35 + paper * 0.1})`,
       }}
     >
-      <Img
-        src={staticFile("bg/stage-blur.jpg")}
+      <img
+        alt=""
+        src={asset("bg/stage-blur.jpg")}
         style={{ position: "absolute", left: -rect.x, top: -rect.y, width: 1920, height: 1080 }}
       />
       <div style={{ position: "absolute", inset: 0, background: "rgba(40,56,130,0.20)" }} />
@@ -47,8 +48,9 @@ export function Panel({ rect, paper, presence }: Props) {
         }}
       />
       {paper > 0 ? (
-        <Img
-          src={staticFile("bg/paper.jpg")}
+        <img
+          alt=""
+          src={asset("bg/paper.jpg")}
           style={{ position: "absolute", left: -rect.x, top: -rect.y, width: 1920, height: 1080, opacity: paper }}
         />
       ) : null}

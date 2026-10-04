@@ -3,39 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "공업교육론 D-30 압축 특강 영상 (Remotion)",
+  "description": "공업교육론 D-30 압축 특강 HTML 강의 플레이어",
   "scripts": {
-    "studio": "remotion studio",
     "check": "node --experimental-strip-types scripts/check-content.mjs",
     "voice": "node --experimental-strip-types scripts/voice.mjs",
     "qa:voice": "node --experimental-strip-types scripts/qa-voice.mjs",
     "sfx": "node scripts/sfx.mjs",
     "mix": "node --experimental-strip-types scripts/mix.mjs",
+    "build": "node --experimental-strip-types scripts/build.mjs",
     "still": "node --experimental-strip-types scripts/stills.mjs",
-    "render": "node --experimental-strip-types scripts/render.mjs",
-    "qa": "node scripts/qa-frames.mjs",
+    "serve": "npx --yes serve dist/t01",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit -p ."
   },
   "dependencies": {
-    "@remotion/bundler": "4.0.532",
-    "@remotion/cli": "4.0.532",
-    "@remotion/fonts": "4.0.532",
-    "@remotion/layout-utils": "4.0.532",
-    "@remotion/media": "4.0.532",
-    "@remotion/motion-blur": "4.0.532",
-    "@remotion/paths": "4.0.532",
-    "@remotion/renderer": "4.0.532",
     "geist": "^1.7.2",
     "pretendard": "^1.3.9",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "remotion": "4.0.532",
-    "zod": "^4.6.5"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "playwright-core": "1.56",
     "typescript": "5.9"
   }
 }

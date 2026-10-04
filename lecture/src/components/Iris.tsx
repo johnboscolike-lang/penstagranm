@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Img, continueRender, delayRender, staticFile } from "remotion";
+import { asset } from "../lib/rt.ts";
 import { ease, irisRadius, mix, prog } from "../lib/anim.ts";
 import { C, FONT } from "../theme.ts";
 
@@ -21,7 +21,7 @@ type Word = { lettersX: number[]; periodLeft: number; periodX: number; periodY: 
  */
 export function irisAt(mode: "opening" | "closing", s: number, word: Word): IrisState & { letters: number; dotMove: number } {
   if (mode === "opening") {
-    const letters = prog(s, 0.5, 1.15);
+    const letters = prog(s, 0.45, 1.5);
     const dotMove = prog(s, 1.55, 0.8);
     const open = Math.max(0, Math.min(1, (s - 2.3) / 1.1));
     const cx = mix(word.periodX, 960, ease(dotMove));
@@ -45,8 +45,6 @@ export function irisAt(mode: "opening" | "closing", s: number, word: Word): Iris
 export function useWordmark(text: string) {
   const ref = useRef<HTMLDivElement>(null);
   const [word, setWord] = useState<Word>({ lettersX: [], periodLeft: 1290, periodX: 1300, periodY: 600, ready: false });
-  const [handle] = useState(() => delayRender("워드마크 측정"));
-  const done = useRef(false);
   // 레이아웃이 자리 잡기 전 값이 들어오지 않도록 매번 재고, 값이 바뀐 경우에만 갱신한다.
   useLayoutEffect(() => {
     const el = ref.current;
@@ -62,10 +60,6 @@ export function useWordmark(text: string) {
       ready: true,
     };
     if (JSON.stringify(next) !== JSON.stringify(word)) setWord(next);
-    else if (!done.current) {
-      done.current = true;
-      continueRender(handle);
-    }
   });
   return { ref, word };
 }
@@ -91,7 +85,7 @@ export function OuterWorld({
   const chars = [...text];
   return (
     <div style={{ position: "absolute", inset: 0 }}>
-      <Img src={staticFile("bg/paper.jpg")} style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }} />
+      <img alt="" src={asset("bg/paper.jpg")} style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }} />
       <div
         ref={wordRef}
         style={{
@@ -111,7 +105,7 @@ export function OuterWorld({
       >
         <div style={{ display: "flex", overflow: "hidden", paddingRight: 4 }}>
           {chars.map((ch, i) => {
-            const stagger = Math.max(0, Math.min(1, letters * 1.6 - (chars.length - 1 - i) * 0.12));
+            const stagger = Math.max(0, Math.min(1, letters * 1.35 - (chars.length - 1 - i) * 0.08));
             const dx = word.ready ? (word.periodLeft - (word.lettersX[i] ?? 0)) * ease(stagger) : 0;
             return (
               <span key={i} style={{ display: "inline-block", translate: `${Math.max(0, dx)}px 0` }}>

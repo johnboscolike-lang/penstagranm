@@ -1,15 +1,13 @@
-import React, { useMemo, useState } from "react";
-import { AbsoluteFill, Img, Sequence, continueRender, delayRender, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import { Audio } from "@remotion/media";
+import React, { useMemo } from "react";
 import type { Lesson as LessonData, Visual } from "./content/types.ts";
 import { Captions, paginate } from "./components/Captions.tsx";
 import { Hud } from "./components/Hud.tsx";
 import { FULL_R, OuterWorld, irisAt, useWordmark } from "./components/Iris.tsx";
 import { Panel } from "./components/Panel.tsx";
 import { Reveal } from "./components/Reveal.tsx";
-import { fontsReady } from "./fonts.ts";
 import { panelFor } from "./layout.ts";
 import { mix, mixRect, prog } from "./lib/anim.ts";
+import { asset } from "./lib/rt.ts";
 import { SceneProvider, useScene, type SceneCtx } from "./lib/clock.tsx";
 import { Chunks } from "./scenes/Chunks.tsx";
 import { Exam } from "./scenes/Exam.tsx";
@@ -22,14 +20,13 @@ import { Statement } from "./scenes/Statement.tsx";
 import { Table } from "./scenes/Table.tsx";
 import { Timeline } from "./scenes/Timeline.tsx";
 import { C, FONT } from "./theme.ts";
-import { planLesson, sec, type VoiceTimeline } from "./timeline.ts";
+import type { Plan } from "./timeline.ts";
 
-export type LessonProps = {
-  lesson: LessonData;
+export type StageProps = {
+  plan: Plan;
   label: string;
-  voice: VoiceTimeline | null;
-  /** Studio 미리듣기용 음성 포함 여부(최종 렌더는 따로 믹스해 합친다) */
-  audio: boolean;
+  /** 현재 시각(초). 화면 전체가 이 값 하나의 순수 함수다. */
+  t: number;
   captions: boolean;
 };
 
@@ -38,17 +35,10 @@ const EXIT = 0.4;
 /**
  * 강의 한 편 전체. 아이리스 안의 세계에서 패널 하나가 장면마다 모프되고,
  * 장면 내용은 발화 큐에 맞춰 나타난다.
- * @param props 강의 데이터와 음성 타임라인
- * @returns 컴포지션
+ * @param props 시간표, 현재 시각
+ * @returns 1920×1080 무대
  */
-export function Lesson({ lesson, label, voice, audio, captions }: LessonProps) {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const t = frame / fps;
-  const [fontHandle] = useState(() => delayRender("폰트"));
-  useState(() => fontsReady.then(() => continueRender(fontHandle)));
-
-  const plan = useMemo(() => planLesson(lesson, voice), [lesson, voice]);
+export function Stage({ plan, label, t, captions }: StageProps) {
   const pages = useMemo(() => plan.scenes.map((s) => paginate(s.words)), [plan]);
   const { ref: wordRef, word } = useWordmark("공업교육론");
 
@@ -85,7 +75,7 @@ export function Lesson({ lesson, label, voice, audio, captions }: LessonProps) {
   const clip = iris.r < FULL_R - 1 ? `circle(${iris.r}px at ${iris.cx}px ${iris.cy}px)` : undefined;
 
   return (
-    <AbsoluteFill style={{ background: C.paper }}>
+    <div style={{ position: "absolute", left: 0, top: 0, width: 1920, height: 1080, overflow: "hidden", background: C.paper }}>
       {mode ? (
         <OuterWorld text="공업교육론" wordRef={wordRef} word={word} letters={iris.letters} showPeriod={mode === "opening" ? iris.dotMove <= 0 : iris.dotMove >= 1} />
       ) : (
@@ -93,8 +83,8 @@ export function Lesson({ lesson, label, voice, audio, captions }: LessonProps) {
           <OuterWorld text="공업교육론" wordRef={wordRef} word={word} letters={0} showPeriod />
         </div>
       )}
-      <AbsoluteFill style={{ clipPath: clip, background: C.navy }}>
-        <Img src={staticFile("bg/stage.jpg")} style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }} />
+      <div style={{ position: "absolute", inset: 0, clipPath: clip, background: C.navy }}>
+        <img alt="" src={asset("bg/stage.jpg")} style={{ position: "absolute", inset: 0, width: 1920, height: 1080 }} />
         <Panel rect={rect} paper={paper} presence={presence} />
         {visible.map((s) => {
           const next = plan.scenes[s.index + 1];
@@ -107,7 +97,7 @@ export function Lesson({ lesson, label, voice, audio, captions }: LessonProps) {
         })}
         <Hud plan={plan} t={t} lessonLabel={label} visible={hudVis} />
         {captions ? <Captions ps={cur} t={t} pages={pages[i]} /> : null}
-      </AbsoluteFill>
+      </div>
       {mode && iris.r < FULL_R - 1 ? (
         <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
           {openP <= 0 ? (
@@ -117,16 +107,7 @@ export function Lesson({ lesson, label, voice, audio, captions }: LessonProps) {
           )}
         </svg>
       ) : null}
-      {audio
-        ? plan.scenes
-            .filter((s) => s.audio)
-            .map((s) => (
-              <Sequence key={s.scene.id} from={sec(s.audioStart)} durationInFrames={sec(s.dur) + 6} premountFor={fps}>
-                <Audio src={staticFile(s.audio!)} />
-              </Sequence>
-            ))
-        : null}
-    </AbsoluteFill>
+    </div>
   );
 }
 
