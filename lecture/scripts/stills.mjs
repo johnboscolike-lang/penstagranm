@@ -30,7 +30,9 @@ const pick = (id, ratio) => {
   const t = s.dur > 0 ? s.audioStart + s.dur * ratio : s.start + (s.end - s.start) * ratio;
   shots.push({ name: `${id}@${ratio}`, t });
 };
-const args = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const li = argv.indexOf("--lesson");
+const args = li >= 0 ? [...argv.slice(0, li), ...argv.slice(li + 2)] : argv;
 if (!args.length) for (const s of plan.scenes) pick(s.scene.id, 0.85);
 for (const a of args) {
   if (a.startsWith("t=")) shots.push({ name: a, t: Number(a.slice(2)) });
