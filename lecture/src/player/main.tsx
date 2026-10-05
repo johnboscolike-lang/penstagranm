@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { flushSync } from "react-dom";
 import { getLesson } from "../content/lessons.ts";
 import { Stage } from "../Stage.tsx";
 import { asset } from "../lib/rt.ts";
@@ -69,6 +70,12 @@ function Player({ plan, chapters }: { plan: Plan; chapters: ChapterAudio[] }) {
     },
     [chapters, chapterAt, plan.total, playing, rate],
   );
+
+  // 영상 렌더용: 같은 페이지에서 시각만 바꿔 곧바로 그리게 한다(`?still=1`일 때만).
+  useEffect(() => {
+    if (!STILL) return;
+    (window as unknown as { __setT: (time: number) => void }).__setT = (time) => flushSync(() => setT(time));
+  }, []);
 
   // 재생 중에는 매 프레임 오디오 시각을 읽어 t를 갱신한다.
   useEffect(() => {

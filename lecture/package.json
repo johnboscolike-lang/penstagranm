@@ -12,6 +12,7 @@
     "mix": "node --experimental-strip-types scripts/mix.mjs",
     "build": "node --experimental-strip-types scripts/build.mjs",
     "still": "node --experimental-strip-types scripts/stills.mjs",
+    "render:mp4": "node --experimental-strip-types scripts/render-mp4.mjs",
     "serve": "npx --yes serve dist/t01",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit -p ."
