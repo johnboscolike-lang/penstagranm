@@ -1,0 +1,34 @@
+{
+  "name": "gongup-lecture",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "공업교육론 D-30 압축 특강 HTML 강의 플레이어",
+  "scripts": {
+    "check": "node --experimental-strip-types scripts/check-content.mjs",
+    "voice": "node --experimental-strip-types scripts/voice.mjs",
+    "qa:voice": "node --experimental-strip-types scripts/qa-voice.mjs",
+    "sfx": "node scripts/sfx.mjs",
+    "mix": "node --experimental-strip-types scripts/mix.mjs",
+    "build": "node --experimental-strip-types scripts/build.mjs",
+    "still": "node --experimental-strip-types scripts/stills.mjs",
+    "render:mp4": "node --experimental-strip-types scripts/render-mp4.mjs",
+    "serve": "npx --yes serve dist/t01",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "geist": "^1.7.2",
+    "pretendard": "^1.3.9",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
+    "playwright-core": "1.56",
+    "typescript": "5.9"
+  }
+}

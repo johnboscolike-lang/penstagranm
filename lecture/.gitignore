@@ -1,0 +1,8 @@
+node_modules
+out
+.cache
+public/voice
+public/sfx
+public/music
+.env*
+dist

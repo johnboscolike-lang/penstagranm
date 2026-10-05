@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "coverage/**",
+    // Remotion 강의 영상 프로젝트는 자체 설정으로 관리한다.
+    "lecture/**",
   ]),
 ]);
 
